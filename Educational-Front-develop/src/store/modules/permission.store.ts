@@ -27,7 +27,7 @@ export const usePermissionStore = defineStore("permission", () => {
         // 如果路由已经加载过，不再重复加载
         if (routesLoaded.value) {
           console.log("⚠️ 路由已加载，跳过重复加载");
-          resolve(routes.value.filter(route => !constantRoutes.includes(route)));
+          resolve(routes.value.filter((route) => !constantRoutes.includes(route)));
           return;
         }
 
@@ -70,6 +70,12 @@ export const usePermissionStore = defineStore("permission", () => {
                 component: () => import("@/views/system/dict/index.vue"),
                 meta: { title: "字典管理", icon: "ep:collection" },
               },
+              {
+                path: "staff",
+                name: "Staff",
+                component: () => import("@/views/system/staff/index.vue"),
+                meta: { title: "员工管理", icon: "ep:collection" },
+              },
             ],
           },
           {
@@ -87,7 +93,7 @@ export const usePermissionStore = defineStore("permission", () => {
         // 清理可能存在的重复路由
         try {
           // 尝试移除可能已存在的路由
-          staticRoutes.forEach(route => {
+          staticRoutes.forEach((route) => {
             if (route.name) {
               try {
                 router.removeRoute(route.name);
@@ -115,7 +121,10 @@ export const usePermissionStore = defineStore("permission", () => {
         routesLoaded.value = true;
 
         // 打印当前路由表以便调试
-        console.log("📋 当前路由表:", router.getRoutes().map(r => r.path));
+        console.log(
+          "📋 当前路由表:",
+          router.getRoutes().map((r) => r.path)
+        );
         console.log("✅ 静态菜单生成完成");
         resolve(staticRoutes);
       } catch (error) {
