@@ -7,9 +7,10 @@
       <div class="flex flex-wrap">
         <!-- 左侧问候语区域 -->
         <div class="flex-1 flex items-start">
-          <img class="w80px h80px rounded-full" src="https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png" />
+          <img class="w80px h80px rounded-full"
+            src="https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png" />
           <div class="ml-5">
-            <p class="text-lg font-bold">欢迎使用医疗管理系统！</p>
+            <p class="text-lg font-bold">欢迎使用教务管理系统！</p>
             <p class="text-sm text-gray">今日天气晴朗，气温在15℃至25℃之间，东南风。</p>
           </div>
         </div>
@@ -162,7 +163,7 @@
           <el-button type="primary" size="small">添加用户</el-button>
         </div>
       </template>
-      
+
       <el-table :data="userList" border style="width: 100%">
         <el-table-column prop="id" label="ID" width="80" />
         <el-table-column prop="name" label="姓名" width="120" />

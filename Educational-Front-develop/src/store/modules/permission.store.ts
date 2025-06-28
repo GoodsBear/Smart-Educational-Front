@@ -76,6 +76,12 @@ export const usePermissionStore = defineStore("permission", () => {
                 component: () => import("@/views/system/staff/index.vue"),
                 meta: { title: "员工管理", icon: "ep:collection" },
               },
+              {
+                path: "position",
+                name: "Position",
+                component: () => import("@/views/system/position/index.vue"),
+                meta: { title: "内部公告管理", icon: "ep:collection" },
+              },
             ],
           },
           {
