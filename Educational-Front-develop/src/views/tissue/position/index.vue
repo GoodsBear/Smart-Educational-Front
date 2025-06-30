@@ -32,9 +32,14 @@
             </el-table-column>
         </el-table>
         <!-- 分页 -->
-        <div class="pagination">
-
+        <div class="pagination-container">
+            <pagination v-model:total="pageParams.TotalCount" v-model:page="pageParams.PageIndex"
+                v-model:limit="pageParams.PageSize" @pagination="handlePagination" />
+            <!-- <div class="pagination-info">
+                共 {{ pageParams.TotalCount }} 条 第{{ pageParams.PageIndex }}页/{{ pageParams.TotalPage }}页
+            </div> -->
         </div>
+
         <!-- 新增/编辑对话框 -->
         <el-dialog v-model="dialogVisible" :title="dialogTitle" width="30%" @closed="resetForm">
             <el-form ref="formRef" :model="formData" :rules="rules" label-width="100px">
@@ -191,8 +196,8 @@ const fetchPositionList = () => {
         console.log("职位列表=>", res);
         positionList.value = res.data;
         //positionList.value = Array.isArray(res.data.data) ? res.data.data : [];
-        pageParams.TotalCount = res.data.totalCount;
-        pageParams.TotalPage = res.data.totalPage;
+        pageParams.TotalCount = res.totleCount;
+        pageParams.TotalPage = res.totlePage;
     });
 }
 // 自定义显示列相关
@@ -208,6 +213,17 @@ const showColumns = computed(() =>
     allColumns.value.filter(col => checkedProps.value.includes(col.prop))
 );
 
+// 分页
+const handlePagination = ({ page, limit }: { page: number; limit: number }) => {
+    pageParams.PageIndex = page;
+    pageParams.PageSize = limit;
+    fetchPositionList();
+};
+// // 查询（重置页码后获取数据）
+// function handleQuery() {
+//     pageParams.PageIndex = 1;
+//     fetchPositionList();
+// }
 onMounted(() => {
     fetchPositionList();
 });

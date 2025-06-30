@@ -43,7 +43,7 @@
       </el-table>
 
       <div class="pagination-container">
-        <pagination v-model:total="total" v-model:page="queryParams.pageIndex" v-model:limit="queryParams.pageSize"
+        <Pagination v-model:total="total" v-model:page="queryParams.pageIndex" v-model:limit="queryParams.pageSize"
           @pagination="handlePagination" />
         <div class="pagination-info">
           共 {{ total }} 条 第{{ queryParams.pageIndex }}页/{{ totalPage }}页
