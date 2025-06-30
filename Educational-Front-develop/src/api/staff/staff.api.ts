@@ -83,14 +83,14 @@ export interface StaffFormData {
   staffGender: string;
   positionId: string; // UUID格式
   roleId: string; // UUID格式
-  staffTypedId: string; // UUID格式
+  staffTypeId: string; // UUID格式
   entryDate: string; // ISO日期格式
   status: number;
   education: string;
   birthday: string; // ISO日期格式
-  graduationschool: string;
+  graduationSchool: string;
   introduction: string;
-  photour1: string;
+  photourl: string;
 }
 
 /** 员工列表项 */
@@ -113,7 +113,7 @@ export interface StaffListItem {
   birthday: string; // ISO日期格式
   graduationSchool: string;
   introduction: string;
-  photoUrl: string;
+  photourl: string;
 }
 
 /** 员工列表响应类型 */

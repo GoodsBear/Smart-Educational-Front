@@ -74,27 +74,113 @@
     </div>
 
     <!-- 新增/编辑对话框 -->
-    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="50%" @closed="resetForm">
-      <el-form ref="formRef" :model="formData" :rules="rules" label-width="100px">
-        <el-form-item label="员工姓名" prop="staffName">
-          <el-input v-model="formData.staffName" placeholder="请输入员工姓名" />
+    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="60%" @closed="resetForm">
+      <el-form ref="formRef" :model="formData" :rules="rules" label-width="110px">
+        <el-form-item label="姓名" prop="staffName" required>
+          <el-input v-model="formData.staffName" placeholder="请输入姓名" />
         </el-form-item>
-        <el-form-item label="账号" prop="staffAccount">
-          <el-input v-model="formData.staffAccount" placeholder="请输入账号" />
+        <el-form-item label="电话" prop="staffPhone" required>
+          <el-input v-model="formData.staffPhone" placeholder="请输入电话" />
         </el-form-item>
-        <el-form-item v-if="isAdd" label="密码" prop="staffPassword">
-          <el-input v-model="formData.staffPassword" placeholder="请输入密码" show-password />
+        <el-form-item label="登录账号" prop="staffAccount" required>
+          <el-input v-model="formData.staffAccount" placeholder="请输入登录账号" />
         </el-form-item>
-        <el-form-item label="手机号" prop="staffPhone">
-          <el-input v-model="formData.staffPhone" placeholder="请输入手机号" />
+        <el-form-item label="登录密码" prop="staffPassword" required>
+          <el-input v-model="formData.staffPassword" placeholder="请输入登录密码" />
+        </el-form-item>
+        <el-form-item label="所属机构" prop="organization">
+          <el-tree
+            ref="treeRef"
+            :data="data"
+            show-checkbox
+            node-key="id"
+            @check-change="handleCheck"
+          />
+          <el-button @click="getSelected">获取选中节点</el-button>
+        </el-form-item>
+        <el-form-item label="所属职位" prop="positionId" required>
+          <el-select v-model="formData.positionId" placeholder="请选择职位">
+            <el-option label="管理" value="3a1aa8f8-4191-62eb-cae1-631ba2b08e4c" />
+            <el-option label="老师" value="3a1aa8f8-5dfe-01db-8f07-9b94ab6e95ca" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="权限角色" prop="roleId" required>
+          <el-select v-model="formData.roleId" placeholder="请选择角色">
+            <el-option label="超级管理员" value="3a1aa9dd-dfb0-c706-496a-965d53a78a02" />
+            <el-option label="教务管理员" value="3a1aaa2d-f541-7089-952e-c95f022ca779" />
+            <el-option label="校长" value="3a1ab850-6f82-cc55-e16d-67689e63e75d" />
+            <el-option label="班主任" value="3a1abbf2-fb1e-b103-6bb2-e446c8e5f870" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="人员类型" prop="staffTypeId" required>
+          <el-select v-model="formData.staffTypeId" placeholder="人员类型">
+            <el-option label="内部" value="3a1aa9dd-dfb0-c706-496a-965d53a73a02" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="性别" prop="staffGender" required>
+          <el-select v-model="formData.staffGender" placeholder="请选择性别">
+            <el-option label="男" value="男" />
+            <el-option label="女" value="女" />
+            <el-option label="未知" value="未知" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="学历" prop="education">
+          <el-select v-model="formData.education" placeholder="请选择学历">
+            <el-option label="未知" value="未知" />
+            <el-option label="大专" value="大专" />
+            <el-option label="本科" value="本科" />
+            <el-option label="硕士" value="硕士" />
+            <el-option label="博士" value="博士" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="生日" prop="birthday">
+          <el-date-picker
+            v-model="formData.birthday"
+            type="date"
+            placeholder="请选择生日"
+            style="width: 100%"
+          />
+        </el-form-item>
+        <el-form-item label="毕业学校" prop="graduationSchool">
+          <el-input v-model="formData.graduationSchool" placeholder="请输入毕业学校" />
+        </el-form-item>
+        <el-form-item label="入职日期" prop="entryDate">
+          <el-date-picker
+            v-model="formData.entryDate"
+            type="date"
+            placeholder="请选择入职日期"
+            style="width: 100%"
+          />
+        </el-form-item>
+        <el-form-item label="简介" prop="introduction">
+          <el-input
+            v-model="formData.introduction"
+            type="textarea"
+            :rows="2"
+            placeholder="请输入简介"
+          />
         </el-form-item>
         <el-form-item label="状态" prop="status">
-          <el-radio-group v-model="formData.status">
-            <el-radio :label="1">启用</el-radio>
-            <el-radio :label="0">禁用</el-radio>
-          </el-radio-group>
+          <el-switch
+            v-model="formData.status"
+            :active-value="1"
+            :inactive-value="0"
+            active-text="在职"
+            inactive-text="离职"
+          />
         </el-form-item>
-        <!-- 其他表单字段... -->
+        <el-form-item label="照片" prop="photourl">
+          <el-upload
+            class="avatar-uploader"
+            action="https://localhost:44375/api/upload/image"
+            :show-file-list="false"
+            :on-success="handleAvatarSuccess"
+            :before-upload="beforeAvatarUpload"
+          >
+            <img v-if="imageUrl" :src="imageUrl" class="avatar" />
+            <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
+          </el-upload>
+        </el-form-item>
       </el-form>
       <template #footer>
         <span class="dialog-footer">
@@ -122,7 +208,10 @@
 import { ref, reactive, onMounted } from "vue";
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from "element-plus";
 import StaffAPI from "@/api/staff/staff.api"; // 导入您封装的API方法
+import { getOrganizationTree } from "@/api/organization/organization.api";
 import moment from "moment";
+import { Plus } from "@element-plus/icons-vue";
+import type { UploadProps } from "element-plus";
 
 // 类型定义
 interface StaffQuery {
@@ -142,13 +231,13 @@ interface StaffFormData {
   staffGender: string;
   positionId: string;
   roleId: string;
-  staffTypedId: string;
+  staffTypeId: string;
   entryDate: string;
   education: string;
   birthday: string;
-  graduationschool: string;
+  graduationSchool: string;
   introduction: string;
-  photour1: string;
+  photourl: string;
   [key: string]: any;
 }
 
@@ -162,6 +251,8 @@ const dialogTitle = ref("新增员工");
 const formRef = ref<FormInstance>();
 const tableRef = ref<any>(null);
 const showColumnDialog = ref(false);
+
+const data = ref([]);
 
 const allColumns = [
   { label: "姓名", prop: "staffName", show: true },
@@ -195,13 +286,13 @@ const resetFormData = () => {
     staffGender: "",
     positionId: "",
     roleId: "",
-    staffTypedId: "",
+    staffTypeId: "",
     entryDate: "",
     education: "",
     birthday: "",
-    graduationschool: "",
+    graduationSchool: "",
     introduction: "",
-    photour1: "",
+    photourl: "",
   });
 };
 
@@ -215,13 +306,13 @@ const formData = reactive<StaffFormData>({
   staffGender: "",
   positionId: "",
   roleId: "",
-  staffTypedId: "",
+  staffTypeId: "",
   entryDate: "",
   education: "",
   birthday: "",
-  graduationschool: "",
+  graduationSchool: "",
   introduction: "",
-  photour1: "",
+  photourl: "",
 });
 
 // 表单验证规则
@@ -242,11 +333,17 @@ const rules = reactive<FormRules<StaffFormData>>({
     { required: true, message: "请输入手机号", trigger: "blur" },
     { pattern: /^1[3-9]\d{9}$/, message: "手机号格式不正确", trigger: "blur" },
   ],
-});
-
-// 生命周期钩子
-onMounted(() => {
-  fetchStaffList();
+  positionId: [{ required: true, message: "请选择职位", trigger: "change" }],
+  staffGender: [{ required: true, message: "请选择性别", trigger: "change" }],
+  education: [{ required: true, message: "请选择学历", trigger: "change" }],
+  birthday: [{ required: true, message: "请选择生日", trigger: "change" }],
+  graduationSchool: [{ required: true, message: "请输入毕业学校", trigger: "blur" }],
+  entryDate: [{ required: true, message: "请选择入职日期", trigger: "change" }],
+  introduction: [
+    { required: true, message: "请输入简介", trigger: "blur" },
+    { min: 2, max: 200, message: "简介长度在 2 到 200 个字符", trigger: "blur" },
+  ],
+  photourl: [{ required: true, message: "请上传照片", trigger: "change" }],
 });
 
 // 获取员工列表
@@ -288,23 +385,31 @@ const showAddDialog = () => {
   isAdd.value = true;
   dialogTitle.value = "新增员工";
   dialogVisible.value = true;
+  resetFormData();
+  formRef.value?.resetFields();
 };
 
 // 显示编辑对话框
 const showEditDialog = (row: any) => {
   isAdd.value = false;
   dialogTitle.value = "编辑员工";
-  Object.assign(formData, row);
   dialogVisible.value = true;
+  resetFormData();
+  Object.assign(formData, row);
+  formData.staffPassword = "123456";
+  imageUrl.value = row.photourl;
+  formRef.value?.resetFields();
 };
 
 // 提交表单
 const submitForm = async () => {
+  console.log("新增员工", formData);
   try {
     await formRef.value?.validate();
 
     if (isAdd.value) {
       await StaffAPI.createStaff(formData);
+
       ElMessage.success("新增成功");
     } else {
       await StaffAPI.updateStaff(formData.id, formData);
@@ -359,6 +464,60 @@ const changePassword = (row: any) => {
 const resetColumns = () => {
   checkedProps.value = allColumns.map((c) => c.prop);
 };
+
+// 图片上传相关
+const imageUrl = ref("");
+
+const handleAvatarSuccess: UploadProps["onSuccess"] = (response, uploadFile) => {
+  imageUrl.value = URL.createObjectURL(uploadFile.raw!);
+  formData.photourl = response;
+};
+
+const beforeAvatarUpload: UploadProps["beforeUpload"] = (rawFile) => {
+  /*
+  if (rawFile.type !== "image/jpeg/gif/png") {
+    ElMessage.error("Avatar picture must be JPG format!");
+    return false;
+  } else
+   */ if (rawFile.size / 1024 / 1024 > 2) {
+    ElMessage.error("Avatar picture size can not exceed 2MB!");
+    return false;
+  }
+  return true;
+};
+
+// 生命周期钩子
+onMounted(async () => {
+  fetchStaffList();
+  const response = await getOrganizationTree("00000000-0000-0000-0000-000000000000");
+  data.value = response;
+  console.log("获取机构信息", data.value);
+  console.log("组件已挂载，treeRef 状态：", treeRef.value ? "正常" : "异常");
+});
+const treeRef = ref(null);
+
+// 获取选中节点
+const handleCheck = () => {
+  const keys = treeRef.value;
+  console.log("选中变化时获取：", keys || "ref 未绑定");
+};
+
+const getSelected = () => {
+  if (!treeRef.value) {
+    console.error("无法获取实例，请检查 ref 绑定！");
+    return;
+  }
+  const checked = treeRef.value.getCheckedNodes();
+  const halfChecked = treeRef.value.getHalfCheckedNodes();
+  console.log("完全选中：", checked);
+  console.log("半选中：", halfChecked);
+  const shanji = ref([]);
+  for (let i = 0; i < checked.length; i++) {
+    shanji.value.push(checked[i].id);
+  }
+  formData.organization = shanji.value.toString();
+  console.log("组织ID：", formData.organization);
+};
 </script>
 
 <style scoped>
@@ -385,5 +544,11 @@ const resetColumns = () => {
 
 .status-select {
   width: 120px;
+}
+
+.avatar-uploader .avatar {
+  width: 100px;
+  height: 100px;
+  display: block;
 }
 </style>
