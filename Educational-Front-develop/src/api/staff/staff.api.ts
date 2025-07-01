@@ -39,8 +39,9 @@ const StaffAPI = {
    */
   deleteStaff(ids: string) {
     return request({
-      url: `${STAFF_BASE_URL}/staff/${ids}`,
+      url: `${STAFF_BASE_URL}/staff/`,
       method: "delete",
+      params: ids,
     });
   },
 
@@ -55,6 +56,21 @@ const StaffAPI = {
       url: `${STAFF_BASE_URL}/staff/${staffId}`,
       method: "put",
       data,
+    });
+  },
+
+  /**
+   * 更新员工状态
+   * 0:离职 1:在职
+   * @params ids 员工ID，多个以英文逗号(,)分隔
+   * @params status 状态
+   * @returns 更新结果
+   * */
+  updateStaffStatus(Ids: string, status: string) {
+    return request({
+      url: `${STAFF_BASE_URL}/staff-status?status=${status}`,
+      method: "put",
+      data: Ids,
     });
   },
 };
@@ -90,7 +106,7 @@ export interface StaffFormData {
   birthday: string; // ISO日期格式
   graduationSchool: string;
   introduction: string;
-  photourl: string;
+  photoUrl: string;
 }
 
 /** 员工列表项 */
@@ -113,7 +129,7 @@ export interface StaffListItem {
   birthday: string; // ISO日期格式
   graduationSchool: string;
   introduction: string;
-  photourl: string;
+  photoUrl: string;
 }
 
 /** 员工列表响应类型 */

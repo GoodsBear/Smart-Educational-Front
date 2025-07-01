@@ -27,15 +27,21 @@
       <el-button>设置角色</el-button>
       <el-button @click="handleDelete">删除</el-button>
       <el-button>转机构</el-button>
-      <el-button>转为离职</el-button>
-      <el-button>转为在职</el-button>
+      <el-button @click="openStatusDialog('离职')">转为离职</el-button>
+      <el-button @click="openStatusDialog('在职')">转为在职</el-button>
       <el-button>转学员</el-button>
       <el-button>导出</el-button>
       <el-button @click="showColumnDialog = true">自定义显示列</el-button>
     </div>
 
     <!-- 员工列表 -->
-    <el-table ref="tableRef" v-loading="loading" :data="staffList" style="width: 100%">
+    <el-table
+      ref="tableRef"
+      v-loading="loading"
+      :data="staffList"
+      style="width: 100%"
+      @selection-change="ToAll"
+    >
       <el-table-column type="selection" width="50" />
       <template v-for="col in allColumns" :key="col.prop">
         <el-table-column v-if="checkedProps.includes(col.prop)" :prop="col.prop" :label="col.label">
@@ -169,7 +175,7 @@
             inactive-text="离职"
           />
         </el-form-item>
-        <el-form-item label="照片" prop="photourl">
+        <el-form-item label="照片" prop="photoUrl">
           <el-upload
             class="avatar-uploader"
             action="https://localhost:44375/api/upload/image"
@@ -199,6 +205,22 @@
       <template #footer>
         <el-button @click="resetColumns">恢复默认</el-button>
         <el-button type="primary" @click="showColumnDialog = false">确认</el-button>
+      </template>
+    </el-dialog>
+
+    <!-- 状态对话框 -->
+    <el-dialog v-model="statusDialogVisible" :title="statusDialogTitle">
+      <el-form :model="statusForm">
+        <el-form-item label="状态">
+          <el-select v-model="statusForm.status" placeholder="请选择状态">
+            <el-option label="在职" :value="1" />
+            <el-option label="离职" :value="0" />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="statusDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="submitStatus">提交</el-button>
       </template>
     </el-dialog>
   </div>
@@ -237,7 +259,7 @@ interface StaffFormData {
   birthday: string;
   graduationSchool: string;
   introduction: string;
-  photourl: string;
+  photoUrl: string;
   [key: string]: any;
 }
 
@@ -251,6 +273,11 @@ const dialogTitle = ref("新增员工");
 const formRef = ref<FormInstance>();
 const tableRef = ref<any>(null);
 const showColumnDialog = ref(false);
+const statusDialogVisible = ref(false);
+const statusDialogTitle = ref();
+const statusForm = reactive({
+  status: "1", // 默认在职
+});
 
 const data = ref([]);
 
@@ -292,7 +319,7 @@ const resetFormData = () => {
     birthday: "",
     graduationSchool: "",
     introduction: "",
-    photourl: "",
+    photoUrl: "",
   });
 };
 
@@ -312,7 +339,7 @@ const formData = reactive<StaffFormData>({
   birthday: "",
   graduationSchool: "",
   introduction: "",
-  photourl: "",
+  photoUrl: "",
 });
 
 // 表单验证规则
@@ -343,7 +370,7 @@ const rules = reactive<FormRules<StaffFormData>>({
     { required: true, message: "请输入简介", trigger: "blur" },
     { min: 2, max: 200, message: "简介长度在 2 到 200 个字符", trigger: "blur" },
   ],
-  photourl: [{ required: true, message: "请上传照片", trigger: "change" }],
+  photoUrl: [{ required: true, message: "请上传照片", trigger: "change" }],
 });
 
 // 获取员工列表
@@ -390,15 +417,26 @@ const showAddDialog = () => {
 };
 
 // 显示编辑对话框
-const showEditDialog = (row: any) => {
+const showEditDialog = async (row: any) => {
   isAdd.value = false;
+  // 1. 打开弹窗
   dialogTitle.value = "编辑员工";
   dialogVisible.value = true;
+
+  // 2. 重置表单（防止残留）
   resetFormData();
+  formRef.value?.resetFields();
+
+  // 4. 赋值表单数据
   Object.assign(formData, row);
   formData.staffPassword = "123456";
-  imageUrl.value = row.photourl;
+  imageUrl.value = row.photoUrl;
   formRef.value?.resetFields();
+  formData.organization = Array.isArray(row.organization)
+    ? row.organization
+    : row.organization
+      ? [row.organization]
+      : [];
 };
 
 // 提交表单
@@ -423,6 +461,14 @@ const submitForm = async () => {
   }
 };
 
+const Delarr = ref([]);
+
+const ToAll = (selection: any) => {
+  console.log(selection);
+  Delarr.value = selection.map((item: any) => item.id);
+  console.log(Delarr.value);
+};
+
 // 删除员工
 const handleDelete = async () => {
   const selection = tableRef.value.getSelectionRows() as StaffFormData[]; // 明确类型
@@ -430,13 +476,15 @@ const handleDelete = async () => {
     ElMessage.warning("请先选择要删除的员工");
     return;
   }
-  const ids = selection.map((item: StaffFormData) => item.id).join(",");
+  const params = {
+    ids: Delarr.value,
+  };
   ElMessageBox.confirm("确定要删除选中的员工吗?", "提示", {
     confirmButtonText: "确定",
     cancelButtonText: "取消",
     type: "warning",
   }).then(async () => {
-    await StaffAPI.deleteStaff(ids);
+    await StaffAPI.deleteStaff(params);
     ElMessage.success("删除成功");
     fetchStaffList();
   });
@@ -470,7 +518,7 @@ const imageUrl = ref("");
 
 const handleAvatarSuccess: UploadProps["onSuccess"] = (response, uploadFile) => {
   imageUrl.value = URL.createObjectURL(uploadFile.raw!);
-  formData.photourl = response;
+  formData.photoUrl = response;
 };
 
 const beforeAvatarUpload: UploadProps["beforeUpload"] = (rawFile) => {
@@ -517,6 +565,34 @@ const getSelected = () => {
   }
   formData.organization = shanji.value.toString();
   console.log("组织ID：", formData.organization);
+};
+
+// 打开弹窗并设置状态
+const openStatusDialog = (type: any) => {
+  statusDialogVisible.value = true;
+  if (type === "离职") {
+    statusDialogTitle.value = "转为离职";
+    statusForm.status = 0;
+  } else {
+    statusDialogTitle.value = "转为在职";
+    statusForm.status = 1;
+  }
+};
+
+// 提交方法
+const submitStatus = () => {
+  // 这里提交 statusForm.status
+  ElMessageBox.confirm("确定要修改员工的状态吗?", "提示", {
+    confirmButtonText: "确定",
+    cancelButtonText: "取消",
+    type: "warning",
+  }).then(async () => {
+    await StaffAPI.updateStaffStatus(Delarr.value, statusForm.status);
+    ElMessage.success("修改成功");
+    fetchStaffList();
+  });
+
+  statusDialogVisible.value = false;
 };
 </script>
 
