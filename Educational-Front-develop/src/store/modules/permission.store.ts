@@ -47,6 +47,38 @@ export const usePermissionStore = defineStore("permission", () => {
             ],
           },
           {
+            path: "/tissue",
+            component: Layout,
+            redirect: "/tissue/user",
+            meta: { title: "组织管理", icon: "ep:setting" },
+            children: [
+              {
+                path: "staff",
+                name: "Staff",
+                component: () => import("@/views/tissue/staff/index.vue"),
+                meta: { title: "员工管理", icon: "ep:collection" },
+              },
+              // {
+              //   path: "money",
+              //   name: "money",
+              //   component: () => import("@/views/tissue/money/index.vue"),
+              //   meta: { title: "薪资设置", icon: "ep:collection" },
+              // },
+              {
+                path: "organization",
+                name: "Organization",
+                component: () => import("@/views/tissue/organization/index.vue"),
+                meta: { title: "组织管理", icon: "ep:collection" },
+              },
+              {
+                path: "position",
+                name: "Position",
+                component: () => import("@/views/tissue/position/index.vue"),
+                meta: { title: "职位管理", icon: "ep:collection" },
+              },
+            ],
+          },
+          {
             path: "/system",
             component: Layout,
             redirect: "/system/user",
@@ -70,14 +102,9 @@ export const usePermissionStore = defineStore("permission", () => {
                 component: () => import("@/views/system/dict/index.vue"),
                 meta: { title: "字典管理", icon: "ep:collection" },
               },
-              {
-                path: "staff",
-                name: "Staff",
-                component: () => import("@/views/system/staff/index.vue"),
-                meta: { title: "员工管理", icon: "ep:collection" },
-              },
             ],
           },
+
           {
             path: "/404",
             component: () => import("@/views/error/404.vue"),
