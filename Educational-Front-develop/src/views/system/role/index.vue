@@ -336,15 +336,62 @@ function handleBatchDelete() {
     ElMessage.warning('请选择要删除的角色');
     return;
   }
-  
-  ElMessageBox.confirm(`确认要删除选中的${selectedRoles.value.length}个角色吗？`, '提示', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
-    type: 'warning'
-  }).then(() => {
-    // 逐个删除选中的角色
-    const promises = selectedRoles.value.map(id => deleteRole(id, false));
-    Promise.all(promises)
+
+  ElMessageBox.confirm("确认删除已选中的数据项?", "警告", {
+    confirmButtonText: "确定",
+    cancelButtonText: "取消",
+    type: "warning",
+  }).then(
+    () => {
+      loading.value = true;
+      RoleAPI.deleteByIds(roleIds)
+        .then(() => {
+          ElMessage.success("删除成功");
+          handleResetQuery();
+        })
+        .finally(() => (loading.value = false));
+    },
+    () => {
+      ElMessage.info("已取消删除");
+    }
+  );
+}
+
+// 打开分配菜单权限弹窗
+async function handleOpenAssignPermDialog(row: RolePageVO) {
+  const roleId = row.id;
+  if (roleId) {
+    assignPermDialogVisible.value = true;
+    loading.value = true;
+
+    checkedRole.value.id = roleId;
+    checkedRole.value.name = row.name;
+
+    // 获取所有的菜单
+    menuPermOptions.value = await MenuAPI.getOptions();
+
+    // 回显角色已拥有的菜单
+    RoleAPI.getRoleMenuIds(roleId)
+      .then((data) => {
+        const checkedMenuIds = data;
+        checkedMenuIds.forEach((menuId: any) => permTreeRef.value!.setChecked(menuId, true, false));
+      })
+      .finally(() => {
+        loading.value = false;
+      });
+  }
+}
+
+// 分配菜单权限提交
+function handleAssignPermSubmit() {
+  const roleId = checkedRole.value.id;
+  if (roleId) {
+    const checkedMenuIds: number[] = permTreeRef
+      .value!.getCheckedNodes(false, true)
+      .map((node: any) => node.value);
+
+    loading.value = true;
+    RoleAPI.updateRoleMenus(roleId, checkedMenuIds)
       .then(() => {
         ElMessage.success(`成功删除${selectedRoles.value.length}个角色`);
         fetchData();
