@@ -76,33 +76,33 @@ const api = {
     })
   },
 
-  // 更新学员状态
-  updateStudentType(guid: string, studentEnum: number) {
+  // 更新学员 在线学员，意向学员，结业学员
+  updateStudentType(studentEnum: number, guids: string[]) {
     return request({
       url: '/api/app/student-services/student-type',
       method: 'put',
       params: { 
-        guid, 
         studentEnum // 学员类型：0-在线学员，1-意向学员，2-结业学员
-      }
+      },
+      data: guids
     })
   },
 
   // 转校
-  transferSchool(guid: string, campusId: string) {
+  transferSchool(params: { campusId: string, guids: string[] }) {
     return request({
-      url: `/api/app/student-services/student-school/${campusId}`,
+      url: `/api/app/student-services/student-school/${params.campusId}`,
       method: 'put',
-      params: { guid }
+      data: params.guids
     })
   },
 
   // 修改顾问
-  updateConsultant(guid: string, consultant: string) {
+  updateConsultant(params: { consultant: string, guids: string[] }) {
     return request({
-      url: '/api/app/student-services/student-consultant',
+      url: `/api/app/student-services/student-consultant?consultant=${params.consultant}`,
       method: 'put',
-      params: { guid, consultant }
+      data: params.guids
     })
   },
 

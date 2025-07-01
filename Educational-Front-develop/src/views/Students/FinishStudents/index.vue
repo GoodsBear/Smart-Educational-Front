@@ -1,6 +1,10 @@
 <template>
   <div class="finish-students">
-    <el-card>      
+    <!-- 查询条件卡片 -->
+    <el-card class="search-card">
+      <div class="card-header">
+        <span>查询条件</span>
+      </div>
       <!-- 搜索区域 -->
       <el-form :inline="true" :model="queryParams" class="search-form">
         <el-form-item label="学员姓名">
@@ -32,9 +36,25 @@
           <el-button type="success" @click="reloadData">刷新数据</el-button>
         </el-form-item>
       </el-form>
+    </el-card>
 
+    <!-- 列表区域卡片 -->
+    <el-card class="list-card">
+      <div class="card-header">
+        <span>结业学员列表</span>
+        <div class="button-group">
+          <el-button type="success" @click="handleToOnline" :disabled="!selectedIds.length">转为在线学员</el-button>
+          <el-button type="primary" @click="handleAdd">新增</el-button>
+        </div>
+      </div>
       <!-- 表格区域 -->
-      <el-table v-loading="loading" :data="studentList" border style="width: 100%">
+      <el-table 
+        v-loading="loading" 
+        :data="studentList" 
+        border 
+        style="width: 100%"
+        @selection-change="handleSelectionChange"
+      >
         <el-table-column type="selection" width="55" align="center" />
         <el-table-column label="编号" type="index" width="60" align="center" />
         <el-table-column label="学员姓名" prop="name" align="center" />
@@ -57,11 +77,9 @@
         </el-table-column>
         <el-table-column label="年龄" prop="age" align="center" />
         <el-table-column label="备注" prop="remark" align="center" show-overflow-tooltip />
-        <el-table-column label="操作" width="200" align="center" fixed="right">
+        <el-table-column label="操作" width="120" align="center" fixed="right">
           <template #default="{ row }">
-            <el-button type="primary" link @click="handleEdit(row)">编辑</el-button>
-            <el-button type="primary" link @click="handleFollow(row)">跟进</el-button>
-            <el-button type="danger" link @click="handleDelete(row)">删除</el-button>
+            <el-button type="primary" link @click="handleView(row)">查看</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -102,6 +120,9 @@ const total = ref(0)
 const loading = ref(false)
 const orgList = ref<any[]>([]) // 明确指定类型为数组
 const gradeList = ref<any[]>([]) // 明确指定类型为数组
+
+// 选中的ID数组
+const selectedIds = ref<string[]>([])
 
 // 格式化性别
 const formatSex = (sex: number) => {
@@ -227,22 +248,10 @@ const handleFollow = (row: any) => {
   console.log('跟进学员:', row)
 }
 
-// 删除学员
-const handleDelete = (row: any) => {
-  ElMessageBox.confirm('确认要删除该学员吗？', '提示', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
-    type: 'warning'
-  }).then(async () => {
-    try {
-      await studentApi.deleteStudent(row.guid)
-      ElMessage.success('删除成功')
-      getStudentList()
-    } catch (error) {
-      console.error('删除学员失败:', error)
-      ElMessage.error('删除失败')
-    }
-  }).catch(() => {})
+// 查看学员详情
+const handleView = (row: any) => {
+  console.log('查看学员详情:', row)
+  // TODO: 实现查看详情功能
 }
 
 // 重新加载所有数据
@@ -251,6 +260,45 @@ const reloadData = () => {
   getGradeList()
   getStaffList()
   getStudentList()
+}
+
+// 表格多选变化事件
+const handleSelectionChange = (selection: any[]) => {
+  selectedIds.value = [] // 清空数组
+  selection.forEach(item => {
+    console.log('选中的行数据:', item)
+    const studentId = item.guid || item.id
+    if (studentId) {
+      selectedIds.value.push(studentId)
+    }
+  })
+  console.log('收集到的ID数组:', selectedIds.value)
+}
+
+// 转为在线学员
+const handleToOnline = () => {
+  if (!selectedIds.value.length) {
+    ElMessage.warning('请选择要转换的学员')
+    return
+  }
+
+  console.log('准备转换的学员ID:', selectedIds.value)
+
+  ElMessageBox.confirm('确认将选中的学员转为在线学员吗？', '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  }).then(async () => {
+    try {
+      console.log('发送请求前的ID数组:', selectedIds.value)
+      await studentApi.updateStudentType(0, selectedIds.value) // 0代表在线学员
+      ElMessage.success('转换成功')
+      getStudentList() // 刷新列表
+    } catch (error) {
+      console.error('转换失败:', error)
+      ElMessage.error('转换失败')
+    }
+  }).catch(() => {})
 }
 
 // 页面加载时获取列表
@@ -267,13 +315,38 @@ onMounted(() => {
   padding: 20px;
 }
 
-.search-form {
+.search-card {
   margin-bottom: 20px;
+}
+
+.list-card {
+  margin-bottom: 20px;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.card-header span {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.search-form {
+  margin-bottom: 0;
 }
 
 .pagination {
   margin-top: 20px;
   display: flex;
   justify-content: flex-end;
+}
+
+.button-group {
+  display: flex;
+  gap: 10px;
 }
 </style>
