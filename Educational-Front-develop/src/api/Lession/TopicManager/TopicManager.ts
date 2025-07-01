@@ -16,15 +16,17 @@ export function getTopicList(params: {
 }
 
 // 创建专题
-export function createTopic(data: {
+export interface CreateTopicDto {
   name: string;
-  categoryId: string;
+  categoryId: string;  // 例如: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
   logoPath: string;
   teacher: string;
   brief: string;
   details: string;
   achievementDisplay: string;
-}) {
+}
+
+export function createTopic(data: CreateTopicDto) {
   return request({
     url: '/api/app/special-subject-services',
     method: 'post',
