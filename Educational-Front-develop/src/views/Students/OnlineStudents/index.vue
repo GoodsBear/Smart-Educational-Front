@@ -268,6 +268,9 @@ import { ref, onMounted, reactive } from 'vue'
 import { ElMessage, ElMessageBox, FormInstance } from 'element-plus'
 import studentApi from '@/api/StudentsManager/Student/Student'
 import { formatDate } from '@/utils/date'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 // 查询参数
 const queryParams = reactive({
@@ -465,7 +468,27 @@ const handleCurrentChange = (val: number) => {
 // 查看学员详情
 const handleView = (row: any) => {
   console.log('查看学员详情:', row)
-  // TODO: 实现查看详情功能
+  router.push({
+    path: '/students/detail',
+    query: {
+      id: row.guid || row.id,
+      name: row.name,
+      phone: row.phone,
+      campusId: row.campusId,
+      parentName: row.parentName,
+      relation: row.relation?.toString(),
+      sex: row.sex?.toString(),
+      enrollTime: row.enrollTime,
+      gradeId: row.gradeId,
+      birthday: row.birthday,
+      idCard: row.idCard,
+      source: row.source,
+      remark: row.remark,
+      studentType: row.studentType?.toString(),
+      consultant: row.consultant,
+      lessonNums: row.lessonNums?.toString()
+    }
+  })
 }
 
 // 学员报名
