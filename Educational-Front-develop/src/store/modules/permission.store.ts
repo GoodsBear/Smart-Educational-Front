@@ -52,18 +52,18 @@ export const usePermissionStore = defineStore("permission", () => {
             redirect: "/tissue/user",
             meta: { title: "组织管理", icon: "ep:setting" },
             children: [
-              // {
-              //   path: "staff",
-              //   name: "Staff",
-              //   component: () => import("@/views/tissue/staff/index.vue"),
-              //   meta: { title: "员工管理", icon: "ep:collection" },
-              // },
-              // {
-              //   path: "money",
-              //   name: "money",
-              //   component: () => import("@/views/tissue/money/index.vue"),
-              //   meta: { title: "薪资设置", icon: "ep:collection" },
-              // },
+              {
+                path: "staff",
+                name: "Staff",
+                component: () => import("@/views/system/staff/index.vue"),
+                meta: { title: "员工管理", icon: "ep:collection" },
+              },
+              //{
+              // path: "money",
+              //name: "money",
+              //component: () => import("@/views/tissue/money/index.vue"),
+              //meta: { title: "薪资设置", icon: "ep:collection" },
+              //},
               {
                 path: "organization",
                 name: "Organization",
