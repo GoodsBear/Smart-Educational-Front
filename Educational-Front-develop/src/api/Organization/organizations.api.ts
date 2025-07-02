@@ -3,10 +3,7 @@ import request from "@/utils/request";
 const ORGANIZATION_BASE_URL = "/api/app/organization-services";
 
 const OrganizationAPI = {
-  /**
-   * 创建组织机构
-   * @param data 组织机构数据
-   */
+  // 创建组织机构
   createOrganization(data: any) {
     return request({
       url: `${ORGANIZATION_BASE_URL}`,
@@ -15,22 +12,15 @@ const OrganizationAPI = {
     });
   },
 
-  /**
-   * 查询组织机构列表
-   * @param params 查询参数
-   */
-  getOrganizationList(params?: any) {
+  // 查询组织机构列表
+  getOrganizationList() {
     return request({
       url: `${ORGANIZATION_BASE_URL}`,
       method: "get",
-      params,
     });
   },
 
-  /**
-   * 删除组织机构
-   * @param id 组织机构ID
-   */
+  // 删除组织机构
   deleteOrganization(id: string) {
     return request({
       url: `${ORGANIZATION_BASE_URL}/${id}`,
@@ -38,10 +28,7 @@ const OrganizationAPI = {
     });
   },
 
-  /**
-   * 根据ID获取组织机构（反填）
-   * @param id 组织机构ID
-   */
+  // 根据ID获取组织机构（反填）
   getOrganizationById(id: string) {
     return request({
       url: `${ORGANIZATION_BASE_URL}/${id}`,
@@ -49,11 +36,7 @@ const OrganizationAPI = {
     });
   },
 
-  /**
-   * 更新组织机构
-   * @param id 组织机构ID
-   * @param data 组织机构数据
-   */
+  // 更新组织机构
   updateOrganization(id: string, data: any) {
     return request({
       url: `${ORGANIZATION_BASE_URL}/${id}`,
@@ -62,9 +45,7 @@ const OrganizationAPI = {
     });
   },
 
-  /**
-   * 组织机构级别下拉表
-   */
+  // 组织机构级别下拉表
   getOrganizationLevelList() {
     return request({
       url: `${ORGANIZATION_BASE_URL}/level`,
@@ -72,10 +53,7 @@ const OrganizationAPI = {
     });
   },
 
-  /**
-   * 组织机构级别添加
-   * @param data 级别数据
-   */
+  // 组织机构级别添加
   addOrganizationLevel(data: any) {
     return request({
       url: `${ORGANIZATION_BASE_URL}/level`,
@@ -84,9 +62,7 @@ const OrganizationAPI = {
     });
   },
 
-  /**
-   * 获取组织机构下拉框
-   */
+  // 获取组织机构下拉框
   getOrganizationSelect() {
     return request({
       url: `${ORGANIZATION_BASE_URL}/organization`,
@@ -94,16 +70,41 @@ const OrganizationAPI = {
     });
   },
 
-  /**
-   * 树形组织机构表
-   * @param parentId 父级ID
-   */
+  // 字段全显示树形组织机构表
+  getOrganizationTreeAll(parentId: string) {
+    return request({
+      url: `${ORGANIZATION_BASE_URL}/tree-all/${parentId}`,
+      method: "get",
+    });
+  },
+
+  // 树形组织机构表
   getOrganizationTree(parentId: string) {
     return request({
       url: `${ORGANIZATION_BASE_URL}/tree/${parentId}`,
       method: "get",
     });
   },
+
+  // 获取机构树
+  getOrganizationTreeSimple() {
+    return request({
+      url: `${ORGANIZATION_BASE_URL}/organization-tree`,
+      method: "get",
+    });
+  },
+    /**
+   * 批量删除职位
+   * @param data 职位ID数组
+   */
+  batchDeleteOrganization(data: any) {
+    return request({
+      url: `${ORGANIZATION_BASE_URL}/batch-delete`,
+      method: "delete",
+      params: data,
+    });
+  },
+};
 };
 
 export default OrganizationAPI;
