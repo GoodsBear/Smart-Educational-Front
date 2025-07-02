@@ -227,14 +227,13 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive, onMounted } from "vue";
+import { ref, reactive, onMounted, nextTick } from "vue";
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from "element-plus";
 import StaffAPI from "@/api/staff/staff.api"; // 导入您封装的API方法
 import { getOrganizationTree } from "@/api/organization/organization.api";
 import moment from "moment";
 import { Plus } from "@element-plus/icons-vue";
 import type { UploadProps } from "element-plus";
-
 // 类型定义
 interface StaffQuery {
   StaffName?: string;
@@ -419,24 +418,34 @@ const showAddDialog = () => {
 // 显示编辑对话框
 const showEditDialog = async (row: any) => {
   isAdd.value = false;
-  // 1. 打开弹窗
   dialogTitle.value = "编辑员工";
-  dialogVisible.value = true;
 
-  // 2. 重置表单（防止残留）
   resetFormData();
   formRef.value?.resetFields();
 
-  // 4. 赋值表单数据
   Object.assign(formData, row);
+
+  // 处理 organization 字段
+  let orgNames = [];
+  if (typeof row.organization === "string") {
+    orgNames = row.organization.split(",");
+  } else if (Array.isArray(row.organization)) {
+    orgNames = row.organization;
+  }
+
+  formData.organization = orgNames;
+
   formData.staffPassword = "123456";
   imageUrl.value = row.photoUrl;
-  formRef.value?.resetFields();
-  formData.organization = Array.isArray(row.organization)
-    ? row.organization
-    : row.organization
-      ? [row.organization]
-      : [];
+
+  dialogVisible.value = true;
+
+  // 等待弹窗和树渲染后设置选中
+  await nextTick();
+  if (treeRef.value && data.value.length) {
+    const checkedIds = findIdsByNames(data.value, orgNames);
+    treeRef.value.setCheckedKeys(checkedIds);
+  }
 };
 
 // 提交表单
@@ -594,6 +603,23 @@ const submitStatus = () => {
 
   statusDialogVisible.value = false;
 };
+
+// 递归查找所有匹配名称的节点id
+function findIdsByNames(treeData, names) {
+  const ids = [];
+  function traverse(nodes) {
+    nodes.forEach((node) => {
+      if (names.includes(node.label)) {
+        ids.push(node.id);
+      }
+      if (node.children && node.children.length) {
+        traverse(node.children);
+      }
+    });
+  }
+  traverse(treeData);
+  return ids;
+}
 </script>
 
 <style scoped>
