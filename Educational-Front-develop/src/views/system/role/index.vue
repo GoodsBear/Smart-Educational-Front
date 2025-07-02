@@ -4,12 +4,7 @@
     <div class="search-container">
       <el-form ref="queryFormRef" :model="queryParams" :inline="true">
         <el-form-item prop="roleName" label="角色名称">
-          <el-input
-            v-model="queryParams.roleName"
-            placeholder="请输入角色名称"
-            clearable
-            @keyup.enter="handleQuery"
-          />
+          <el-input v-model="queryParams.roleName" placeholder="请输入角色名称" clearable @keyup.enter="handleQuery" />
         </el-form-item>
 
         <el-form-item class="search-buttons">
@@ -23,48 +18,24 @@
       <div class="data-table__toolbar">
         <div class="data-table__toolbar--actions">
           <el-button type="success" :icon="Plus" @click="handleAdd">新增</el-button>
-          <el-button
-            type="danger"
-            :disabled="selectedRoles.length === 0"
-            :icon="Delete"
-            @click="handleBatchDelete"
-          >
+          <el-button type="danger" :disabled="selectedRoles.length === 0" :icon="Delete" @click="handleBatchDelete">
             删除
           </el-button>
         </div>
       </div>
 
-      <el-table
-        ref="dataTableRef"
-        v-loading="loading"
-        :data="roleList"
-        highlight-current-row
-        border
-        class="data-table__content"
-        @selection-change="handleSelectionChange"
-      >
+      <el-table ref="dataTableRef" v-loading="loading" :data="roleList" highlight-current-row border
+        class="data-table__content" @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="55" align="center" />
         <el-table-column label="角色名称" prop="roleName" min-width="120" />
         <el-table-column label="角色编码" prop="roleEncode" width="150" />
 
         <el-table-column label="操作" width="220">
           <template #default="scope">
-            <el-button
-              type="primary"
-              size="small"
-              link
-              :icon="Edit"
-              @click="handleEdit(scope.row)"
-            >
+            <el-button type="primary" size="small" link :icon="Edit" @click="handleEdit(scope.row)">
               编辑
             </el-button>
-            <el-button
-              type="danger"
-              size="small"
-              link
-              :icon="Delete"
-              @click="handleDelete(scope.row)"
-            >
+            <el-button type="danger" size="small" link :icon="Delete" @click="handleDelete(scope.row)">
               删除
             </el-button>
           </template>
@@ -72,12 +43,8 @@
       </el-table>
 
       <div class="pagination-container">
-        <pagination
-          v-model:total="total"
-          v-model:page="queryParams.pageIndex"
-          v-model:limit="queryParams.pageSize"
-          @pagination="handlePagination"
-        />
+        <Pagination v-model:total="total" v-model:page="queryParams.pageIndex" v-model:limit="queryParams.pageSize"
+          @pagination="handlePagination" />
         <div class="pagination-info">
           共 {{ total }} 条 第{{ queryParams.pageIndex }}页/{{ totalPage }}页
         </div>
@@ -85,29 +52,13 @@
     </el-card>
 
     <!-- 添加/修改角色对话框 -->
-    <el-dialog
-      v-model="dialogVisible"
-      :title="dialogTitle"
-      width="500px"
-      append-to-body
-      @closed="resetForm"
-    >
-      <el-form
-        ref="roleFormRef"
-        :model="roleForm"
-        :rules="rules"
-        label-width="100px"
-      >
+    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="500px" append-to-body @closed="resetForm">
+      <el-form ref="roleFormRef" :model="roleForm" :rules="rules" label-width="100px">
         <el-form-item label="角色名称" prop="roleName">
           <el-input v-model="roleForm.roleName" placeholder="请输入角色名称" />
         </el-form-item>
         <el-form-item label="角色描述" prop="roleDesc">
-          <el-input
-            v-model="roleForm.roleDesc"
-            type="textarea"
-            placeholder="请输入角色描述"
-            :rows="3"
-          />
+          <el-input v-model="roleForm.roleDesc" type="textarea" placeholder="请输入角色描述" :rows="3" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -254,13 +205,13 @@ function handleEdit(row: RoleItem) {
   isEdit.value = true;
   currentId.value = row.id;
   resetForm();
-  
+
   // 填充表单数据
   roleForm.roleName = row.roleName;
   roleForm.roleEncode = row.roleEncode;
   roleForm.roleDesc = row.roleDesc;
   roleForm.roleStatus = row.roleStatus;
-  
+
   dialogTitle.value = '编辑角色';
   dialogVisible.value = true;
 }
@@ -336,7 +287,7 @@ function handleBatchDelete() {
     ElMessage.warning('请选择要删除的角色');
     return;
   }
-  
+
   ElMessageBox.confirm(`确认要删除选中的${selectedRoles.value.length}个角色吗？`, '提示', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
@@ -365,8 +316,8 @@ function handleBatchDelete() {
 function deleteRole(id: string, showMessage = true) {
   return RoleManagerAPI.deleteRole(id)
     .then(response => {
-          ElMessage.success('删除角色成功');
-          fetchData();
+      ElMessage.success('删除角色成功');
+      fetchData();
     })
     .catch(error => {
       if (showMessage) {
@@ -444,4 +395,4 @@ onMounted(() => {
 .dialog-footer {
   text-align: center;
 }
-</style> 
+</style>

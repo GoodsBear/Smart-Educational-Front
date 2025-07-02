@@ -4,21 +4,11 @@
     <div class="search-container">
       <el-form ref="queryFormRef" :model="queryParams" :inline="true" label-suffix=":">
         <el-form-item label="标题" prop="title">
-          <el-input
-            v-model="queryParams.title"
-            placeholder="标题"
-            clearable
-            @keyup.enter="handleQuery()"
-          />
+          <el-input v-model="queryParams.title" placeholder="标题" clearable @keyup.enter="handleQuery()" />
         </el-form-item>
 
         <el-form-item label="发布状态" prop="publishStatus">
-          <el-select
-            v-model="queryParams.publishStatus"
-            clearable
-            placeholder="全部"
-            style="width: 100px"
-          >
+          <el-select v-model="queryParams.publishStatus" clearable placeholder="全部" style="width: 100px">
             <el-option :value="0" label="未发布" />
             <el-option :value="1" label="已发布" />
             <el-option :value="-1" label="已撤回" />
@@ -35,34 +25,18 @@
     <el-card shadow="hover" class="data-table">
       <div class="data-table__toolbar">
         <div class="data-table__toolbar--actions">
-          <el-button
-            v-hasPerm="['sys:notice:add']"
-            type="success"
-            icon="plus"
-            @click="handleOpenDialog()"
-          >
+          <el-button v-hasPerm="['sys:notice:add']" type="success" icon="plus" @click="handleOpenDialog()">
             新增通知
           </el-button>
-          <el-button
-            v-hasPerm="['sys:notice:delete']"
-            type="danger"
-            :disabled="selectIds.length === 0"
-            icon="delete"
-            @click="handleDelete()"
-          >
+          <el-button v-hasPerm="['sys:notice:delete']" type="danger" :disabled="selectIds.length === 0" icon="delete"
+            @click="handleDelete()">
             删除
           </el-button>
         </div>
       </div>
 
-      <el-table
-        ref="dataTableRef"
-        v-loading="loading"
-        :data="pageData"
-        highlight-current-row
-        class="data-table__content"
-        @selection-change="handleSelectionChange"
-      >
+      <el-table ref="dataTableRef" v-loading="loading" :data="pageData" highlight-current-row
+        class="data-table__content" @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="55" align="center" />
         <el-table-column type="index" label="序号" width="60" />
         <el-table-column label="通知标题" prop="title" min-width="200" />
@@ -112,67 +86,32 @@
             <el-button type="primary" size="small" link @click="openDetailDialog(scope.row.id)">
               查看
             </el-button>
-            <el-button
-              v-if="scope.row.publishStatus != 1"
-              v-hasPerm="['sys:notice:publish']"
-              type="primary"
-              size="small"
-              link
-              @click="handlePublish(scope.row.id)"
-            >
+            <el-button v-if="scope.row.publishStatus != 1" v-hasPerm="['sys:notice:publish']" type="primary"
+              size="small" link @click="handlePublish(scope.row.id)">
               发布
             </el-button>
-            <el-button
-              v-if="scope.row.publishStatus == 1"
-              v-hasPerm="['sys:notice:revoke']"
-              type="primary"
-              size="small"
-              link
-              @click="handleRevoke(scope.row.id)"
-            >
+            <el-button v-if="scope.row.publishStatus == 1" v-hasPerm="['sys:notice:revoke']" type="primary" size="small"
+              link @click="handleRevoke(scope.row.id)">
               撤回
             </el-button>
-            <el-button
-              v-if="scope.row.publishStatus != 1"
-              v-hasPerm="['sys:notice:edit']"
-              type="primary"
-              size="small"
-              link
-              @click="handleOpenDialog(scope.row.id)"
-            >
+            <el-button v-if="scope.row.publishStatus != 1" v-hasPerm="['sys:notice:edit']" type="primary" size="small"
+              link @click="handleOpenDialog(scope.row.id)">
               编辑
             </el-button>
-            <el-button
-              v-if="scope.row.publishStatus != 1"
-              v-hasPerm="['sys:notice:delete']"
-              type="danger"
-              size="small"
-              link
-              @click="handleDelete(scope.row.id)"
-            >
+            <el-button v-if="scope.row.publishStatus != 1" v-hasPerm="['sys:notice:delete']" type="danger" size="small"
+              link @click="handleDelete(scope.row.id)">
               删除
             </el-button>
           </template>
         </el-table-column>
       </el-table>
 
-      <pagination
-        v-if="total > 0"
-        v-model:total="total"
-        v-model:page="queryParams.pageNum"
-        v-model:limit="queryParams.pageSize"
-        @pagination="handleQuery()"
-      />
+      <pagination v-if="total > 0" v-model:total="total" v-model:page="queryParams.pageNum"
+        v-model:limit="queryParams.pageSize" @pagination="handleQuery()" />
     </el-card>
 
     <!-- 通知公告表单弹窗 -->
-    <el-dialog
-      v-model="dialog.visible"
-      :title="dialog.title"
-      top="3vh"
-      width="80%"
-      @close="handleCloseDialog"
-    >
+    <el-dialog v-model="dialog.visible" :title="dialog.title" top="3vh" width="80%" @close="handleCloseDialog">
       <el-form ref="dataFormRef" :model="formData" :rules="rules" label-width="100px">
         <el-form-item label="通知标题" prop="title">
           <el-input v-model="formData.title" placeholder="通知标题" clearable />
@@ -192,12 +131,7 @@
         </el-form-item>
         <el-form-item v-if="formData.targetType == 2" label="指定用户" prop="targetUserIds">
           <el-select v-model="formData.targetUserIds" multiple search placeholder="请选择指定用户">
-            <el-option
-              v-for="item in userOptions"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            />
+            <el-option v-for="item in userOptions" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
         <el-form-item label="通知内容" prop="content">
@@ -212,13 +146,7 @@
       </template>
     </el-dialog>
     <!-- 通知公告详情 -->
-    <el-dialog
-      v-model="detailDialog.visible"
-      :show-close="false"
-      width="50%"
-      append-to-body
-      @close="closeDetailDialog"
-    >
+    <el-dialog v-model="detailDialog.visible" :show-close="false" width="50%" append-to-body @close="closeDetailDialog">
       <template #header>
         <div class="flex-x-between">
           <span>通知公告详情</span>
