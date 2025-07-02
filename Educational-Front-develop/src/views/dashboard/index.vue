@@ -10,8 +10,8 @@
           <img class="w80px h80px rounded-full"
             src="https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png" />
           <div class="ml-5">
-            <p class="text-lg font-bold">欢迎使用教务管理系统！</p>
-            <p class="text-sm text-gray">今日天气晴朗，气温在15℃至25℃之间，东南风。</p>
+            <p class="text-lg font-bold">欢迎使用智慧教务系统！</p>
+            zhzh <p class="text-sm text-gray">今日天气晴朗，气温在15℃至25℃之间，东南风。</p>
           </div>
         </div>
 
