@@ -47,6 +47,38 @@ export const usePermissionStore = defineStore("permission", () => {
             ],
           },
           {
+            path: "/tissue",
+            component: Layout,
+            redirect: "/tissue/user",
+            meta: { title: "组织管理", icon: "ep:setting" },
+            children: [
+              {
+                path: "staff",
+                name: "Staff",
+                component: () => import("@/views/tissue/staff/index.vue"),
+                meta: { title: "员工管理", icon: "ep:collection" },
+              },
+              // {
+              //   path: "money",
+              //   name: "money",
+              //   component: () => import("@/views/tissue/money/index.vue"),
+              //   meta: { title: "薪资设置", icon: "ep:collection" },
+              // },
+              {
+                path: "organization",
+                name: "Organization",
+                component: () => import("@/views/tissue/organization/index.vue"),
+                meta: { title: "组织管理", icon: "ep:collection" },
+              },
+              {
+                path: "position",
+                name: "Position",
+                component: () => import("@/views/tissue/position/index.vue"),
+                meta: { title: "职位管理", icon: "ep:collection" },
+              },
+            ],
+          },
+          {
             path: "/system",
             component: Layout,
             redirect: "/system/user",
@@ -71,25 +103,60 @@ export const usePermissionStore = defineStore("permission", () => {
                 meta: { title: "字典管理", icon: "ep:collection" },
               },
               {
-                path: "staff",
-                name: "Staff",
-                component: () => import("@/views/system/staff/index.vue"),
-                meta: { title: "员工管理", icon: "ep:collection" },
-              },
+                path: 'announcement',
+                component: () => import('@/views/system/announcement/index.vue'),
+                name: 'Announcement',
+                meta: {
+                  title: '内部公告',
+                  icon: 'notification',
+                  permission: ['system:announcement:list']
+                }
+              }
             ],
           },
-          {
-            path: "/404",
-            component: () => import("@/views/error/404.vue"),
-            meta: { hidden: true },
-          },
-          {
-            path: "/:pathMatch(.*)*",
-            redirect: "/404",
-            meta: { hidden: true },
-          },
-        ];
 
+          {
+            path: '/educational',
+            component: Layout,
+            redirect: '/educational/course',
+            name: 'Educational',
+            meta: {
+              title: '课程管理',
+              icon: 'education',
+              order: 1
+            },
+            children: [
+              {
+                path: 'course',
+                component: () => import('@/views/Lessions/course/index.vue'),
+                name: 'CourseManagement',
+                meta: {
+                  title: '课程管理',
+                  icon: 'course'
+                }
+              },
+              {
+                path: 'subject',
+                component: () => import('@/views/Lessions/subject/index.vue'),
+                name: 'SubjectManagement',
+                meta: {
+                  title: '科目管理',
+                  icon: 'subject'
+                }
+              },
+              {
+                path: 'topic',
+                component: () => import('@/views/Lessions/topic/index.vue'),
+                name: 'TopicManagement',
+                meta: {
+                  title: '专题管理',
+                  icon: 'topic'
+                }
+              }
+            ]
+          }
+
+        ];
         // 清理可能存在的重复路由
         try {
           // 尝试移除可能已存在的路由
