@@ -46,6 +46,40 @@ export const usePermissionStore = defineStore("permission", () => {
               },
             ],
           },
+
+          {
+            path: "/Students",
+            component: Layout,
+            redirect: "/Students/OnlineStudents",
+            meta: { title: "学员管理", icon: "ep:user-filled" },
+            children: [
+              {
+                path: "OnlineStudents",
+                name: "OnlineStudents",
+                component: () => import("@/views/Students/OnlineStudents/index.vue"),
+                meta: { title: "在学学员", icon: "ep:user" },
+              },
+              {
+                path: "ThingStudents",
+                name: "ThingStudents",
+                component: () => import("@/views/Students/ThinkStudents/index.vue"),
+                meta: { title: "意向学员", icon: "ep:star-filled" },
+              },
+              {
+                path: "FinishStudents",
+                name: "FinishStudents",
+                component: () => import("@/views/Students/FinishStudents/index.vue"),
+                meta: { title: "结业学员", icon: "ep:medal" },
+              },
+              {
+                path: "detail",
+                name: "StudentDetail",
+                component: () => import("@/views/Students/StudentDetail/index.vue"),
+                meta: { title: "学员详情", icon: "ep:info", hidden: true },
+              },
+            ],
+          },
+
           {
             path: "/tissue",
             component: Layout,
@@ -188,10 +222,7 @@ export const usePermissionStore = defineStore("permission", () => {
         routesLoaded.value = true;
 
         // 打印当前路由表以便调试
-        console.log(
-          "📋 当前路由表:",
-          router.getRoutes().map((r) => r.path)
-        );
+        console.log("📋 当前路由表:", router.getRoutes().map((r: RouteRecordRaw) => r.path));
         console.log("✅ 静态菜单生成完成");
         resolve(staticRoutes);
       } catch (error) {
