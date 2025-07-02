@@ -1,0 +1,95 @@
+import request from '@/utils/request'
+
+// 获取专题列表（查询专题-分页+查询）
+export function getTopicList(params: {
+  Name?: string;
+  CategoryId?: string;
+  Teacher?: string;
+  PageIndex: number;
+  PageSize: number;
+}) {
+  return request({
+    url: '/api/app/special-subject-services',
+    method: 'get',
+    params
+  })
+}
+
+// 创建专题
+export function createTopic(data: {
+  name: string;
+  categoryId: string;
+  logoPath: string;
+  teacher: string;
+  brief: string;
+  details: string;
+  achievementDisplay: string;
+}) {
+  return request({
+    url: '/api/app/special-subject-services',
+    method: 'post',
+    data
+  })
+}
+
+// 创建专题分类
+export function createCategory(data: {
+  categoryName: string;
+}) {
+  return request({
+    url: '/api/app/special-subject-services/category',
+    method: 'post',
+    data
+  })
+}
+
+// 获取专题分类列表
+export function getCategoryList() {
+  return request({
+    url: '/api/app/special-subject-services/category',
+    method: 'get'
+  })
+}
+
+// 批量删除专题
+export function batchDeleteTopic(guids: string[]) {
+  return request({
+    url: '/api/app/special-subject-services/guid',
+    method: 'delete',
+    params: { guids }
+  })
+}
+
+// 获取专题详情
+export function getTopicDetail(id: string) {
+  return request({
+    url: `/api/app/special-subject-services/${id}`,
+    method: 'get'
+  })
+}
+
+// 更新专题
+export function updateTopic(id: string, data: {
+  name: string;
+  categoryId: string;
+  logoPath: string;
+  teacher: string;
+  brief: string;
+  details: string;
+  achievementDisplay: string;
+  concurrencyStamp?: string;
+}) {
+  return request({
+    url: `/api/app/special-subject-services/${id}`,
+    method: 'put',
+    data
+  })
+}
+
+// 下拉专题
+export function getSpecialSubjectDropdown() {
+  return request({
+    url: '/api/app/special-subject-services/xi-aSpecial-subject',
+    method: 'post'
+  })
+} 
