@@ -93,7 +93,7 @@ const OrganizationAPI = {
       method: "get",
     });
   },
-    /**
+  /**
    * 批量删除职位
    * @param data 职位ID数组
    */
@@ -104,7 +104,6 @@ const OrganizationAPI = {
       params: data,
     });
   },
-};
 };
 
 export default OrganizationAPI;
