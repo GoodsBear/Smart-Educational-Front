@@ -1,24 +1,24 @@
 <template>
   <div class="organization-management">
-    <div class="main-content">
-      <el-table :data="treeData" style="width: 100%" border row-key="id"
-        :tree-props="{ children: 'children', hasChildren: 'hasChildren' }" default-expand-all>
-        <el-table-column prop="name" label="机构名称" min-width="120" />
-        <el-table-column prop="fullName" label="全称" min-width="150" />
-        <el-table-column prop="levelName" label="级别" min-width="80" />
-        <el-table-column prop="contactPerson" label="联系人" min-width="100" />
-        <el-table-column prop="phone" label="电话" min-width="120" />
-        <el-table-column label="操作" min-width="200">
-          <template #default="{ row }">
-            <el-button type="text" @click="showAddDialog(row)">添加子机构</el-button>
-            <el-button type="text" @click="showEditDialog(row)">编辑</el-button>
-            <el-button type="text" @click="handleDelete(row)">删除</el-button>
-            <el-button type="text" @click="handleView(row)">查看</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
-
-    </div>
+    <!-- 组织机构树形表格 -->
+    <el-table ref="tableRef" :data="treeData" style="width: 100%" border row-key="id" lazy :load="load"
+      :tree-props="{ children: 'children', hasChildren: 'hasChildren' }" default-expand-all
+      @selection-change="selectAll">
+      <el-table-column type="selection" width="50" />
+      <el-table-column prop="name" label="机构名称" min-width="120" />
+      <el-table-column prop="shortName" label="全称" min-width="150" />
+      <el-table-column prop="levelId" label="级别" min-width="80" />
+      <el-table-column prop="contactPerson" label="联系人" min-width="100" />
+      <el-table-column prop="phone" label="电话" min-width="120" />
+      <el-table-column label="操作" min-width="200">
+        <template #default="{ row }">
+          <el-button type="text" @click="showAddDialog(row)">添加子机构</el-button>
+          <el-button type="text" @click="showEditDialog(row)">编辑</el-button>
+          <el-button type="text" @click="handleDelete(row)">删除</el-button>
+          <el-button type="text" @click="handleView(row)">查看</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
     <!-- 新增/编辑对话框 -->
     <el-dialog v-model="dialogVisible" :title="dialogTitle" width="40%" @closed="resetForm">
       <el-form ref="formRef" :model="formData" :rules="rules" label-width="100px">
@@ -67,9 +67,9 @@
 import { ref, reactive, onMounted } from "vue";
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from "element-plus";
 import OrganizationAPI from "@/api/Organization/organizations.api";
-
 // 树形结构数据
 const treeData = ref<any[]>([]);
+const tableRef = ref();
 // 级别下拉
 const levelOptions = ref<any[]>([]);
 // 弹窗相关
@@ -91,89 +91,130 @@ const rules: FormRules = {
   fullName: [{ required: true, message: "请输入机构全称", trigger: "blur" }],
   level: [{ required: true, message: "请选择机构级别", trigger: "change" }],
 };
-
 // 查看对话框
 const viewDialogVisible = ref(false);
 const viewData = reactive<any>({});
-
-// 获取树形结构
-const fetchTreeData = async () => {
-  OrganizationAPI.getOrganizationList().then((res: any) => {
-    treeData.value = res.data;
-    fetchLevelOptions();
-  });
+// 懒加载子节点
+const load = async (
+  row: any,
+  treeNode: unknown,
+  resolve: (data: any[]) => void
+) => {
+  // 假设 row.id 为 parentId，顶级节点 parentId 为 "0"
+  const res = await OrganizationAPI.getOrganizationTree(row.id);
+  console.log("懒加载子节点=>", res);
+  resolve(res.data || []);
 };
-
+// 获取顶级节点
+const fetchOrganizationList = async () => {
+  try {
+    const res = await OrganizationAPI.getOrganizationTreeAll("00000000-0000-0000-0000-000000000000");
+    treeData.value = res.data || [];
+  } catch (e) {
+    ElMessage.error("获取机构树失败，请联系管理员！",);
+  }
+};
 // 获取级别下拉
 const fetchLevelOptions = async () => {
   const res = await OrganizationAPI.getOrganizationLevelList();
   levelOptions.value = (res.data || []).map((item: any) => ({ label: item.name, value: item.value }));
 };
-
-//添加子机构
-function showAddDialog(parent: any) {
+// 新增弹窗
+function showAddDialog(parent?: any) {
   isAdd.value = true;
   dialogTitle.value = '添加子机构';
-  resetForm();
-  if (parent) {
-    formData.parentId = parent.id;
-  } else {
-    formData.parentId = "";
-  }
+  formData.parentId = parent.id;
   dialogVisible.value = true;
 }
-// 编辑
+// 编辑弹窗
 function showEditDialog(row: any) {
   isAdd.value = false;
   dialogTitle.value = "编辑机构";
   Object.assign(formData, row);
   dialogVisible.value = true;
 }
-// 删除
-function handleDelete(row: any) {
-  ElMessageBox.confirm('确认删除该机构吗?', '提示', {
-    confirmButtonText: '确认',
-    cancelButtonText: '取消',
-    type: 'warning',
-  }).then(async () => {
-    await OrganizationAPI.deleteOrganization(row.id);
-    ElMessage.success('删除成功');
-    fetchTreeData();
-  }).catch(() => { });
+//全选 全部选
+const Ids = ref([]);
+const selectAll = (id: any) => {
+  Ids.value = id.map((item: any) => (item.id));
+  console.log("ids=>", Ids.value);
+}
+// 批量删除
+const handleDelete = (row?: any) => {
+  let ids: string[] = [];
+  if (row) {
+    ids = [row.id];
+  } else {
+    ids = Ids.value;
+  }
+  if (!ids.length) {
+    ElMessage.warning("请先选择要删除的机构！");
+    return;
+  }
+  ElMessageBox.confirm(
+    '确认删除吗?',
+    'Warning',
+    {
+      confirmButtonText: '确认',
+      cancelButtonText: ' 取消',
+      type: 'warning',
+    }
+  )
+    .then(() => {
+      const params = {
+        ids: Ids.value,
+      };
+      OrganizationAPI.batchDeleteOrganization(params).then((res) => {
+        console.log("组织批量删除=>", res);
+        ElMessage.success("删除成功");
+      });
+      fetchOrganizationList();
+    })
+    .catch(() => {
+      ElMessage({
+        type: 'info',
+        message: '删除已取消',
+      })
+    })
+}
+// // 重置表单
+// const resetForm = () => {
+//   formData.id = "";
+//   formData.name = "";
+//   formData.fullName = "";
+//   formData.level = "";
+//   formData.contactPerson = "";
+//   formData.phone = "";
+//   formData.parentId = "";
+// }
+//添加修改
+const submitForm = () => {
+  (formRef.value as FormInstance).validate((valid) => {
+    if (valid) {
+      if (isAdd.value) {
+        OrganizationAPI.createOrganization(formData).then((res) => {
+          console.log("组织添加=>", res);
+          ElMessage.success("添加成功");
+        });
+      } else {
+        OrganizationAPI.updateOrganization(formData.id, formData).then((res) => {
+          console.log("组织修改=>", res);
+          ElMessage.success("修改成功");
+        });
+      }
+      dialogVisible.value = false;
+      fetchOrganizationList();
+    }
+  });
 }
 // 查看
 function handleView(row: any) {
   Object.assign(viewData, row);
   viewDialogVisible.value = true;
 }
-// 重置表单
-function resetForm() {
-  formData.id = "";
-  formData.name = "";
-  formData.fullName = "";
-  formData.level = "";
-  formData.contactPerson = "";
-  formData.phone = "";
-  formData.parentId = "";
-}
-// 新增/编辑提交
-function submitForm() {
-  (formRef.value as FormInstance).validate(async (valid) => {
-    if (valid) {
-      if (isAdd.value) {
-        await OrganizationAPI.createOrganization(formData);
-        ElMessage.success("添加成功");
-      } else {
-        await OrganizationAPI.updateOrganization(formData.id, formData);
-        ElMessage.success("修改成功");
-      }
-      dialogVisible.value = false;
-      fetchTreeData();
-    }
-  });
-}
+
 onMounted(() => {
-  fetchTreeData();
+  fetchOrganizationList();
   fetchLevelOptions();
 });
 </script>
@@ -187,12 +228,6 @@ onMounted(() => {
 
 .search-bar {
   margin-bottom: 12px;
-}
-
-.main-content {
-  background: #fff;
-  padding: 16px;
-  border-radius: 6px;
 }
 
 .operation-area {
