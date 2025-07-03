@@ -2,7 +2,7 @@ import request from '@/utils/request'
 
 // 员工管理相关接口
 const api = {
-  // 获取员工列表
+  // 获取员工下拉
   getStaffList() {
     return request({
       url: '/api/app/staff-services/staff',
