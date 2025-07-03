@@ -6,28 +6,29 @@ import request from '@/utils/request'
  */
 export function addCourse(data: {
   courseName: string
-  campusId: string
-  subjectId: string
-  topicId: string
-  courseTypeId: string
-  price: number
-  totalPrice: number
-  lessonNum: number
-  validMonthNum: number
-  isReserve: boolean
-  lessonCar: number
-  isInterCut: boolean
-  classSchedule: string
-  lessonDescribe: string
-  status: boolean
-  isLineSale: boolean
-  coverImage: string
-  isRecommend: boolean
-  classQRCode: string
-  stockNum: number
-  stopSaleDate: string
-  detailImageList: string
-  teacherRemark: string
+  campusId: string,
+  subjectId: string,
+  topicId: string,
+  gradeId: string,
+  sellUnit:string,
+  courseTypeId: number,
+  totalPrice: number,
+  lessonNum: number,
+  validMonthNum: number ,
+  isReserve: boolean,
+  lessonCut: number,
+  isAfterPay: boolean ,
+  lessonCutMode: number,
+  lessonDuration: number,
+  status: boolean,
+  isOnlineSale: boolean,
+  coverImage: string,
+  isOpenRecommend: boolean,
+  classQrCode: string,
+  stockNum: number,
+  stopSaleDate: string,
+  detailImageList: string[],
+  teacherRemark: string,
   serviceRemark: string
 }) {
   return request({

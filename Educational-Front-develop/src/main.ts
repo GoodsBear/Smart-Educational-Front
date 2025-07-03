@@ -18,6 +18,7 @@ import "animate.css";
 
 // 自动为某些默认事件（如 touchstart、wheel 等）添加 { passive: true },提升滚动性能并消除控制台的非被动事件监听警告
 import "default-passive-events";
+import { error } from "console";
 
 console.log("🚀 应用启动...");
 
@@ -53,6 +54,10 @@ app.config.errorHandler = (err, instance, info) => {
   console.error("Vue应用错误:", err);
   console.error("错误信息:", info);
 };
+
+app.config.errorHandler=(error)=>{
+  console.error("Vue应用错误:", error);
+}
 
 // 先初始化路由，再挂载应用
 const permissionStore = usePermissionStore();

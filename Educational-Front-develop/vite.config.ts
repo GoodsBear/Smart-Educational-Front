@@ -4,7 +4,7 @@ import { type ConfigEnv, loadEnv, defineConfig } from "vite";
 import AutoImport from "unplugin-auto-import/vite";
 import Components from "unplugin-vue-components/vite";
 import { ElementPlusResolver } from "unplugin-vue-components/resolvers";
-
+import { createSvgIconsPlugin } from 'vite-plugin-svg-icons';
 import mockDevServerPlugin from "vite-plugin-mock-dev-server";
 
 import UnoCSS from "unocss/vite";
@@ -55,6 +55,10 @@ export default defineConfig(({ mode }: ConfigEnv) => {
     },
     plugins: [
       vue(),
+      createSvgIconsPlugin({
+        iconDirs: [resolve(process.cwd(), "src/assets/svg-icons")],
+        symbolId: "icon-[dir]-[name]",
+      }),
       env.VITE_MOCK_DEV_SERVER === "true" ? mockDevServerPlugin() : null,
       UnoCSS(),
       // API 自动导入
