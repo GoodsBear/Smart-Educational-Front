@@ -118,4 +118,34 @@ const RoleManagerAPI = {
   },
 };
 
+/**
+ * 用户分配角色
+ * @param data 用户角色分配信息
+ */
+export function assignUserRole(data: {
+  staffId: string;
+  roleIds: string[];
+}) {
+  return request({
+    url: '/api/app/staf-role/staff-role',
+    method: 'post',
+    data
+  })
+}
+
+/**
+ * 给角色分配用户
+ * @param data 角色用户分配信息
+ */
+export function assignRoleToStaff(data: {
+  roleId: string;
+  staffIds: string[];
+}) {
+  return request({
+    url: '/api/app/staf-role/role-staff',
+    method: 'post',
+    data
+  })
+}
+
 export default RoleManagerAPI;
