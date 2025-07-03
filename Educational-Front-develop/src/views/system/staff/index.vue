@@ -102,7 +102,6 @@
             node-key="id"
             @check-change="handleCheck"
           />
-          <el-button @click="getSelected">获取选中节点</el-button>
         </el-form-item>
         <el-form-item label="所属职位" prop="positionId" required>
           <el-select v-model="formData.positionId" placeholder="请选择职位">
@@ -297,7 +296,7 @@ const checkedProps = ref(allColumns.filter((c) => c.show).map((c) => c.prop));
 // 查询参数
 const queryParams = reactive<StaffQuery>({
   PageIndex: 1,
-  PageSize: 10,
+  PageSize: 20,
 });
 
 // 表单数据
@@ -451,6 +450,20 @@ const showEditDialog = async (row: any) => {
 // 提交表单
 const submitForm = async () => {
   console.log("新增员工", formData);
+  if (!treeRef.value) {
+    console.error("无法获取实例，请检查 ref 绑定！");
+    return;
+  }
+  const checked = treeRef.value.getCheckedNodes();
+  const halfChecked = treeRef.value.getHalfCheckedNodes();
+  console.log("完全选中：", checked);
+  console.log("半选中：", halfChecked);
+  const shanji = ref([]);
+  for (let i = 0; i < checked.length; i++) {
+    shanji.value.push(checked[i].id);
+  }
+  formData.organization = shanji.value.toString();
+  console.log("组织ID：", formData.organization);
   try {
     await formRef.value?.validate();
 
@@ -559,22 +572,7 @@ const handleCheck = () => {
   console.log("选中变化时获取：", keys || "ref 未绑定");
 };
 
-const getSelected = () => {
-  if (!treeRef.value) {
-    console.error("无法获取实例，请检查 ref 绑定！");
-    return;
-  }
-  const checked = treeRef.value.getCheckedNodes();
-  const halfChecked = treeRef.value.getHalfCheckedNodes();
-  console.log("完全选中：", checked);
-  console.log("半选中：", halfChecked);
-  const shanji = ref([]);
-  for (let i = 0; i < checked.length; i++) {
-    shanji.value.push(checked[i].id);
-  }
-  formData.organization = shanji.value.toString();
-  console.log("组织ID：", formData.organization);
-};
+const getSelected = () => {};
 
 // 打开弹窗并设置状态
 const openStatusDialog = (type: any) => {
