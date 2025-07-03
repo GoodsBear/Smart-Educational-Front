@@ -1,11 +1,16 @@
 <template>
   <div>
     <h3 text-center m-0 mb-20px>{{ t("login.login") }}</h3>
-    <el-form ref="loginFormRef" :model="loginFormData" :rules="loginRules" size="large"
-      :validate-on-rule-change="false">
+    <el-form
+      ref="loginFormRef"
+      :model="loginFormData"
+      :rules="loginRules"
+      size="large"
+      :validate-on-rule-change="false"
+    >
       <!-- 用户名 -->
-      <el-form-item prop="username">
-        <el-input v-model.trim="loginFormData.username" :placeholder="t('login.username')">
+      <el-form-item prop="StaffAccount">
+        <el-input v-model="loginFormData.StaffAccount" :placeholder="t('login.username')">
           <template #prefix>
             <el-icon>
               <User />
@@ -16,9 +21,15 @@
 
       <!-- 密码 -->
       <el-tooltip :visible="isCapsLock" :content="t('login.capsLock')" placement="right">
-        <el-form-item prop="password">
-          <el-input v-model.trim="loginFormData.password" :placeholder="t('login.password')" type="password"
-            show-password @keyup="checkCapsLock" @keyup.enter="handleLoginSubmit">
+        <el-form-item prop="StaffPassword">
+          <el-input
+            v-model.trim="loginFormData.StaffPassword"
+            :placeholder="t('login.password')"
+            type="password"
+            show-password
+            @keyup="checkCapsLock"
+            @keyup.enter="handleLoginSubmit"
+          >
             <template #prefix>
               <el-icon>
                 <Lock />
@@ -28,27 +39,27 @@
         </el-form-item>
       </el-tooltip>
 
-      <!-- 验证码 - 已注释 -->
-      <!-- 
-      <el-form-item prop="captchaCode">
-        <div flex>
-          <el-input v-model.trim="loginFormData.captchaCode" :placeholder="t('login.captchaCode')"
-            @keyup.enter="handleLoginSubmit">
-            <template #prefix>
-              <div class="i-svg:captcha" />
-            </template>
-          </el-input>
-          <div cursor-pointer h="[40px]" w="[120px]" flex-center ml-10px @click="getCaptcha">
-            <el-icon v-if="codeLoading" class="is-loading">
-              <Loading />
-            </el-icon>
-
-            <img v-else object-cover border-rd-4px p-1px shadow="[0_0_0_1px_var(--el-border-color)_inset]"
-              :src="captchaBase64" alt="code" />
-          </div>
-        </div>
+      <el-form-item label="验证码">
+        <el-input
+          v-model="loginFormData.CaptchaCode"
+          placeholder="请输入验证码"
+          style="width: 120px"
+        />
+        <el-button
+          :disabled="!loginFormData.StaffAccount || captchaLoading"
+          style="margin-left: 8px"
+          @click="getCaptchaImg"
+        >
+          获取验证码
+        </el-button>
+        <img
+          v-if="captchaImgUrl"
+          :src="captchaImgUrl"
+          style="height: 32px; margin-left: 8px; cursor: pointer"
+          title="点击刷新验证码"
+          @click="getCaptchaImg"
+        />
       </el-form-item>
-      -->
 
       <div class="flex-x-between w-full">
         <el-checkbox v-model="loginFormData.rememberMe">{{ t("login.rememberMe") }}</el-checkbox>
@@ -59,17 +70,13 @@
 
       <!-- 开发模式下显示模拟数据开关 -->
       <div class="flex-x-between w-full mt-2">
-        <el-checkbox v-model="useMockData" @change="handleMockDataChange">
-          使用模拟数据
-        </el-checkbox>
+        <el-checkbox v-model="useMockData" @change="handleMockDataChange">使用模拟数据</el-checkbox>
         <el-text type="info" size="small">后端未启动时使用</el-text>
       </div>
 
       <!-- 添加后端连接测试按钮 -->
       <div v-if="showDiagnosticTools" class="flex-x-between w-full mt-2">
-        <el-button size="small" type="info" @click="testBackendConnection">
-          测试后端连接
-        </el-button>
+        <el-button size="small" type="info" @click="testBackendConnection">测试后端连接</el-button>
         <el-text v-if="connectionStatus" type="info" size="small">{{ connectionStatus }}</el-text>
       </div>
 
@@ -115,22 +122,20 @@
 <script setup lang="ts">
 import type { FormInstance } from "element-plus";
 import { useI18n } from "vue-i18n";
-import { type LoginFormData } from "@/api/myuser.api";
 import CommonWrapper from "@/components/CommonWrapper/index.vue";
 import { Auth } from "@/utils/auth";
 import { ElMessage } from "element-plus";
 import { ApiDetector } from "@/utils/apiDetector";
 import { useUserStore } from "@/store/modules/user.store";
 import { useRoute, useRouter } from "vue-router";
+import { ref, watch, reactive } from "vue";
+import MyUserAPI from "@/api/myuser.api";
 
 const { t } = useI18n();
 
 // 获取路由实例
 const route = useRoute();
 const router = useRouter();
-
-// 注释获取验证码的调用
-// onMounted(() => getCaptcha());
 
 const loginFormRef = ref<FormInstance>();
 const loading = ref(false);
@@ -146,25 +151,13 @@ const useMockData = ref(localStorage.getItem("useMockData") === "true");
 // 显示诊断工具（开发环境）
 const showDiagnosticTools = ref(import.meta.env.DEV);
 // 连接状态信息
-const connectionStatus = ref('');
+const connectionStatus = ref("");
 
-// 测试后端连接
-async function testBackendConnection() {
-  try {
-    connectionStatus.value = '正在测试连接...';
-    const baseUrl = 'https://localhost:44375/';
-    const result = await ApiDetector.testConnection(baseUrl);
-    connectionStatus.value = result;
-  } catch (error: any) {
-    connectionStatus.value = `测试失败: ${error.message || '未知错误'}`;
-  }
-}
-
-const loginFormData = ref<LoginFormData>({
-  username: "admin",
-  password: "123456",
-  captchaKey: "", // 保留字段但不使用
-  captchaCode: "", // 保留字段但不使用
+const loginFormData = reactive({
+  StaffAccount: "",
+  StaffPassword: "",
+  CaptchaKey: "",
+  CaptchaCode: "",
   rememberMe,
 });
 
@@ -202,21 +195,6 @@ const loginRules = computed(() => {
   };
 });
 
-// 获取验证码 - 已注释
-/*
-const codeLoading = ref(false);
-function getCaptcha() {
-  codeLoading.value = true;
-  // 使用MyUserAPI获取验证码
-  MyUserAPI.getCaptcha()
-    .then((data) => {
-      loginFormData.value.captchaKey = data.captchaKey;
-      captchaBase64.value = data.captchaBase64;
-    })
-    .finally(() => (codeLoading.value = false));
-}
-*/
-
 /**
  * 登录提交
  */
@@ -230,14 +208,16 @@ async function handleLoginSubmit() {
 
     // 2. 调用登录API
     const userStore = useUserStore();
-    await userStore.login(loginFormData.value);
+    console.log("提交数据", loginFormData);
+    await userStore.login(loginFormData);
 
     // 3. 登录成功
     ElMessage.success(t("login.loginSuccess"));
 
     // 4. 获取重定向地址或默认跳转到仪表盘
     //const redirect = route.query.redirect?.toString() || '/dashboard';
-    await router.push('/dashboard');
+    await router.replace({ path: "/dashboard" });
+    window.location.reload();
   } catch (error: any) {
     console.error("登录失败:", error);
 
@@ -245,7 +225,7 @@ async function handleLoginSubmit() {
     if (localStorage.getItem("useMockData") === "true") {
       ElMessage.warning("已切换到模拟数据模式，请使用admin/123456登录");
     } else {
-    ElMessage.error(error.message || '登录失败，请稍后重试');
+      ElMessage.error(error.message || "登录失败，请稍后重试");
     }
   } finally {
     loading.value = false;
@@ -270,6 +250,33 @@ function handleMockDataChange(val: any) {
   localStorage.setItem("useMockData", val ? "true" : "false");
   console.log(`模拟数据模式: ${val ? "开启" : "关闭"}`);
 }
+
+const captchaImgUrl = ref(""); // 用于显示验证码图片
+const captchaLoading = ref(false);
+
+const getCaptchaImg = async () => {
+  if (!loginFormData.StaffAccount) {
+    ElMessage.warning("请先输入账号");
+    return;
+  }
+  captchaLoading.value = true;
+  try {
+    const res = await MyUserAPI.getCaptcha(loginFormData.StaffAccount);
+    captchaImgUrl.value = URL.createObjectURL(res.data || res);
+    loginFormData.CaptchaKey = loginFormData.StaffAccount;
+  } catch (e) {
+    ElMessage.error("获取验证码失败");
+  } finally {
+    captchaLoading.value = false;
+  }
+};
+
+watch(
+  () => loginFormData.StaffAccount,
+  (val) => {
+    loginFormData.CaptchaKey = val;
+  }
+);
 </script>
 
 <style lang="scss" scoped>

@@ -1,40 +1,40 @@
-import request from '@/utils/request'
+import request from "@/utils/request";
 
 /**
  * @description 新增课程
  * @param {object} data 课程信息
  */
 export function addCourse(data: {
-  courseName: string
-  campusId: string
-  subjectId: string
-  topicId: string
-  courseTypeId: string
-  price: number
-  totalPrice: number
-  lessonNum: number
-  validMonthNum: number
-  isReserve: boolean
-  lessonCar: number
-  isInterCut: boolean
-  classSchedule: string
-  lessonDescribe: string
-  status: boolean
-  isLineSale: boolean
-  coverImage: string
-  isRecommend: boolean
-  classQRCode: string
-  stockNum: number
-  stopSaleDate: string
-  detailImageList: string
-  teacherRemark: string
-  serviceRemark: string
+  courseName: string;
+  campusId: string;
+  subjectId: string;
+  topicId: string;
+  courseTypeId: string;
+  price: number;
+  totalPrice: number;
+  lessonNum: number;
+  validMonthNum: number;
+  isReserve: boolean;
+  lessonCar: number;
+  isInterCut: boolean;
+  classSchedule: string;
+  lessonDescribe: string;
+  status: boolean;
+  isLineSale: boolean;
+  coverImage: string;
+  isRecommend: boolean;
+  classQRCode: string;
+  stockNum: number;
+  stopSaleDate: string;
+  detailImageList: string;
+  teacherRemark: string;
+  serviceRemark: string;
 }) {
   return request({
-    url: '/api/app/course-services/course',
-    method: 'post',
+    url: "/api/app/course-services/course",
+    method: "post",
     data,
-  })
+  });
 }
 
 /**
@@ -42,19 +42,19 @@ export function addCourse(data: {
  * @param {object} params 查询参数
  */
 export function getCourseList(params: {
-  CourseName?: string
-  CampusId?: string
-  SubjectId?: string
-  Status?: boolean
-  GradeId?: string
-  PageIndex: number
-  PageSize: number
+  CourseName?: string;
+  CampusId?: string;
+  SubjectId?: string;
+  Status?: boolean;
+  GradeId?: string;
+  PageIndex: number;
+  PageSize: number;
 }) {
   return request({
-    url: '/GetListCourse',
-    method: 'get',
+    url: "/GetListCourse",
+    method: "get",
     params,
-  })
+  });
 }
 
 /**
@@ -62,16 +62,13 @@ export function getCourseList(params: {
  * @param {object} params URL参数
  * @param {string[]} data 课程ID列表
  */
-export function updateCourseStatus(
-  params: { status: boolean; type: number },
-  data: string[]
-) {
+export function updateCourseStatus(params: { status: boolean; type: number }, data: string[]) {
   return request({
-    url: '/api/app/course-services/course-status',
-    method: 'put',
+    url: "/api/app/course-services/course-status",
+    method: "put",
     params,
     data,
-  })
+  });
 }
 
 /**
@@ -79,7 +76,7 @@ export function updateCourseStatus(
  */
 export function getCourseDropdown() {
   return request({
-    url: '/GetCourseAsync',
-    method: 'get',
-  })
+    url: "/GetCourseAsync",
+    method: "get",
+  });
 }
