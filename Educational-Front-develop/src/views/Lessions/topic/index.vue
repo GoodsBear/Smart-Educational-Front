@@ -2,15 +2,21 @@
 <template>
   <div class="app-container">
     <el-card shadow="never" class="search-wrapper">
-      <el-form :model="queryParams" ref="queryForm" :inline="true">
+      <el-form ref="queryForm" :model="queryParams" :inline="true">
         <el-form-item label="专题名称" prop="name">
           <el-input v-model="queryParams.name" placeholder="请输入专题名称" clearable />
         </el-form-item>
         <el-form-item label="分类" prop="categoryId">
-          <el-input v-model="queryParams.categoryId" placeholder="请输入分类ID" clearable />
+          <!-- <el-input v-model="queryParams.categoryId" placeholder="请输入分类ID" clearable /> -->
+          <el-select v-model="queryParams.categoryId" placeholder="专题级别" style="width: 240px">
+            <el-option v-for="item in categoryOptions" :key="item.id" :label="item.categoryName" :value="item.id" />
+          </el-select>
         </el-form-item>
         <el-form-item label="讲师" prop="teacher">
-          <el-input v-model="queryParams.teacher" placeholder="请输入讲师名称" clearable />
+          <!-- <el-input v-model="queryParams.teacher" placeholder="请输入讲师名称" clearable /> -->
+          <el-select v-model="queryParams.teacher" placeholder="请输入讲师名称" style="width: 240px">
+            <el-option v-for="item in staffList" :key="item.id" :label="item.staffName" :value="item.id" />
+          </el-select>
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="handleQuery">查询</el-button>
@@ -26,7 +32,7 @@
             <el-button type="primary" @click="handleAdd">新增</el-button>
           </el-col>
           <el-col :span="1.5">
-            <el-button type="danger" @click="handleBatchDelete" :disabled="multiple">批量删除</el-button>
+            <el-button type="danger" :disabled="multiple" @click="handleBatchDelete">批量删除</el-button>
           </el-col>
         </el-row>
       </template>
@@ -62,39 +68,40 @@
         </el-table-column>
       </el-table>
 
-      <pagination v-if="total > 0" :total="total" v-model:page="queryParams.pageIndex"
-        v-model:limit="queryParams.pageSize" @pagination="getList" />
+      <pagination v-if="total > 0" v-model:page="queryParams.pageIndex" v-model:limit="queryParams.pageSize"
+        :total="total" @pagination="getList" />
     </el-card>
 
     <!-- 添加或修改专题对话框 -->
-    <el-dialog 
-      :title="title" 
-      v-model="open" 
-      width="600px" 
-      destroy-on-close
-      :close-on-click-modal="false"
-    >
-      <el-form 
-        ref="topicForm"
-        :model="form" 
-        :rules="rules" 
-        label-width="100px"
-        status-icon
-      >
+    <el-dialog v-model="open" :title="title" width="600px" destroy-on-close :close-on-click-modal="false">
+      <el-form ref="topicForm" :model="form" :rules="rules" label-width="100px" status-icon>
         <el-form-item label="专题名称" prop="name">
           <el-input v-model="form.name" placeholder="请输入专题名称" />
         </el-form-item>
         <el-form-item label="分类" prop="categoryId">
-          <el-input v-model="form.categoryId" placeholder="请输入分类ID" />
+          <!-- <el-input v-model="form.categoryId" placeholder="请输入分类ID" /> -->
+          <el-select v-model="form.categoryId" placeholder="请输入分类ID" style="width: 240px">
+            <el-option v-for="item in categoryOptions" :key="item.id" :label="item.categoryName" :value="item.id" />
+          </el-select>
         </el-form-item>
         <el-form-item label="讲师" prop="teacher">
-          <el-input v-model="form.teacher" placeholder="请输入讲师名称" />
+          <!-- <el-input v-model="form.teacher" placeholder="请输入讲师名称" /> -->
+          <el-select v-model="form.teacher" placeholder="请输入讲师名称" style="width: 240px">
+            <el-option v-for="item in staffList" :key="item.id" :label="item.staffName" :value="item.id" />
+          </el-select>
         </el-form-item>
         <el-form-item label="Logo路径" prop="logoPath">
           <el-input v-model="form.logoPath" placeholder="请输入Logo路径" />
         </el-form-item>
-        <el-form-item label="简介" prop="brief">
-          <el-input v-model="form.brief" type="textarea" :rows="3" placeholder="请输入简介" />
+        <el-form-item v-model="form.brief" label="简介" prop="brief">
+          <!-- <el-input  type="textarea" :rows="3" placeholder="请输入简介" /> -->
+          <div style="border: 1px solid #ccc">
+            <Toolbar style="border-bottom: 1px solid #ccc" :editor="editorRef" :default-config="toolbarConfig"
+              :mode="mode" />
+            <Editor v-model="valueHtml" style="height: 500px; overflow-y: hidden;" :default-config="editorConfig"
+              :mode="mode" @on-created="handleCreated" />
+            {{ valueHtml }}
+          </div>
         </el-form-item>
         <el-form-item label="详情" prop="details">
           <el-input v-model="form.details" type="textarea" :rows="4" placeholder="请输入详情" />
@@ -116,15 +123,15 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { 
-  createTopic, 
-  getTopicList, 
-  updateTopic, 
+import {
+  createTopic,
+  getTopicList,
+  updateTopic,
   getTopicDetail,
   batchDeleteTopic,
-  getCategoryList
+  getCategoryList,
+  getstaffList
 } from '@/api/Lession/TopicManager/TopicManager'
-
 // 列表数据
 const topicList = ref([])
 const loading = ref(true)
@@ -134,6 +141,7 @@ const open = ref(false)
 const multiple = ref(true)
 const selectedIdList = ref<string[]>([])
 const categoryOptions = ref([])
+const staffList = ref([])
 const topicForm = ref()
 
 // 查询参数
@@ -171,12 +179,25 @@ const rules = {
 const loadCategories = async () => {
   try {
     const response = await getCategoryList()
-    categoryOptions.value = response.data || []
+    categoryOptions.value = response || []
   } catch (error) {
     console.error('获取分类列表失败:', error)
   }
 }
 
+// 获取教职员工下拉列表
+const loadstaff = async () => {
+  try {
+    const response = await getstaffList()
+    staffList.value = response || []
+  } catch (error) {
+    console.error('获取教职员工下拉列表失败:', error)
+  }
+}
+
+watch(categoryOptions, (val) => {
+  console.log('categoryOptions:', val)
+})
 // 查询专题列表
 const getList = () => {
   loading.value = true
@@ -262,7 +283,7 @@ const submitForm = async () => {
 
   try {
     await formEl.validate()
-    
+
     if (form.value.id) {
       // 修改
       try {
@@ -337,7 +358,6 @@ const handleBatchDelete = () => {
     ElMessage.warning('请选择要删除的数据')
     return
   }
-  
   ElMessageBox.confirm('确认批量删除所选专题吗？', '警告', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
@@ -350,19 +370,19 @@ const handleBatchDelete = () => {
   })
 }
 
+
 // 时间格式化
 const formatDateTime = (dateTimeStr: string) => {
   if (!dateTimeStr) return '-'
-  
+
   const date = new Date(dateTimeStr)
-  
+
   const year = date.getFullYear()
   const month = String(date.getMonth() + 1).padStart(2, '0')
   const day = String(date.getDate()).padStart(2, '0')
   const hours = String(date.getHours()).padStart(2, '0')
   const minutes = String(date.getMinutes()).padStart(2, '0')
   const seconds = String(date.getSeconds()).padStart(2, '0')
-  
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
 }
 
@@ -374,15 +394,39 @@ watch(() => open.value, (newVal) => {
 onMounted(() => {
   console.log('组件已挂载')
   loadCategories()
+  loadstaff()
   getList()
 })
+import '@wangeditor/editor/dist/css/style.css' // 引入 css  可以在main.js中引入
+import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
+const editorRef = shallowRef()
+const valueHtml = ref('<p>hello</p>')
+const mode = 'default'
+const toolbarConfig = {}
+const editorConfig = { placeholder: '请输入内容...' }
+// 模拟 ajax 异步获取内容
+onMounted(() => {
+  setTimeout(() => {
+    valueHtml.value = '<p>模拟 Ajax 异步设置内容</p>'
+  }, 1500)
+})
+
+onBeforeUnmount(() => {
+  const editor = editorRef.value
+  if (editor == null) return
+  editor.destroy()
+})
+const handleCreated = (editor) => {
+  editorRef.value = editor // 记录 editor 实例，重要！
+}
 </script>
 
 <style scoped>
 .search-wrapper {
   margin-bottom: 20px;
 }
+
 .mb8 {
   margin-bottom: 8px;
 }
-</style> 
+</style>
