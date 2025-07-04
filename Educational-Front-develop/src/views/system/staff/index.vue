@@ -27,8 +27,8 @@
       <el-button>设置角色</el-button>
       <el-button @click="handleDelete">删除</el-button>
       <el-button>转机构</el-button>
-      <el-button @click="openStatusDialog('离职')">转为离职</el-button>
-      <el-button @click="openStatusDialog('在职')">转为在职</el-button>
+      <el-button @click="handleChangeStatus('离职')">转为离职</el-button>
+      <el-button @click="handleChangeStatus('在职')">转为在职</el-button>
       <el-button>转学员</el-button>
       <el-button>导出</el-button>
       <el-button @click="showColumnDialog = true">自定义显示列</el-button>
@@ -618,6 +618,15 @@ function findIdsByNames(treeData, names) {
   traverse(treeData);
   return ids;
 }
+
+const handleChangeStatus = (status) => {
+  // Delarr.value 是你存放已选员工id的数组
+  if (!Delarr.value || Delarr.value.length === 0) {
+    ElMessage.warning("请先选择要操作的员工");
+    return;
+  }
+  openStatusDialog(status);
+};
 </script>
 
 <style scoped>
