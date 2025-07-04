@@ -1,83 +1,95 @@
 <template>
   <div class="staff-management">
-    <!-- 搜索和操作区域 -->
-    <div class="operation-area">
-      <el-form :inline="true" :model="queryParams" class="search-form">
-        <el-form-item label="姓名">
-          <el-input v-model="queryParams.StaffName" placeholder="请输入" clearable />
-        </el-form-item>
-        <el-form-item label="状态">
-          <el-select
-            v-model="queryParams.Status"
-            placeholder="请选择状态"
-            clearable
-            class="status-select"
+    <!-- 搜索栏 Card -->
+    <el-card class="search-card" shadow="never">
+      <div class="search-bar">
+        <div class="search-fields">
+          <el-form :inline="true" :model="queryParams" class="search-form">
+            <el-form-item label="姓名">
+              <el-input v-model="queryParams.StaffName" placeholder="请输入" clearable />
+            </el-form-item>
+            <el-form-item label="状态">
+              <el-select
+                v-model="queryParams.Status"
+                placeholder="请选择状态"
+                clearable
+                class="status-select"
+              >
+                <el-option label="在职" :value="1" />
+                <el-option label="离职" :value="0" />
+              </el-select>
+            </el-form-item>
+          </el-form>
+          <div class="search-btns">
+            <el-button type="primary" @click="handleSearch">搜索</el-button>
+            <el-button @click="resetSearch">重置</el-button>
+          </div>
+        </div>
+        <div class="action-btns">
+          <el-button type="primary" @click="showAddDialog">添加员工</el-button>
+          <el-button>设置角色</el-button>
+          <el-button @click="handleDelete">删除</el-button>
+          <el-button>转机构</el-button>
+          <el-button @click="handleChangeStatus('离职')">转为离职</el-button>
+          <el-button @click="handleChangeStatus('在职')">转为在职</el-button>
+          <el-button>转学员</el-button>
+          <el-button>导出</el-button>
+          <el-button @click="showColumnDialog = true">自定义显示列</el-button>
+        </div>
+      </div>
+    </el-card>
+
+    <!-- 信息列表 Card -->
+    <el-card class="table-card" shadow="never">
+      <!-- 员工列表 -->
+      <el-table
+        ref="tableRef"
+        v-loading="loading"
+        :data="staffList"
+        style="width: 100%"
+        @selection-change="ToAll"
+      >
+        <el-table-column type="selection" width="50" />
+        <template v-for="col in allColumns" :key="col.prop">
+          <el-table-column
+            v-if="checkedProps.includes(col.prop)"
+            :prop="col.prop"
+            :label="col.label"
           >
-            <el-option label="在职" :value="1" />
-            <el-option label="离职" :value="0" />
-          </el-select>
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="handleSearch">搜索</el-button>
-          <el-button @click="resetSearch">重置</el-button>
-        </el-form-item>
-      </el-form>
-
-      <el-button type="primary" @click="showAddDialog">添加员工</el-button>
-      <el-button>设置角色</el-button>
-      <el-button @click="handleDelete">删除</el-button>
-      <el-button>转机构</el-button>
-      <el-button @click="handleChangeStatus('离职')">转为离职</el-button>
-      <el-button @click="handleChangeStatus('在职')">转为在职</el-button>
-      <el-button>转学员</el-button>
-      <el-button>导出</el-button>
-      <el-button @click="showColumnDialog = true">自定义显示列</el-button>
-    </div>
-
-    <!-- 员工列表 -->
-    <el-table
-      ref="tableRef"
-      v-loading="loading"
-      :data="staffList"
-      style="width: 100%"
-      @selection-change="ToAll"
-    >
-      <el-table-column type="selection" width="50" />
-      <template v-for="col in allColumns" :key="col.prop">
-        <el-table-column v-if="checkedProps.includes(col.prop)" :prop="col.prop" :label="col.label">
-          <template v-if="col.prop === 'staffName'" #default="{ row }">
-            <el-link @click="goToDetail(row)">{{ row.staffName }}</el-link>
-          </template>
-          <template v-else-if="col.prop === 'entryDate'" #default="{ row }">
-            {{ row.entryDate ? moment(row.entryDate).format("YYYY-MM-DD") : "" }}
-          </template>
-          <template v-else-if="col.prop === 'status'" #default="{ row }">
-            <el-tag :type="row.status === 1 ? 'success' : 'info'">
-              {{ row.status === 1 ? "在职" : "离职" }}
-            </el-tag>
+            <template v-if="col.prop === 'staffName'" #default="{ row }">
+              <el-link @click="goToDetail(row)">{{ row.staffName }}</el-link>
+            </template>
+            <template v-else-if="col.prop === 'entryDate'" #default="{ row }">
+              {{ row.entryDate ? moment(row.entryDate).format("YYYY-MM-DD") : "" }}
+            </template>
+            <template v-else-if="col.prop === 'status'" #default="{ row }">
+              <el-tag :type="row.status === 1 ? 'success' : 'info'">
+                {{ row.status === 1 ? "在职" : "离职" }}
+              </el-tag>
+            </template>
+          </el-table-column>
+        </template>
+        <el-table-column label="操作">
+          <template #default="{ row }">
+            <el-button size="small" @click="showEditDialog(row)">编辑</el-button>
+            <el-button size="small" @click="changePassword(row)">改密</el-button>
           </template>
         </el-table-column>
-      </template>
-      <el-table-column label="操作">
-        <template #default="{ row }">
-          <el-button size="small" @click="showEditDialog(row)">编辑</el-button>
-          <el-button size="small" @click="changePassword(row)">改密</el-button>
-        </template>
-      </el-table-column>
-    </el-table>
+      </el-table>
 
-    <!-- 分页 -->
-    <div class="pagination">
-      <el-pagination
-        v-model:current-page="queryParams.PageIndex"
-        v-model:page-size="queryParams.PageSize"
-        :page-sizes="[10, 20, 50, 100]"
-        layout="total, sizes, prev, pager, next, jumper"
-        :total="total"
-        @size-change="fetchStaffList"
-        @current-change="fetchStaffList"
-      />
-    </div>
+      <!-- 分页 -->
+      <div class="pagination">
+        <el-pagination
+          v-model:current-page="queryParams.PageIndex"
+          v-model:page-size="queryParams.PageSize"
+          :page-sizes="[10, 20, 50, 100]"
+          layout="total, sizes, prev, pager, next, jumper"
+          :total="total"
+          @size-change="fetchStaffList"
+          @current-change="fetchStaffList"
+        />
+      </div>
+    </el-card>
 
     <!-- 新增/编辑对话框 -->
     <el-dialog v-model="dialogVisible" :title="dialogTitle" width="60%" @closed="resetForm">
@@ -91,7 +103,12 @@
         <el-form-item label="登录账号" prop="staffAccount" required>
           <el-input v-model="formData.staffAccount" placeholder="请输入登录账号" />
         </el-form-item>
-        <el-form-item label="登录密码" prop="staffPassword" required>
+        <el-form-item
+          v-if="dialogTitle == '新增员工'"
+          label="登录密码"
+          prop="staffPassword"
+          required
+        >
           <el-input v-model="formData.staffPassword" placeholder="请输入登录密码" />
         </el-form-item>
         <el-form-item label="所属机构" prop="organization">
@@ -224,6 +241,23 @@
       <template #footer>
         <el-button @click="statusDialogVisible = false">取消</el-button>
         <el-button type="primary" @click="submitStatus">提交</el-button>
+      </template>
+    </el-dialog>
+
+    <el-dialog v-model="passwordDialogVisible" title="重置密码" width="400px">
+      <el-form
+        ref="passwordFormRef"
+        :model="passwordForm"
+        :rules="passwordRules"
+        label-width="100px"
+      >
+        <el-form-item label="输入新密码:" prop="newPassword">
+          <el-input v-model="passwordForm.newPassword" type="password" placeholder="请输入新密码" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="passwordDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="submitPassword">提交</el-button>
       </template>
     </el-dialog>
   </div>
@@ -452,7 +486,6 @@ const showEditDialog = async (row: any) => {
     orgNames = row.organization;
   }
   formData.organization = orgNames;
-  formData.staffPassword = "123456";
   imageUrl.value = row.photoUrl;
   dialogVisible.value = true;
   await getRoleList(); // 编辑时也获取角色下拉
@@ -537,8 +570,12 @@ const goToDetail = (row: any) => {
 
 // 修改密码
 const changePassword = (row: any) => {
-  // 实现修改密码的逻辑
-  console.log("修改密码", row);
+  currentStaffId.value = row.id;
+  passwordForm.newPassword = "";
+  passwordDialogVisible.value = true;
+  nextTick(() => {
+    passwordFormRef.value?.clearValidate();
+  });
 };
 
 // 恢复默认
@@ -614,10 +651,10 @@ const submitStatus = () => {
 };
 
 // 递归查找所有匹配名称的节点id
-function findIdsByNames(treeData, names) {
-  const ids = [];
-  function traverse(nodes) {
-    nodes.forEach((node) => {
+function findIdsByNames(treeData: any, names: any) {
+  const ids: any[] = [];
+  function traverse(nodes: any) {
+    nodes.forEach((node: any) => {
       if (names.includes(node.label)) {
         ids.push(node.id);
       }
@@ -638,6 +675,32 @@ const handleChangeStatus = (status) => {
   }
   openStatusDialog(status);
 };
+
+// 新增
+const passwordDialogVisible = ref(false);
+const passwordFormRef = ref<FormInstance>();
+const passwordForm = reactive({
+  newPassword: "",
+});
+const passwordRules = {
+  newPassword: [
+    { required: true, message: "请输入新密码", trigger: "blur" },
+    { min: 6, message: "密码长度不能少于6位", trigger: "blur" },
+  ],
+};
+const currentStaffId = ref("");
+
+// 提交新密码的方法
+const submitPassword = async () => {
+  await passwordFormRef.value?.validate();
+  try {
+    await StaffAPI.updateStaffPassword(currentStaffId.value, passwordForm.newPassword);
+    ElMessage.success("密码修改成功");
+    passwordDialogVisible.value = false;
+  } catch (e) {
+    ElMessage.error("密码修改失败");
+  }
+};
 </script>
 
 <style scoped>
@@ -645,15 +708,42 @@ const handleChangeStatus = (status) => {
   padding: 20px;
 }
 
-.operation-area {
-  margin-bottom: 20px;
-  display: flex;
-  justify-content: space-between;
+.search-card {
+  margin-bottom: 18px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px #f0f1f2;
 }
 
-.search-form {
+.table-card {
+  border-radius: 8px;
+  box-shadow: 0 2px 8px #f0f1f2;
+}
+
+.search-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.search-fields {
   display: flex;
   align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.search-btns {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: 16px;
+}
+
+.action-btns {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 .pagination {
