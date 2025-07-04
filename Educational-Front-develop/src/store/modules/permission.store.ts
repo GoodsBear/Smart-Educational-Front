@@ -137,59 +137,58 @@ export const usePermissionStore = defineStore("permission", () => {
                 meta: { title: "字典管理", icon: "ep:collection" },
               },
               {
-                path: 'announcement',
-                component: () => import('@/views/system/announcement/index.vue'),
-                name: 'Announcement',
+                path: "announcement",
+                component: () => import("@/views/system/announcement/index.vue"),
+                name: "Announcement",
                 meta: {
-                  title: '内部公告',
-                  icon: 'notification',
-                  permission: ['system:announcement:list']
-                }
-              }
+                  title: "内部公告",
+                  icon: "notification",
+                  permission: ["system:announcement:list"],
+                },
+              },
             ],
           },
 
           {
-            path: '/educational',
+            path: "/educational",
             component: Layout,
-            redirect: '/educational/course',
-            name: 'Educational',
+            redirect: "/educational/course",
+            name: "Educational",
             meta: {
-              title: '课程管理',
-              icon: 'education',
-              order: 1
+              title: "课程管理",
+              icon: "education",
+              order: 1,
             },
             children: [
               {
-                path: 'course',
-                component: () => import('@/views/Lessions/course/index.vue'),
-                name: 'CourseManagement',
+                path: "course",
+                component: () => import("@/views/Lessions/course/index.vue"),
+                name: "CourseManagement",
                 meta: {
-                  title: '课程管理',
-                  icon: 'course'
-                }
+                  title: "课程管理",
+                  icon: "course",
+                },
               },
               {
-                path: 'subject',
-                component: () => import('@/views/Lessions/subject/index.vue'),
-                name: 'SubjectManagement',
+                path: "subject",
+                component: () => import("@/views/Lessions/subject/index.vue"),
+                name: "SubjectManagement",
                 meta: {
-                  title: '科目管理',
-                  icon: 'subject'
-                }
+                  title: "科目管理",
+                  icon: "subject",
+                },
               },
               {
-                path: 'topic',
-                component: () => import('@/views/Lessions/topic/index.vue'),
-                name: 'TopicManagement',
+                path: "topic",
+                component: () => import("@/views/Lessions/topic/index.vue"),
+                name: "TopicManagement",
                 meta: {
-                  title: '专题管理',
-                  icon: 'topic'
-                }
-              }
-            ]
-          }
-
+                  title: "专题管理",
+                  icon: "topic",
+                },
+              },
+            ],
+          },
         ];
         // 清理可能存在的重复路由
         try {
@@ -222,7 +221,10 @@ export const usePermissionStore = defineStore("permission", () => {
         routesLoaded.value = true;
 
         // 打印当前路由表以便调试
-        console.log("📋 当前路由表:", router.getRoutes().map((r: RouteRecordRaw) => r.path));
+        console.log(
+          "📋 当前路由表:",
+          router.getRoutes().map((r: RouteRecordRaw) => r.path)
+        );
         console.log("✅ 静态菜单生成完成");
         resolve(staticRoutes);
       } catch (error) {

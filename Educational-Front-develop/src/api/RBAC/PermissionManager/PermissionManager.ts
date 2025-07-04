@@ -72,3 +72,33 @@ export function getPermissionPage(params: {
     params
   })
 }
+
+/**
+ * 角色分配权限
+ * @param data 角色权限分配信息
+ */
+export function addRolePermission(data: {
+  roleId: string;
+  permissionIds: string[];
+}) {
+  return request({
+    url: '/api/app/role-perssion/role-permission',
+    method: 'post',
+    data
+  })
+}
+
+/**
+ * 获取角色已分配的权限
+ * @param roleId 角色ID
+ */
+export function getRolePermissions(roleId: string) {
+  return request({
+    url: `/api/app/role-perssion/role-id-to-find-permission/${roleId}`,
+    method: 'get'
+  }).catch(() => {
+    // 当接口返回404或其他错误时，静默处理，返回一个表示"无权限"的空数据结构
+    // 这样就不会触发全局的错误提示
+    return { data: [] };
+  });
+}

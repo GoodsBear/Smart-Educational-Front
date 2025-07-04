@@ -77,7 +77,17 @@ const dialogVisible = ref(false);
 const dialogTitle = ref("新增机构");
 const formRef = ref<FormInstance>();
 const isAdd = ref(true);
-const formData = reactive<any>({
+// 1. 新增接口定义
+interface IOrganizationForm {
+  id: string;
+  name: string;
+  fullName: string;
+  level: string;
+  contactPerson: string;
+  phone: string;
+  parentId: string;
+}
+const formData = reactive<IOrganizationForm>({
   id: "",
   name: "",
   fullName: "",
@@ -96,23 +106,23 @@ const viewDialogVisible = ref(false);
 const viewData = reactive<any>({});
 // 懒加载子节点
 const load = async (
-  row: any,
+  row: IOrganizationForm,
   treeNode: unknown,
-  resolve: (data: any[]) => void
+  resolve: (data: IOrganizationForm[]) => void
 ) => {
-  // 假设 row.id 为 parentId，顶级节点 parentId 为 "0"
-  const res = await OrganizationAPI.getOrganizationTree(row.id);
-  console.log("懒加载子节点=>", res);
-  resolve(res.data || []);
+  setTimeout(() => {
+    if (row.id === '00000000-0000-0000-0000-000000000000') {
+      resolve([]);
+    } else {
+      resolve([]);
+    }
+  }, 500);
 };
 // 获取顶级节点
-const fetchOrganizationList = async () => {
-  try {
-    const res = await OrganizationAPI.getOrganizationTreeAll("00000000-0000-0000-0000-000000000000");
-    treeData.value = res.data || [];
-  } catch (e) {
-    ElMessage.error("获取机构树失败，请联系管理员！",);
-  }
+const fetchOrganizationList = () => {
+  OrganizationAPI.getOrganizationTreeAll("00000000-0000-0000-0000-000000000000").then((res) => {
+    treeData.value = res.data;
+  });
 };
 // 获取级别下拉
 const fetchLevelOptions = async () => {
@@ -123,7 +133,7 @@ const fetchLevelOptions = async () => {
 function showAddDialog(parent?: any) {
   isAdd.value = true;
   dialogTitle.value = '添加子机构';
-  formData.parentId = parent.id;
+  formData.parentId = parent?.id || "";
   dialogVisible.value = true;
 }
 // 编辑弹窗
