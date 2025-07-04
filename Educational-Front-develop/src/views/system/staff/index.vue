@@ -7,7 +7,12 @@
           <el-input v-model="queryParams.StaffName" placeholder="请输入" clearable />
         </el-form-item>
         <el-form-item label="状态">
-          <el-select v-model="queryParams.Status" placeholder="请选择状态" clearable class="status-select">
+          <el-select
+            v-model="queryParams.Status"
+            placeholder="请选择状态"
+            clearable
+            class="status-select"
+          >
             <el-option label="在职" :value="1" />
             <el-option label="离职" :value="0" />
           </el-select>
@@ -30,7 +35,13 @@
     </div>
 
     <!-- 员工列表 -->
-    <el-table ref="tableRef" v-loading="loading" :data="staffList" style="width: 100%" @selection-change="ToAll">
+    <el-table
+      ref="tableRef"
+      v-loading="loading"
+      :data="staffList"
+      style="width: 100%"
+      @selection-change="ToAll"
+    >
       <el-table-column type="selection" width="50" />
       <template v-for="col in allColumns" :key="col.prop">
         <el-table-column v-if="checkedProps.includes(col.prop)" :prop="col.prop" :label="col.label">
@@ -57,9 +68,15 @@
 
     <!-- 分页 -->
     <div class="pagination">
-      <el-pagination v-model:current-page="queryParams.PageIndex" v-model:page-size="queryParams.PageSize"
-        :page-sizes="[10, 20, 50, 100]" layout="total, sizes, prev, pager, next, jumper" :total="total"
-        @size-change="fetchStaffList" @current-change="fetchStaffList" />
+      <el-pagination
+        v-model:current-page="queryParams.PageIndex"
+        v-model:page-size="queryParams.PageSize"
+        :page-sizes="[10, 20, 50, 100]"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="total"
+        @size-change="fetchStaffList"
+        @current-change="fetchStaffList"
+      />
     </div>
 
     <!-- 新增/编辑对话框 -->
@@ -78,7 +95,13 @@
           <el-input v-model="formData.staffPassword" placeholder="请输入登录密码" />
         </el-form-item>
         <el-form-item label="所属机构" prop="organization">
-          <el-tree ref="treeRef" :data="data" show-checkbox node-key="id" @check-change="handleCheck" />
+          <el-tree
+            ref="treeRef"
+            :data="data"
+            show-checkbox
+            node-key="id"
+            @check-change="handleCheck"
+          />
         </el-form-item>
         <el-form-item label="所属职位" prop="positionId" required>
           <el-select v-model="formData.positionId" placeholder="请选择职位">
@@ -88,7 +111,12 @@
         </el-form-item>
         <el-form-item label="权限角色" prop="roleId" required>
           <el-select v-model="formData.roleId" placeholder="请选择角色">
-            <el-option v-for="item in roleOptions" :key="item.value" :label="item.label" :value="item.value" />
+            <el-option
+              v-for="item in roleOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
           </el-select>
         </el-form-item>
         <el-form-item label="人员类型" prop="staffTypeId" required>
@@ -113,24 +141,49 @@
           </el-select>
         </el-form-item>
         <el-form-item label="生日" prop="birthday">
-          <el-date-picker v-model="formData.birthday" type="date" placeholder="请选择生日" style="width: 100%" />
+          <el-date-picker
+            v-model="formData.birthday"
+            type="date"
+            placeholder="请选择生日"
+            style="width: 100%"
+          />
         </el-form-item>
         <el-form-item label="毕业学校" prop="graduationSchool">
           <el-input v-model="formData.graduationSchool" placeholder="请输入毕业学校" />
         </el-form-item>
         <el-form-item label="入职日期" prop="entryDate">
-          <el-date-picker v-model="formData.entryDate" type="date" placeholder="请选择入职日期" style="width: 100%" />
+          <el-date-picker
+            v-model="formData.entryDate"
+            type="date"
+            placeholder="请选择入职日期"
+            style="width: 100%"
+          />
         </el-form-item>
         <el-form-item label="简介" prop="introduction">
-          <el-input v-model="formData.introduction" type="textarea" :rows="2" placeholder="请输入简介" />
+          <el-input
+            v-model="formData.introduction"
+            type="textarea"
+            :rows="2"
+            placeholder="请输入简介"
+          />
         </el-form-item>
         <el-form-item label="状态" prop="status">
-          <el-switch v-model="formData.status" :active-value="1" :inactive-value="0" active-text="在职"
-            inactive-text="离职" />
+          <el-switch
+            v-model="formData.status"
+            :active-value="1"
+            :inactive-value="0"
+            active-text="在职"
+            inactive-text="离职"
+          />
         </el-form-item>
         <el-form-item label="照片" prop="photoUrl">
-          <el-upload class="avatar-uploader" action="https://localhost:44375/api/upload/image" :show-file-list="false"
-            :on-success="handleAvatarSuccess" :before-upload="beforeAvatarUpload">
+          <el-upload
+            class="avatar-uploader"
+            action="https://localhost:44375/api/upload/image"
+            :show-file-list="false"
+            :on-success="handleAvatarSuccess"
+            :before-upload="beforeAvatarUpload"
+          >
             <img v-if="imageUrl" :src="imageUrl" class="avatar" />
             <el-icon v-else class="avatar-uploader-icon">
               <Plus />
@@ -184,7 +237,7 @@ import { getOrganizationTree } from "@/api/organization/organization.api";
 import moment from "moment";
 import { Plus } from "@element-plus/icons-vue";
 import type { UploadProps } from "element-plus";
-import { selRole } from '@/api/RBAC/RoleManager/RoleManager'; // 新增：引入selRole方法
+import { selRole } from "@/api/RBAC/RoleManager/RoleManager"; // 新增：引入selRole方法
 // 类型定义
 interface StaffQuery {
   StaffName?: string;
@@ -230,14 +283,16 @@ const statusForm = reactive({
 });
 
 const data = ref([]);
-const roleOptions = ref<any[]>([]);
+const roleOptions = ref<any[]>([
+  {
+    value: "",
+    label: "",
+  },
+]);
 const getRoleList = async () => {
-  const res = await selRole();
-  roleOptions.value = res.map(item => ({
-    value: String(item.value),
-    label: item.label
-  }));
-}
+  roleOptions.value = await selRole();
+  console.log(roleOptions.value);
+};
 
 const allColumns = [
   { label: "姓名", prop: "staffName", show: true },
@@ -260,7 +315,8 @@ const queryParams = reactive<StaffQuery>({
 });
 
 // 表单数据
-const resetFormData = () => {
+const resetForm = () => {
+  // 先重置响应式对象
   Object.assign(formData, {
     staffName: "",
     staffAccount: "",
@@ -279,6 +335,8 @@ const resetFormData = () => {
     introduction: "",
     photoUrl: "",
   });
+  // 再重置表单校验状态
+  formRef.value?.resetFields();
 };
 
 const formData = reactive<StaffFormData>({
@@ -367,10 +425,14 @@ const resetSearch = () => {
 
 // 显示新增对话框
 const showAddDialog = async () => {
+  console.log("新增员工", formData);
+
   isAdd.value = true;
   dialogTitle.value = "新增员工";
+  shanji.value = [];
+  imageUrl.value = "";
   dialogVisible.value = true;
-  resetFormData();
+  resetForm();
   formRef.value?.resetFields();
   await getRoleList(); // 新增时获取角色下拉
 };
@@ -379,7 +441,7 @@ const showAddDialog = async () => {
 const showEditDialog = async (row: any) => {
   isAdd.value = false;
   dialogTitle.value = "编辑员工";
-  resetFormData();
+  resetForm();
   formRef.value?.resetFields();
   Object.assign(formData, row);
   // 处理 organization 字段
@@ -402,6 +464,7 @@ const showEditDialog = async (row: any) => {
   }
 };
 
+const shanji = ref([]);
 // 提交表单
 const submitForm = async () => {
   console.log("新增员工", formData);
@@ -413,7 +476,6 @@ const submitForm = async () => {
   const halfChecked = treeRef.value.getHalfCheckedNodes();
   console.log("完全选中：", checked);
   console.log("半选中：", halfChecked);
-  const shanji = ref([]);
   for (let i = 0; i < checked.length; i++) {
     shanji.value.push(checked[i].id);
   }
@@ -465,12 +527,6 @@ const handleDelete = async () => {
     ElMessage.success("删除成功");
     fetchStaffList();
   });
-};
-
-// 重置表单
-const resetForm = () => {
-  formRef.value?.resetFields();
-  resetFormData();
 };
 
 // 跳转到详情页
@@ -527,7 +583,7 @@ const handleCheck = () => {
   console.log("选中变化时获取：", keys || "ref 未绑定");
 };
 
-const getSelected = () => { };
+const getSelected = () => {};
 
 // 打开弹窗并设置状态
 const openStatusDialog = (type: any) => {
