@@ -148,4 +148,14 @@ export function assignRoleToStaff(data: {
   })
 }
 
+/**
+ * 角色下拉
+ */
+export function selRole (){
+  return request({
+    url:'/api/app/role-services/sel-role',
+    method:'get'
+  })
+}
+
 export default RoleManagerAPI;
