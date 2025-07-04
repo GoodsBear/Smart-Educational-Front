@@ -73,6 +73,34 @@ const StaffAPI = {
       data: Ids,
     });
   },
+
+  /**
+   * 修改员工密码
+   * @param staffId 员工ID
+   * @param newPassword 新密码
+   * @returns 请求结果
+   */
+  updateStaffPassword(staffId: string, newPassword: string) {
+    return request({
+      url: `/api/app/staff-services/staff-password/${staffId}`,
+      method: "put",
+      params: { newPassword },
+    });
+  },
+
+  /**
+   * 批量设置员工所属机构
+   * @param Ids 员工ID数组
+   * @param organizationIds 机构ID数组
+   * @returns 请求结果
+   */
+  setStaffOrganization(Ids: string[], organizationIds: string[]) {
+    return request({
+      url: `/api/app/staff-services/staff-oranization?Ids=${Ids}`,
+      method: "post",
+      data: organizationIds,
+    });
+  },
 };
 
 export default StaffAPI;
