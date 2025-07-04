@@ -5,6 +5,7 @@ import request from '@/utils/request'
  * @param {object} data 课程信息
  */
 export function addCourse(data: {
+  id: string,
   courseName: string
   campusId: string,
   subjectId: string,
@@ -74,6 +75,8 @@ export function updateCourseStatus(
     data,
   })
 }
+
+//在哪拦截的知道吗
 
 /**
  * @description 获取课程列表下拉框

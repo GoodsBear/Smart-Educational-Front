@@ -13,6 +13,9 @@ import "@/styles/dark/css-vars.css";
 import "@/styles/index.scss";
 import "uno.css";
 
+//element-plus图标
+import * as ElementPlusIconsVue from '@element-plus/icons-vue'
+
 // 过渡动画
 import "animate.css";
 
@@ -46,6 +49,11 @@ ApiDetector.testConnection("https://localhost:44375/")
   });
 
 const app = createApp(App);
+// 注册Element Plus 图标
+for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
+  app.component(key, component)
+}
+
 // 注册插件
 app.use(setupPlugins);
 

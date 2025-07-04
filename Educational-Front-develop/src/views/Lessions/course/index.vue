@@ -4,23 +4,74 @@
     <div class="filter-container">
       <el-card class="box-card">
         <div class="filter-item">
-          <el-input v-model="queryParams.CourseName" placeholder="请输入课程名称" style="width: 200px" class="filter-item"
-            @keyup.enter="handleQuery" />
-          <el-button type="primary" class="filter-item" @click="handleQuery">
-            搜索
-          </el-button>
 
+          <el-form :inline="true" :model="queryParams" class="demo-form-inline">
+            <el-form-item label="课程名称">
+              <el-input v-model="queryParams.CourseName" placeholder="请输入课程名称" style="width: 150px" class="filter-item"
+                @keyup.enter="handleQuery" />
+            </el-form-item>
+            <el-form-item label="适用学校">
+              <el-select v-model="queryParams.CampusId" placeholder="请选择学校" style="width: 150px;" clearable>
+                <el-option label="Zone two" value="beijing" />
+              </el-select>
+            </el-form-item>
+            <el-form-item label="科目">
+              <el-select v-model="queryParams.SubjectId" placeholder="请选择科目" style="width: 150px;" clearable>
+                <el-option v-for="item in SubjectList" :key="item.id" :label="item.subjectName" :value="item.id" />
+              </el-select>
+            </el-form-item>
+            <el-form-item label="状态">
+              <el-select v-model="queryParams.status" placeholder="请选择状态" style="width: 150px;" clearable>
+                <el-option label="启用" :value="true" />
+                <el-option label="禁用" :value="false" />
+              </el-select>
+            </el-form-item>
+            <el-form-item label="适用年级">
+              <el-select v-model="queryParams.GradeId" placeholder="请选择年级" style="width: 150px;" clearable>
+                <el-option label="Zone two" value="beijing" />
+              </el-select>
+            </el-form-item>
+
+            <el-button type="primary" class="filter-item" @click="handleQuery">
+              搜索
+            </el-button>
+            <el-button class="filter-item" round @click="handleResetQuery">
+              ✖
+            </el-button>
+          </el-form>
         </div>
       </el-card>
     </div>
 
     <el-card class="box-card">
-      <el-button type="success" class="filter-item" @click="handleAdd">
-        +新增
-      </el-button>
-      <el-table v-loading="loading" :data="courseList" style="width: 100%" border>
+      <el-row>
+        <el-col style="margin-bottom: 20px;">
+          <el-button type="success" class="filter-item" @click="handleAdd">
+            ✚&nbsp;新增
+          </el-button>
+          <el-button type="success" @click="handleAction('enable')">启用</el-button>
+          <el-button type="danger" @click="handleAction('disable')">禁用</el-button>
+          <el-button type="primary" @click="handleAction('publish')">上架</el-button>
+          <el-button type="warning" @click="handleAction('unpublish')">下架</el-button>
+          <el-button type="danger" @click="handleAction('delete')">删除</el-button>
+        </el-col>
+      </el-row>
+
+      <el-table ref="tableRef" v-loading="loading" :data="courseList" style="width: 100%" border>
         <el-table-column type="selection" width="55" align="center" />
         <el-table-column label="课程名称" prop="courseName" />
+        <el-table-column label="状态" prop="status">
+          <template #default="scope">
+            <el-tag v-if="scope.row.status" type="success">启用</el-tag>
+            <el-tag v-else type="danger">禁用</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="是否上架" prop="isOnlineSale">
+          <template #default="scope">
+            <el-tag v-if="scope.row.isOnlineSale" type="success">已上架</el-tag>
+            <el-tag v-else type="danger">已下架</el-tag>
+          </template>
+        </el-table-column>
         <el-table-column label="校区" prop="campusName" />
         <el-table-column label="科目" prop="subjectName" />
         <el-table-column label="专题" prop="topicName" />
@@ -35,9 +86,6 @@
           <template #default="scope">
             <el-button type="primary" link @click="handleEdit(scope.row)">
               编辑
-            </el-button>
-            <el-button type="danger" link @click="handleDelete(scope.row)">
-              删除
             </el-button>
           </template>
         </el-table-column>
@@ -212,16 +260,16 @@
           </el-form-item>
         </el-col>
       </el-row>
-            <el-row>
+      <el-row>
         <el-col :span="12">
-       <el-form-item label="库存量" prop="stockNum">
-        <el-input v-model="courseForm.stockNum"></el-input>
-      </el-form-item>
+          <el-form-item label="库存量" prop="stockNum">
+            <el-input v-model="courseForm.stockNum"></el-input>
+          </el-form-item>
         </el-col>
         <el-col :span="12">
-      <el-form-item label="停售日期" prop="stopSaleDate">
-        <el-date-picker v-model="courseForm.stopSaleDate" type="date" placeholder="选择日期"></el-date-picker>
-      </el-form-item>
+          <el-form-item label="停售日期" prop="stopSaleDate">
+            <el-date-picker v-model="courseForm.stopSaleDate" type="date" placeholder="选择日期"></el-date-picker>
+          </el-form-item>
         </el-col>
       </el-row>
 
@@ -257,6 +305,8 @@ import { ref, reactive } from 'vue'
 import { updateCourseStatus, getCourseList, addCourse } from '@/api/Lession/CourseManager/Course'
 import moment from 'moment'
 import type { FormInstance, FormRules } from 'element-plus'
+import { getSubjectList, getSubjectById, getSubjectDropdown, deleteSubjects, updateSubject, addSubject } from '@/api/Lession/SubjectManager/Subject'
+
 
 
 defineOptions({
@@ -276,7 +326,7 @@ const queryParams = reactive({
   CourseName: '',
   CampusId: '',
   SubjectId: '',
-  status: null,
+  status: '',
   GradeId: '',
   PageIndex: 1,
   PageSize: 10
@@ -291,17 +341,27 @@ const handleQuery = async () => {
   total.value = response.totleCount;
   count.value = response.totlePage;
 }
+//重置查询条件
+const handleResetQuery = () => {
+  // TODO: 实现重置查询逻辑
+  queryParams.CourseName = ''
+  queryParams.CampusId = ''
+  queryParams.SubjectId = ''
+  queryParams.status = ''
+  queryParams.GradeId = ''
+  handleQuery()
+}
 
 
 
-//#region 添加
+//#region 添加相关操作
 // 抽屉开关
 const drawer = ref(false)
 // 标题
 const title = ref("")
-
 // 表单数据
 interface CourseForm {
+  id: string
   courseName: string
   campusId: string,
   subjectId: string,
@@ -330,11 +390,8 @@ interface CourseForm {
 }
 
 const ruleFormRef = ref()
-
-
-
-
 const courseForm = reactive<CourseForm>({
+  id: '',
   courseName: '',
   campusId: '',
   subjectId: '',
@@ -411,13 +468,78 @@ const resetForm = (formEl: any) => {
   if (!formEl) return
   formEl.resetFields()
 }
-//加载学校信息
-const LoadSchool = async () => {
-  const response = await getCourseDropdown()
-  Course.campusId = response.data[0].id
-}
+
 //#endregion
 
+//#region 操作按钮
+const tableRef = ref() // 用于获取表格实例
+const actionResult = ref();
+const status = ref();
+const actions = ref("");
+//批量操作
+const handleAction = async (action: any) => {
+  switch (action) {
+    //启用
+    case 'enable':
+      actions.value = "启用"
+      status.value = true;
+      actionResult.value = 0;
+      break;
+    //禁用
+    case 'disable':
+      actions.value = "禁用"
+      status.value = false;
+      actionResult.value = 0;
+      break;
+    //上架
+    case 'publish':
+      actions.value = "上架"
+      status.value = true;
+      actionResult.value = 1;
+      break;
+    //下架
+    case 'unpublish':
+      actions.value = "下架"
+      status.value = true;
+      actionResult.value = 1;
+      break;
+    //删除
+    case 'delete':
+      actions.value = "删除"
+      actionResult.value = 2;
+      break;
+  }
+
+  // 这里可以添加实际的操作逻辑
+  // 获取选中行数据
+  const selectedRows = tableRef.value?.getSelectionRows()
+  if (!selectedRows?.length) {
+    return ElMessage.warning('请先选择要' + actions.value + '的课程')
+  }
+  // 提取选中行ID
+  const ids = selectedRows.map(row => row.id)
+
+  // 显示确认对话框
+  await ElMessageBox.confirm(
+    `确定【${actions.value}】选中的【${ids.length}】门课程吗?`,
+    '警告',
+    {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning',
+    }
+  )
+  // 调用后台API
+
+    const response = await updateCourseStatus({
+      status: status.value,
+      type: actionResult.value,
+    }, ids);
+
+      ElMessage.success('课程【' + actions.value + '】成功');
+      handleQuery();
+
+};
 
 
 
@@ -428,37 +550,41 @@ const handleEdit = (row: any) => {
   Object.assign(courseForm, row)
 }
 
-// 删除方法
-const handleDelete = (row: any) => {
-  // TODO: 实现删除逻辑
-}
+
 
 // 处理每页显示数量变化
 const handleSizeChange = (val: number) => {
-  queryParams.pageSize = val
+  queryParams.PageSize = val
   handleQuery()
 }
 
 // 处理页码变化
 const handleCurrentChange = (val: number) => {
-  queryParams.pageNum = val
+  queryParams.PageIndex = val
   handleQuery()
 }
+//#endregion
 //#region 下拉框数据
 //学校选项
-const LoadSchool=()=>{
-  
-}
-//科目选项
-const LoadSubject=()=>{
+const LoadSchool = () => {
 
 }
+//科目数据
+const SubjectList = ref([{
+  id: '',
+  subjectName: ''
+}])
+//科目选项
+const LoadSubject = async () => {
+  const response = await getSubjectDropdown()
+  SubjectList.value = response
+}
 //年级选项
-const LoadGrade=()=>{
+const LoadGrade = () => {
 
 }
 //专题选项
-const LoadTopic=()=>{
+const LoadTopic = () => {
 
 }
 
@@ -468,6 +594,7 @@ const LoadTopic=()=>{
 
 onMounted(() => {
   handleQuery()
+  LoadSubject()
 })
 </script>
 
