@@ -118,4 +118,93 @@ const RoleManagerAPI = {
   },
 };
 
+/**
+ * 用户分配角色
+ * @param data 用户角色分配信息
+ */
+export function assignUserRole(data: {
+  staffId: string;
+  roleIds: string[];
+}) {
+  return request({
+    url: '/api/app/staf-role/staff-role',
+    method: 'post',
+    data
+  })
+}
+
+/**
+ * 给角色分配用户
+ * @param data 角色用户分配信息
+ */
+export function assignRoleToStaff(data: {
+  roleId: string;
+  staffIds: string[];
+}) {
+  return request({
+    url: '/api/app/staf-role/role-staff',
+    method: 'post',
+    data
+  })
+}
+
+/**
+ * 获取角色下拉
+ */
+export function selRole (){
+  return request({
+    url:'/api/app/role-services/sel-role',
+    method:'get'
+  })
+}
+
+/**
+ * 通过角色ID获取该角色下的用户列表
+ * @param roleId 角色ID
+ * @param pageIndex 页码
+ * @param pageSize 每页大小
+ */
+export function getRoleStaffList(roleId: string, pageIndex: number = 1, pageSize: number = 5) {
+  return request({
+    url: `/GetRoleIdsToShowStaffList`,
+    method: 'get',
+    params: {
+      RoleId: roleId,
+      PageIndex: pageIndex,
+      PageSize: pageSize
+    }
+  })
+}
+
+/**
+ * 通过角色ID获取不在该角色下的用户列表
+ * @param roleId 角色ID
+ * @param pageIndex 页码
+ * @param pageSize 每页大小
+ */
+export function getStaffsNotInRole(roleId: string, pageIndex: number = 1, pageSize: number = 5) {
+  return request({
+    url: `/GetStaffsNotInRole`,
+    method: 'get',
+    params: {
+      RoleId: roleId,
+      PageIndex: pageIndex,
+      PageSize: pageSize
+    }
+  })
+}
+
+/**
+ * 从角色中移除用户
+ * @param roleId 角色ID
+ * @param staffIds 要移除的用户ID集合
+ */
+export function removeStaffFromRole(roleId: string, staffIds: string[]) {
+  return request({
+    url: `/api/app/staf-role/staff-from-role/${roleId}`,
+    method: 'delete',
+    params: { staffIds }
+  })
+}
+
 export default RoleManagerAPI;

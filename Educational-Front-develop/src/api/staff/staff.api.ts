@@ -57,6 +57,49 @@ const StaffAPI = {
       data,
     });
   },
+
+  /**
+   * 更新员工状态
+   * 0:离职 1:在职
+   * @params ids 员工ID，多个以英文逗号(,)分隔
+   * @params status 状态
+   * @returns 更新结果
+   * */
+  updateStaffStatus(Ids: string, status: string) {
+    return request({
+      url: `${STAFF_BASE_URL}/staff-status?status=${status}`,
+      method: "put",
+      data: Ids,
+    });
+  },
+
+  /**
+   * 修改员工密码
+   * @param staffId 员工ID
+   * @param newPassword 新密码
+   * @returns 请求结果
+   */
+  updateStaffPassword(staffId: string, newPassword: string) {
+    return request({
+      url: `/api/app/staff-services/staff-password/${staffId}`,
+      method: "put",
+      params: { newPassword },
+    });
+  },
+
+  /**
+   * 批量设置员工所属机构
+   * @param Ids 员工ID数组
+   * @param organizationIds 机构ID数组
+   * @returns 请求结果
+   */
+  setStaffOrganization(Ids: string[], organizationIds: string[]) {
+    return request({
+      url: `/api/app/staff-services/staff-oranization?Ids=${Ids}`,
+      method: "post",
+      data: organizationIds,
+    });
+  },
 };
 
 export default StaffAPI;
