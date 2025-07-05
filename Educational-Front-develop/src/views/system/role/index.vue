@@ -6,7 +6,6 @@
         <el-form-item prop="roleName" label="角色名称">
           <el-input v-model="queryParams.roleName" placeholder="请输入角色名称" clearable @keyup.enter="handleQuery" />
         </el-form-item>
-
         <el-form-item class="search-buttons">
           <el-button type="primary" :icon="Search" @click="handleQuery">搜索</el-button>
           <el-button :icon="Refresh" @click="handleResetQuery">重置</el-button>
@@ -15,6 +14,7 @@
     </div>
 
     <el-card shadow="hover" class="data-table">
+      <!-- 工具栏 -->
       <div class="data-table__toolbar">
         <div class="data-table__toolbar--actions">
           <el-button type="success" :icon="Plus" @click="handleAdd">新增</el-button>
@@ -24,24 +24,22 @@
         </div>
       </div>
 
+      <!-- 数据表格 -->
       <el-table ref="dataTableRef" v-loading="loading" :data="roleList" highlight-current-row border
         class="data-table__content" @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="55" align="center" />
         <el-table-column label="角色名称" prop="roleName" min-width="120" />
         <el-table-column label="角色编码" prop="roleEncode" width="150" />
-
-        <el-table-column label="操作" width="220">
+        <el-table-column label="操作" width="250">
           <template #default="scope">
-            <el-button type="primary" size="small" link :icon="Edit" @click="handleEdit(scope.row)">
-              编辑
-            </el-button>
-            <el-button type="danger" size="small" link :icon="Delete" @click="handleDelete(scope.row)">
-              删除
-            </el-button>
+            <el-button type="primary" size="small" link :icon="Edit" @click="handleEdit(scope.row)">编辑</el-button>
+            <el-button type="danger" size="small" link :icon="Delete" @click="handleDelete(scope.row)">删除</el-button>
+            <el-button type="primary" size="small" link @click="handleAssignPermission(scope.row)">分配权限</el-button>
           </template>
         </el-table-column>
       </el-table>
 
+      <!-- 分页 -->
       <div class="pagination-container">
         <Pagination v-model:total="total" v-model:page="queryParams.pageIndex" v-model:limit="queryParams.pageSize"
           @pagination="handlePagination" />
@@ -68,6 +66,41 @@
         </div>
       </template>
     </el-dialog>
+
+    <!-- 分配权限对话框 -->
+    <el-dialog v-if="permissionDialogVisible" v-model="permissionDialogVisible" :key="currentRoleId" title="分配权限"
+      width="950px" :close-on-click-modal="false" class="permission-dialog" destroy-on-close>
+      <div class="permission-dialog-content">
+        <el-card v-for="(group, index) in permissionTreeData" :key="index" class="permission-card" shadow="never">
+          <template #header>
+            <div class="card-header">
+              <el-checkbox :model-value="getGroupCheckedState(group).all"
+                :indeterminate="getGroupCheckedState(group).indeterminate"
+                @change="(checked) => handleGroupCheckChange(group, checked as boolean)">
+                <span class="card-title">{{ group.label }}</span>
+              </el-checkbox>
+            </div>
+          </template>
+
+          <!-- ====================== -->
+          <div class="card-content">
+            <el-checkbox-group v-model="checkedPermissions">
+              <el-checkbox v-for="item in group.children" :key="item.value" :label="item.value"
+                class="permission-checkbox">
+                {{ item.label }}
+              </el-checkbox>
+            </el-checkbox-group>
+          </div>
+        </el-card>
+      </div>
+
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="permissionDialogVisible = false">取消</el-button>
+          <el-button type="primary" @click="handleSavePermissions">确定</el-button>
+        </span>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -77,39 +110,39 @@ import { ElMessage, ElMessageBox, FormInstance, FormRules } from 'element-plus';
 import { Search, Refresh, Delete, Edit, Plus } from '@element-plus/icons-vue';
 import RoleManagerAPI, { RoleQueryParams, RoleItem, RoleData } from '@/api/RBAC/RoleManager/RoleManager';
 import Pagination from '@/components/Pagination/index.vue';
+import { getPermissionTree, addRolePermission, getRolePermissions } from '@/api/RBAC/PermissionManager/PermissionManager';
+import { log } from 'console';
 
 defineOptions({
   name: "RoleList",
   inheritAttrs: false,
 });
 
-const queryFormRef = ref();
+const queryFormRef = ref<FormInstance>();
 const loading = ref(false);
 const selectedRoles = ref<string[]>([]);
 const total = ref(0);
 const totalPage = ref(1);
 const roleList = ref<RoleItem[]>([]);
 
-// 查询参数
 const queryParams = reactive<RoleQueryParams>({
   pageIndex: 1,
   pageSize: 10,
+  roleName: '',
 });
 
-// 对话框相关
 const dialogVisible = ref(false);
 const dialogTitle = ref('');
 const roleFormRef = ref<FormInstance>();
 const roleForm = reactive<RoleData>({
   roleName: '',
-  roleEncode: 'ROLE_DEFAULT',  // 设置默认固定值
+  roleEncode: 'ROLE_DEFAULT',
   roleDesc: '',
-  roleStatus: 1  // 默认启用
+  roleStatus: 1,
 });
-const isEdit = ref(false); // 是否为编辑模式
-const currentId = ref<string>(''); // 当前编辑的角色ID
+const isEdit = ref(false);
+const currentId = ref<string>('');
 
-// 表单验证规则
 const rules = reactive<FormRules>({
   roleName: [
     { required: true, message: '角色名称不能为空', trigger: 'blur' },
@@ -120,27 +153,126 @@ const rules = reactive<FormRules>({
   ]
 });
 
-// 获取数据
+// --- 权限分配相关 ---
+const permissionDialogVisible = ref(false);
+const permissionTreeData = ref<any[]>([]);
+const currentRoleId = ref('');
+const checkedPermissions = ref<string[]>([]);
+
+const getGroupCheckedState = (group: any) => {
+  if (!group.children || group.children.length === 0) {
+
+    return { all: false, indeterminate: false };
+  }
+  const childIds = group.children.map((item: any) => item.value);
+  const checkedCount = childIds.filter((id: string) => checkedPermissions.value.includes(id)).length;
+
+  return {
+    all: checkedCount === childIds.length && childIds.length > 0,
+    indeterminate: checkedCount > 0 && checkedCount < childIds.length,
+  };
+};
+
+const handleGroupCheckChange = (group: any, checked: boolean) => {
+  const childIds = group.children.map((item: any) => item.value);
+  const checkedSet = new Set(checkedPermissions.value);
+  if (checked) {
+    childIds.forEach((id: string) => checkedSet.add(id));
+  } else {
+    childIds.forEach((id: string) => checkedSet.delete(id));
+  }
+  checkedPermissions.value = Array.from(checkedSet);
+};
+
+const handleAssignPermission = async (row: RoleItem) => {
+  try {
+    currentRoleId.value = row.id;
+
+    // 加载所有权限
+    const treeResponse = await getPermissionTree();
+    permissionTreeData.value = treeResponse?.data || treeResponse || [];
+
+    // 获取并设置已有权限
+    const rolePermissionsResponse = await getRolePermissions(row.id);
+    const permissions = rolePermissionsResponse || [];
+    console.log('当前角色权限:', permissions);
+    console.log('权限树数据:', permissionTreeData.value);
+
+    // 处理权限数据并设置选中状态
+    if (Array.isArray(permissions)) {
+      if (permissions.length > 0) {
+        if (typeof permissions[0] === 'string') {
+          // 如果是字符串数组，直接使用
+          checkedPermissions.value = permissions;
+        } else if (typeof permissions[0] === 'object' && permissions[0] !== null) {
+          // 如果是对象数组，提取id作为value
+          checkedPermissions.value = permissions
+            .filter(item => item && typeof item === 'object' && 'id' in item)
+            .map(item => item.id);
+
+          // 确保权限树数据的value和label与后端返回的id和permissionName匹配
+          const permissionMap = new Map(
+            permissions.map(item => [item.id, item.permissionName])
+          );
+
+
+
+          // 更新权限树数据的value和label
+          const updateTreeData = (nodes: any[]) => {
+            nodes.forEach(node => {
+              if (permissionMap.has(node.value)) {
+                // 如果找到匹配的权限，确保label匹配
+                node.label = permissionMap.get(node.value);
+              }
+              if (node.children && node.children.length > 0) {
+                updateTreeData(node.children);
+              }
+            });
+          };
+
+          updateTreeData(permissionTreeData.value);
+        }
+      } else {
+        // 空数组表示没有权限
+        checkedPermissions.value = [];
+      }
+    } else {
+      // 非数组数据
+      console.warn('权限数据不是数组格式:', permissions);
+      checkedPermissions.value = [];
+    }
+
+    permissionDialogVisible.value = true;
+  } catch (error) {
+    console.error('加载权限数据失败:', error);
+    ElMessage.error('加载权限数据失败，请重试');
+  }
+};
+
+const handleSavePermissions = async () => {
+  try {
+    await addRolePermission({
+      roleId: currentRoleId.value,
+      permissionIds: checkedPermissions.value
+    });
+    ElMessage.success('权限分配成功');
+    permissionDialogVisible.value = false;
+  } catch (error) {
+    console.error('权限分配失败:', error);
+    ElMessage.error('权限分配失败');
+  }
+};
+// --- 权限分配结束 ---
+
 function fetchData() {
   loading.value = true;
   RoleManagerAPI.getRoleList(queryParams)
     .then((response) => {
-
-      console.log(response)
-
-      try {
-        // 直接接收后台返回的数据
-        if (response) {
-          roleList.value = response.data || [];
-          total.value = response.totleCount || 0;
-          totalPage.value = response.totlePage || 1;
-        } else {
-          roleList.value = [];
-          total.value = 0;
-          totalPage.value = 1;
-        }
-      } catch (err) {
-        console.error('处理角色列表数据时发生错误:', err);
+      if (response) {
+        roleList.value = response.data || [];
+        total.value = response.totleCount || 0;
+        totalPage.value = response.totlePage || 1;
+      } else {
         roleList.value = [];
         total.value = 0;
         totalPage.value = 1;
@@ -149,49 +281,33 @@ function fetchData() {
     .catch((error) => {
       console.error('获取角色列表失败:', error);
       ElMessage.error('获取角色列表失败');
-      roleList.value = [];
-      total.value = 0;
-      totalPage.value = 1;
     })
     .finally(() => {
       loading.value = false;
     });
 }
 
-// 处理分页变化
 function handlePagination({ page, limit }: { page: number; limit: number }) {
   queryParams.pageIndex = page;
   queryParams.pageSize = limit;
   fetchData();
 }
 
-// 查询（重置页码后获取数据）
 function handleQuery() {
   queryParams.pageIndex = 1;
   fetchData();
 }
 
-// 重置查询
 function handleResetQuery() {
   queryFormRef.value?.resetFields();
   queryParams.pageIndex = 1;
   fetchData();
 }
 
-// 行复选框选中
 function handleSelectionChange(selection: RoleItem[]) {
   selectedRoles.value = selection.map(item => item.id);
 }
 
-// 功能开发中提示
-function handleFeatureUnderDevelopment() {
-  ElMessage({
-    message: '该功能正在开发中，敬请期待！',
-    type: 'info'
-  });
-}
-
-// 新增角色
 function handleAdd() {
   isEdit.value = false;
   currentId.value = '';
@@ -200,23 +316,14 @@ function handleAdd() {
   dialogVisible.value = true;
 }
 
-// 编辑角色
 function handleEdit(row: RoleItem) {
   isEdit.value = true;
   currentId.value = row.id;
-  resetForm();
-
-  // 填充表单数据
-  roleForm.roleName = row.roleName;
-  roleForm.roleEncode = row.roleEncode;
-  roleForm.roleDesc = row.roleDesc;
-  roleForm.roleStatus = row.roleStatus;
-
+  Object.assign(roleForm, row);
   dialogTitle.value = '编辑角色';
   dialogVisible.value = true;
 }
 
-// 重置表单
 function resetForm() {
   if (roleFormRef.value) {
     roleFormRef.value.resetFields();
@@ -227,122 +334,77 @@ function resetForm() {
   }
 }
 
-// 提交表单
 function submitForm() {
-  if (!roleFormRef.value) {
-    return;
-  }
-
-  roleFormRef.value.validate((valid) => {
+  roleFormRef.value?.validate((valid) => {
     if (valid) {
-      if (isEdit.value) {
-        // 编辑模式
-        RoleManagerAPI.updateRole(currentId.value, roleForm)
-          .then(() => {
-            ElMessage.success('修改角色成功');
-            dialogVisible.value = false;
-            fetchData(); // 刷新列表
-          })
-          .catch((error) => {
-            console.error('修改角色失败:', error.msg);
-            ElMessage.error('修改角色失败');
-          });
-      } else {
-        // 新增模式
-        RoleManagerAPI.createRole(roleForm)
-          .then(() => {
-            ElMessage.success('添加角色成功');
-            dialogVisible.value = false;
-            fetchData(); // 刷新列表
-          })
-          .catch((error) => {
-            console.error('添加角色失败:', error.msg);
-            ElMessage.error('添加角色失败');
-          });
-      }
+      const apiCall = isEdit.value ? RoleManagerAPI.updateRole(currentId.value, roleForm) : RoleManagerAPI.createRole(roleForm);
+      const successMessage = isEdit.value ? '修改角色成功' : '添加角色成功';
+      const errorMessage = isEdit.value ? '修改角色失败' : '添加角色失败';
+
+      apiCall.then(() => {
+        ElMessage.success(successMessage);
+        dialogVisible.value = false;
+        fetchData();
+      }).catch((error) => {
+        console.error(errorMessage, error);
+        ElMessage.error(errorMessage);
+      });
     }
   });
 }
 
-// 删除角色
 function handleDelete(row: RoleItem) {
   ElMessageBox.confirm(`确认要删除角色"${row.roleName}"吗？`, '提示', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
     type: 'warning'
   }).then(() => {
-    deleteRole(row.id);
+    deleteRoles([row.id]);
   }).catch(() => {
-    // 用户取消删除操作
-    ElMessage({
-      type: 'info',
-      message: '已取消删除'
-    });
+    ElMessage.info('已取消删除');
   });
 }
 
-// 批量删除
 function handleBatchDelete() {
   if (selectedRoles.value.length === 0) {
     ElMessage.warning('请选择要删除的角色');
     return;
   }
-
   ElMessageBox.confirm(`确认要删除选中的${selectedRoles.value.length}个角色吗？`, '提示', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
     type: 'warning'
   }).then(() => {
-    // 逐个删除选中的角色
-    const promises = selectedRoles.value.map(id => deleteRole(id, false));
-    Promise.all(promises)
-      .then(() => {
-        ElMessage.success(`成功删除${selectedRoles.value.length}个角色`);
-        fetchData();
-      })
-      .catch(error => {
-        console.error('批量删除角色失败:', error);
-        ElMessage.error('批量删除角色失败');
-      });
+    deleteRoles(selectedRoles.value);
   }).catch(() => {
-    ElMessage({
-      type: 'info',
-      message: '已取消删除'
-    });
+    ElMessage.info('已取消删除');
   });
 }
 
-// 执行删除操作
-function deleteRole(id: string, showMessage = true) {
-  return RoleManagerAPI.deleteRole(id)
-    .then(response => {
-      ElMessage.success('删除角色成功');
+function deleteRoles(ids: string[]) {
+  const promises = ids.map(id => RoleManagerAPI.deleteRole(id));
+  Promise.all(promises)
+    .then(() => {
+      ElMessage.success(`成功删除${ids.length}个角色`);
       fetchData();
     })
     .catch(error => {
-      if (showMessage) {
-        console.error('删除角色失败:', error.msg);
-        ElMessage.error('删除角色失败');
-      }
-      return Promise.reject(error);
+      console.error('删除角色失败:', error);
+      ElMessage.error('删除角色失败');
     });
 }
 
-// 在组件卸载前清理所有可能的定时器和状态
-//
-onBeforeUnmount(() => {
-  // 确保对话框关闭
-  dialogVisible.value = false;
-  // 清空列表数据，避免内存泄漏
-  roleList.value = [];
+onMounted(() => {
+  fetchData();
 });
 
-onMounted(() => {
-  handleQuery();
+onBeforeUnmount(() => {
+  dialogVisible.value = false;
+  roleList.value = [];
 });
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .app-container {
   padding: 20px;
 }
@@ -393,6 +455,57 @@ onMounted(() => {
 }
 
 .dialog-footer {
-  text-align: center;
+  text-align: right;
+}
+
+// --- 权限分配对话框样式 ---
+.permission-dialog {
+  :deep(.el-dialog__body) {
+    padding: 15px 20px;
+    max-height: 70vh;
+    overflow-y: auto;
+  }
+}
+
+.permission-dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.permission-card {
+  border-radius: 4px;
+  border: 1px solid #e4e7ed;
+
+  :deep(.el-card__header) {
+    background-color: #f5f7fa;
+    padding: 10px 15px;
+  }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .card-title {
+    font-weight: bold;
+    font-size: 15px;
+  }
+
+  :deep(.el-card__body) {
+    padding: 15px;
+  }
+
+  .card-content .el-checkbox-group {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    font-size: 14px;
+  }
+}
+
+.permission-checkbox {
+  margin-right: 0 !important;
 }
 </style>
