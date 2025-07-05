@@ -10,13 +10,22 @@ const StaffAPI = {
    * @returns 成员列表数据
    */
   getList(queryParams?: StaffQuery) {
-    return request<any[]>({
+    return request<DeptListResponse>({
       url: `/api/app/staff-services/staff-list`,
       method: "get",
       params: queryParams,
     });
   },
-
+  /**
+   * 获取成员下拉框
+   *
+   */
+  selectStaff() {
+    return request<DeptListResponse>({
+      url: `/api/app/staff-services/staff`,
+      method: "get",
+    });
+  },
   /**
    * 新增员工
    *
@@ -95,7 +104,7 @@ export interface StaffFormData {
   staffAccount: string;
   staffPassword?: string; // 密码在更新时可选
   staffPhone: string;
-  organization: string;
+  organization: string; // 可能存储机构名称字符串或ID
   staffGender: string;
   positionId: string; // UUID格式
   roleId: string; // UUID格式
@@ -107,6 +116,7 @@ export interface StaffFormData {
   graduationSchool: string;
   introduction: string;
   photoUrl: string;
+  [key: string]: any; // 允许动态属性访问
 }
 
 /** 员工列表项 */

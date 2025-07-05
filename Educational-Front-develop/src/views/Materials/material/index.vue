@@ -1,90 +1,101 @@
 <template>
   <div class="material-management">
     <!-- 搜索栏 -->
-    <div class="search-bar">
-      <el-form :inline="true" :model="queryParams">
-        <el-form-item label="物料名称：">
-          <el-input v-model="queryParams.name" placeholder="请输入物料名称" clearable />
-        </el-form-item>
-        <el-form-item label="状态：">
-          <el-select v-model="queryParams.status" placeholder="请选择">
-            <el-option label="全部" value="" />
-            <el-option label="启用" value="1" />
-            <el-option label="禁用" value="0" />
-          </el-select>
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="fetchMaterialList">查询</el-button>
-        </el-form-item>
-      </el-form>
-    </div>
-    <!-- 操作按钮区 -->
-    <div class="operation-area">
-      <el-button type="primary" @click="showAddDialog">新增</el-button>
-      <el-button @click="handleDelete">删除</el-button>
-      <el-button @click="handleEnable(true)">启用</el-button>
-      <el-button @click="handleEnable(false)">禁用</el-button>
-      <el-button @click="fetchMaterialList">刷新</el-button>
-      <el-button @click="showColumnDialog = true">自定义显示列</el-button>
-    </div>
-    <!-- 物料表格 -->
-    <el-table ref="tableRef" :data="materialList" style="width: 100%" @selection-change="selectAll">
-      <el-table-column type="selection" width="50" />
-      <el-table-column v-for="col in showColumns" :key="col.prop" :prop="col.prop" :label="col.label" :width="col.width" :min-width="col.minWidth">
-        <template v-if="col.templet === 'image'" #default="{ row }">
-          <el-image v-if="row[col.prop]" :src="row[col.prop]" :preview-src-list="[row[col.prop]]" :style="'width:40px;height:40px'" />
-          <span v-else style="color:#ccc">加载失败</span>
-        </template>
-        <template v-else-if="col.templet === 'list'" #default="{ row }">
-          {{ col.selectList[row[col.prop]] || '' }}
-        </template>
-        <template v-else-if="col.templet === 'date'" #default="{ row }">
-          {{ row[col.prop] ? (row[col.prop].replace('T', ' ').slice(0, 16)) : '' }}
-        </template>
-        <template v-else #default="{ row }">
-          {{ row[col.prop] }}
-        </template>
-      </el-table-column>
-      <el-table-column label="操作" width="180">
-        <template #default="{ row }">
-          <el-button type="text" @click="showEditDialog(row)">编辑</el-button>
-          <el-button type="text" @click="showStockInDialog(row)">入库</el-button>
-          <el-button type="text" @click="showStockOutDialog(row)">出库</el-button>
-        </template>
-      </el-table-column>
-    </el-table>
-    <!-- 分页 -->
-    <div class="pagination-container">
-      <el-pagination
-        background
-        layout="total, prev, pager, next, sizes"
-        :total="pageParams.total"
-        :page-size="pageParams.pageSize"
-        :current-page="pageParams.pageIndex"
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-      />
-    </div>
+    <el-card style="max-width: 10000px">
+      <div class="search-bar">
+        <el-form :inline="true" :model="queryParams">
+          <el-form-item label="物料名称：">
+            <el-input v-model="queryParams.materialName" placeholder="请输入物料名称" clearable />
+          </el-form-item>
+          <el-form-item label="状态：">
+            <el-select v-model="queryParams.materialStatus" placeholder="请选择" style="width: 200px;">
+              <el-option label="全部" value="" />
+              <el-option label="启用" :value="true" />
+              <el-option label="禁用" :value="false" />
+            </el-select>
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" @click="handleQuery">查询</el-button>
+          </el-form-item>
+        </el-form>
+      </div>
+    </el-card>
+    <el-card style="max-width: 10000px;margin-top: 10px">
+      <!-- 表格标题和操作按钮区 -->
+      <div class="table-header-bar">
+        <div class="table-title">物料列表</div>
+        <div class="operation-area">
+          <el-button type="primary" @click="showAddDialog">新增</el-button>
+          <el-button type="danger" @click="handleDelete">删除</el-button>
+          <el-button type="success" @click="handlestartEnable(true)">启用</el-button>
+          <el-button type="danger" @click="handlestartEnable(false)">禁用</el-button>
+          <el-button type="success" @click="fetchMaterialList">刷新</el-button>
+          <el-button @click="showColumnDialog = true">自定义显示列</el-button>
+        </div>
+      </div>
+      <!-- 物料表格 -->
+      <el-table ref="tableRef" :data="materialList" style="width: 100%" @selection-change="selectAll">
+        <el-table-column type="selection" width="50" />
+        <el-table-column v-for="col in showColumns" :key="col.prop" :prop="col.prop" :label="col.label">
+          <template v-if="col.prop === 'materialImage'" #default="{ row }">
+            <el-image v-if="row.materialImage" :src="row.materialImage" :preview-src-list="[row.materialImage]"
+              :style="'width:40px;height:40px'" />
+            <span v-else style="color:#ccc">加载失败</span>
+          </template>
+          <template v-else-if="col.prop === 'lastModificationTime'" #default="{ row }">
+            {{ moment(row.lastModificationTime).format("YYYY-MM-DD HH:mm:ss") }}
+          </template>
+          <template v-else-if="col.prop === 'status'" #default="{ row }">
+            <el-tag v-if="row.status === true" type="primary">启用</el-tag>
+            <el-tag v-if="row.status === false" type="danger">禁用</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="180">
+          <template #default="{ row }">
+            <el-button type="text" @click="showEditDialog(row)">编辑</el-button>
+            <el-button type="text" @click="showStockInDialog(row)">入库</el-button>
+            <el-button type="text" @click="showStockOutDialog(row)">出库</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <!-- 分页 -->
+      <div class="pagination-container">
+        <Pagination v-model:total="pageParams.TotalCount" v-model:page="pageParams.PageIndex"
+          v-model:limit="pageParams.PageSize" @pagination="handlePagination" />
+      </div>
+    </el-card>
     <!-- 新增/编辑弹窗 -->
     <el-dialog v-model="dialogVisible" :title="dialogTitle" width="40%" @closed="resetForm">
       <el-form ref="formRef" :model="formData" :rules="rules" label-width="100px">
-        <el-form-item label="物料名称" prop="name">
-          <el-input v-model="formData.name" placeholder="请输入物料名称" />
+        <el-form-item label="物料名称" prop="materialName">
+          <el-input v-model="formData.materialName" placeholder="请输入物料名称" />
         </el-form-item>
-        <el-form-item label="分类" prop="category">
-          <el-input v-model="formData.category" placeholder="请输入分类" />
-        </el-form-item>
-        <el-form-item label="所属学校" prop="school">
-          <el-input v-model="formData.school" placeholder="请输入所属学校" />
-        </el-form-item>
-        <el-form-item label="库存" prop="stock">
-          <el-input-number v-model="formData.stock" :min="0" />
-        </el-form-item>
-        <el-form-item label="状态" prop="status">
-          <el-select v-model="formData.status">
-            <el-option label="启用" value="1" />
-            <el-option label="禁用" value="0" />
+        <el-form-item label="所属学校" prop="schoolId">
+          <el-select v-model="formData.schoolId" placeholder="请选择">
+            <el-option v-for="item in Schoolname" :key="item.id" :label="item.name" :value="item.id" />
           </el-select>
+        </el-form-item>
+        <el-form-item label="所属分类" prop="materialTypeId">
+          <el-select v-model="formData.materialTypeId" placeholder="请选择">
+            <el-option label="教材" :value="0" />
+            <el-option label="办公用品" :value="1" />
+            <el-option label="桌椅" :value="2" />
+            <el-option label="娱乐设施" :value="3" />
+            <el-option label="电脑耗材" :value="4" />
+            <el-option label="学习用品" :value="5" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="物料图片" prop="materialImage">
+          <el-upload class="avatar-uploader" action="https://localhost:44375/api/upload/image" :show-file-list="false"
+            :on-success="handleAvatarSuccess" :before-upload="beforeAvatarUpload">
+            <img v-if="formData.materialImage" :src="formData.materialImage" class="avatar" />
+            <el-icon v-else class="avatar-uploader-icon">
+              <Plus />
+            </el-icon>
+          </el-upload>
+        </el-form-item>
+        <el-form-item label="物料说明" prop="mterialDescription">
+          <el-input v-model="formData.mterialDescription" placeholder="请输入物料说明" type="textarea" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -94,26 +105,32 @@
     </el-dialog>
     <!-- 入库弹窗 -->
     <el-dialog v-model="stockInDialogVisible" title="物料入库" width="30%">
-      <el-form :model="stockForm">
-        <el-form-item label="入库数量">
-          <el-input-number v-model="stockForm.count" :min="1" />
+      <el-form :model="stockForm" :rules="stockInRules" ref="stockInFormRef" label-width="100px">
+        <el-form-item label="入库数量:" prop="count" required>
+          <el-input-number v-model="stockForm.count" :min="1" style="width: 100%" />
+        </el-form-item>
+        <el-form-item label="入库说明:" prop="description" required>
+          <el-input v-model="stockForm.remark" type="textarea" placeholder="请输入入库说明" />
         </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="stockInDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="submitStockIn">确认</el-button>
+        <el-button type="primary" @click="submitStockIn">提交</el-button>
       </template>
     </el-dialog>
     <!-- 出库弹窗 -->
     <el-dialog v-model="stockOutDialogVisible" title="物料出库" width="30%">
-      <el-form :model="stockForm">
-        <el-form-item label="出库数量">
-          <el-input-number v-model="stockForm.count" :min="1" />
+      <el-form :model="stockForm" :rules="stockOutRules" ref="stockOutFormRef" label-width="100px">
+        <el-form-item label="出库数量:" prop="count" required>
+          <el-input-number v-model="stockForm.count" :min="1" style="width: 100%" />
+        </el-form-item>
+        <el-form-item label="原因说明:" prop="reason" required>
+          <el-input v-model="stockForm.remark" type="textarea" placeholder="请输入原因说明" />
         </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="stockOutDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="submitStockOut">确认</el-button>
+        <el-button type="primary" @click="submitStockOut">提交</el-button>
       </template>
     </el-dialog>
     <!-- 自定义显示列弹窗 -->
@@ -132,85 +149,53 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive, computed, onMounted } from "vue";
+import { ref, reactive, onMounted, computed } from "vue";
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from "element-plus";
-import {
-  addMaterial,
-  getPagedMaterials,
-  stockInMaterial,
-  stockOutMaterial,
-  updateMaterialStatus
-} from "@/api/Materials/material.api";
-
+import Pagination from '@/components/Pagination/index.vue';
+import { updateMaterial, getPagedMaterials, stockInMaterial, stockOutMaterial, updateMaterialStatus, addMaterial, batchDeleteMaterial } from "@/api/Materials/material.api";
+import moment from "moment";
+import { Plus } from '@element-plus/icons-vue'
+import type { UploadProps } from 'element-plus'
+import OrganizationAPI from "@/api/Organization/organizations.api";
 // 查询参数
-const queryParams = reactive({ name: "", status: "" });
-const pageParams = reactive({ pageIndex: 1, pageSize: 10, total: 0 });
-const materialList = ref<any[]>([]);
-const Ids = ref<string[]>([]);
-
-// 列定义
-const allColumns = ref([
-  { label: "图片", prop: "image", width: 70, templet: "image" },
-  { label: "物料名称", prop: "name", minWidth: 120 },
-  { label: "分类", prop: "category", minWidth: 80 },
-  { label: "所属学校", prop: "school", minWidth: 100 },
-  { label: "库存", prop: "stock", minWidth: 60 },
-  { label: "最后编辑时间", prop: "editTime", minWidth: 150, templet: "date" },
-  { label: "状态", prop: "status", minWidth: 70, templet: "list", selectList: { 1: "启用", 0: "禁用" } }
-]);
-const checkedProps = ref(allColumns.value.map(col => col.prop));
-const resetColumns = () => {
-  checkedProps.value = allColumns.value.map(col => col.prop);
+const queryParams = reactive({
+  materialName: "",
+  materialStatus: ""
+});
+const pageParams = reactive({
+  PageIndex: 1,
+  PageSize: 10,
+  TotalCount: 0,
+  TotalPage: 0
+});
+// 查询
+const handleQuery = () => {
+  pageParams.PageIndex = 1;
+  fetchMaterialList();
 };
-const showColumns = computed(() => allColumns.value.filter(col => checkedProps.value.includes(col.prop)));
-
-// 弹窗相关
-const dialogVisible = ref(false);
-const dialogTitle = ref("新增物料");
-const formRef = ref<FormInstance>();
-const isAdd = ref(true);
-const formData = reactive<any>({ id: "", name: "", category: "", school: "", stock: 0, status: 1 });
-const rules: FormRules = {
-  name: [{ required: true, message: "请输入物料名称", trigger: "blur" }],
-  category: [{ required: true, message: "请输入分类", trigger: "blur" }],
-  school: [{ required: true, message: "请输入所属学校", trigger: "blur" }],
-  stock: [{ required: true, message: "请输入库存", trigger: "blur" }],
-};
-
-// 入库/出库弹窗
-const stockInDialogVisible = ref(false);
-const stockOutDialogVisible = ref(false);
-const stockForm = reactive({ id: "", count: 1 });
-
-// 选择
-const selectAll = (rows: any[]) => {
-  Ids.value = rows.map(item => item.id);
-};
-
 // 获取列表
 const fetchMaterialList = () => {
-  const params = {
-    pageIndex: pageParams.pageIndex,
-    pageSize: pageParams.pageSize,
-    name: queryParams.name,
-    status: queryParams.status
+  const params: any = {
+    pageIndex: pageParams.PageIndex,
+    pageSize: pageParams.PageSize,
+    materialName: queryParams.materialName,
   };
-  getPagedMaterials(params).then(res => {
-    materialList.value = res.data?.items || [];
-    pageParams.total = res.data?.total || 0;
+  if (queryParams.materialStatus !== '') {
+    params.MaterialStatus = queryParams.materialStatus;
+  }
+  getPagedMaterials(params).then((res) => {
+    console.log("物料列表=>", res);
+    materialList.value = res.data;
+    pageParams.TotalCount = res.totleCount;
+    pageParams.TotalPage = res.totlePage;
   });
 };
-
 // 分页
-const handleSizeChange = (size: number) => {
-  pageParams.pageSize = size;
+const handlePagination = ({ page, limit }: { page: number; limit: number }) => {
+  pageParams.PageIndex = page;
+  pageParams.PageSize = limit;
   fetchMaterialList();
 };
-const handleCurrentChange = (page: number) => {
-  pageParams.pageIndex = page;
-  fetchMaterialList();
-};
-
 // 新增/编辑弹窗
 const showAddDialog = () => {
   isAdd.value = true;
@@ -219,114 +204,279 @@ const showAddDialog = () => {
   dialogVisible.value = true;
 };
 const showEditDialog = (row: any) => {
+  console.log("Editing row ID:", row.id);
   isAdd.value = false;
   dialogTitle.value = "编辑物料";
   Object.assign(formData, row);
   dialogVisible.value = true;
 };
+const materialList = ref<any[]>([]);
+// 弹窗相关
+const dialogVisible = ref(false);
+const dialogTitle = ref("新增物料");
+const formRef = ref<FormInstance>();
+const isAdd = ref(true);
+const formData = reactive<any>({
+  id: "",
+  materialName: "",
+  materialTypeId: "",
+  schoolId: null,
+  materialImage: "",
+  mterialDescription: ""
+});
+const rules: FormRules = {
+  materialName: [{ required: true, message: "请输入物料名称", trigger: "blur" }],
+  materialTypeId: [{ required: true, message: "请输入分类", trigger: "blur" }],
+  schoolId: [{ required: true, message: "请输入所属学校", trigger: "blur" }],
+  materialImage: [{ required: true, message: "请上传物料图片", trigger: "change" }],
+  mterialDescription: [{ required: true, message: "请输入物料说明", trigger: "blur" }],
+};
 const resetForm = () => {
   formData.id = "";
-  formData.name = "";
-  formData.category = "";
-  formData.school = "";
-  formData.stock = 0;
-  formData.status = 1;
+  formData.materialName = "";
+  formData.materialTypeId = "";
+  formData.schoolId = null;
+  formData.materialImage = "";
+  formData.mterialDescription = "";
 };
+//学校下拉
+let Schoolname = ref([{
+  id: "",
+  name: ""
+}])
+const SchoolSelect = () => {
+  OrganizationAPI.getOrganizationSelect().then((res) => {
+    console.log("学校下拉=>", res);
+    Schoolname.value = res;
+  })
+}
+// 图片上传
+const imageUrl = ref('');
+const handleAvatarSuccess: UploadProps['onSuccess'] = (response, uploadFile) => {
+  imageUrl.value = URL.createObjectURL(uploadFile.raw!); // 预览图片
+  formData.materialImage = response; // 将返回的图片 URL 赋值给 formData
+};
+const beforeAvatarUpload: UploadProps['beforeUpload'] = (rawFile) => {
+  if (rawFile.type !== 'image/jpeg' && rawFile.type !== 'image/png' && rawFile.type !== 'image/gif') {
+    ElMessage.error('图片只能是 JPG/PNG/GIF 格式!');
+    return false;
+  } else if (rawFile.size / 1024 / 1024 > 2) {
+    ElMessage.error('图片大小不能超过 2MB!');
+    return false;
+  }
+  return true;
+};
+//添加修改
 const submitForm = () => {
   (formRef.value as FormInstance).validate((valid) => {
     if (valid) {
       if (isAdd.value) {
-        addMaterial(formData).then(() => {
+        addMaterial(formData).then((res) => {
+          console.log("物料添加=>", res);
           ElMessage.success("添加成功");
           dialogVisible.value = false;
           fetchMaterialList();
-        });
+
+        })
       } else {
-        // TODO: 编辑接口
-        ElMessage.success("编辑成功");
-        dialogVisible.value = false;
-        fetchMaterialList();
+        console.log("Submitting update for ID:", formData.id);
+        updateMaterial(formData.id, formData).then(res => {
+          console.log("物料修改=>", res);
+          ElMessage.success("编辑成功");
+          dialogVisible.value = false;
+          fetchMaterialList();
+        })
       }
     }
   });
 };
-// 删除
+//全选 全部选
+const Ids = ref([]);
+const selectAll = (id: any) => {
+  Ids.value = id.map((item: any) => (item.id));
+  console.log("ids=>", Ids.value);
+}
+// 批量删除
 const handleDelete = () => {
   if (!Ids.value.length) {
     ElMessage.warning("请先选择要删除的物料！");
     return;
   }
-  ElMessageBox.confirm('确认删除吗?', '提示', { confirmButtonText: '确认', cancelButtonText: '取消', type: 'warning' })
+  ElMessageBox.confirm('确认删除吗?', '提示',
+    {
+      confirmButtonText: '确认',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
     .then(() => {
-      // TODO: 删除接口
-      ElMessage.success("删除成功");
-      fetchMaterialList();
+      batchDeleteMaterial({ ids: Ids.value }).then((res) => {
+        console.log("物料批删=>", res);
+        ElMessage.success("删除成功");
+        fetchMaterialList();
+      })
     })
     .catch(() => {
       ElMessage.info('删除已取消');
     });
 };
 // 启用/禁用
-const handleEnable = (enable: boolean) => {
+const handlestartEnable = (status: boolean) => {
   if (!Ids.value.length) {
     ElMessage.warning("请先选择要操作的物料！");
     return;
   }
-  updateMaterialStatus({ ids: Ids.value, status: enable ? 1 : 0 }).then(() => {
-    ElMessage.success(enable ? "启用成功" : "禁用成功");
+  updateMaterialStatus(Ids.value, status).then(() => {
+    ElMessage.success(status ? "启用成功" : "禁用成功");
     fetchMaterialList();
   });
+};
+
+// 入库/出库弹窗
+const stockInDialogVisible = ref(false);
+const stockOutDialogVisible = ref(false);
+const stockForm = reactive({
+  id: "",
+  count: 1,
+  remark: ""
+});
+const stockInFormRef = ref<FormInstance>();
+const stockOutFormRef = ref<FormInstance>();
+const stockInRules: FormRules = {
+  count: [
+    { required: true, message: "请输入入库数量", trigger: "blur" }
+  ],
+  remark: [
+    { required: true, message: "请输入入库说明", trigger: "blur" }
+  ]
+};
+const stockOutRules: FormRules = {
+  count: [
+    { required: true, message: "请输入出库数量", trigger: "blur" }
+  ],
+  remark: [
+    { required: true, message: "请输入原因说明", trigger: "blur" }
+  ]
 };
 // 入库/出库弹窗
 const showStockInDialog = (row: any) => {
   stockForm.id = row.id;
   stockForm.count = 1;
+  stockForm.remark = "";
   stockInDialogVisible.value = true;
 };
 const showStockOutDialog = (row: any) => {
   stockForm.id = row.id;
   stockForm.count = 1;
+  stockForm.remark = "";
   stockOutDialogVisible.value = true;
 };
 const submitStockIn = () => {
-  stockInMaterial(stockForm.id, { count: stockForm.count }).then(() => {
-    ElMessage.success("入库成功");
-    stockInDialogVisible.value = false;
-    fetchMaterialList();
+  (stockInFormRef.value as FormInstance).validate((valid) => {
+    if (!valid) return;
+    stockInMaterial(stockForm.id, { count: stockForm.count, remark: stockForm.remark }).then(() => {
+      ElMessage.success("入库成功");
+      stockInDialogVisible.value = false;
+      fetchMaterialList();
+    });
   });
 };
 const submitStockOut = () => {
-  stockOutMaterial(stockForm.id, { count: stockForm.count }).then(() => {
-    ElMessage.success("出库成功");
-    stockOutDialogVisible.value = false;
-    fetchMaterialList();
+  (stockOutFormRef.value as FormInstance).validate((valid) => {
+    if (!valid) return;
+    stockOutMaterial(stockForm.id, { count: stockForm.count, remark: stockForm.remark }).then(() => {
+      ElMessage.success("出库成功");
+      stockOutDialogVisible.value = false;
+      fetchMaterialList();
+    });
   });
 };
-// 自定义列
+
+
+// 自定义显示列相关
+const allColumns = ref([
+  { label: "图片", prop: "materialImage" },
+  { label: "物料名称", prop: "materialName" },
+  { label: "分类", prop: "materialTypeName" },
+  { label: "所属学校", prop: "schoolName" },
+  { label: "库存", prop: "stockSum" },
+  { label: "最后编辑时间", prop: "lastModificationTime" },
+  { label: "状态", prop: "status" },
+]);
+const checkedProps = ref(allColumns.value.map(col => col.prop));
+const showColumns = computed(() =>
+  allColumns.value.filter(col => checkedProps.value.includes(col.prop))
+);
 const showColumnDialog = ref(false);
+const resetColumns = () => {
+  checkedProps.value = allColumns.value.map(col => col.prop);
+};
 
 onMounted(() => {
   fetchMaterialList();
+  SchoolSelect();
 });
 </script>
 
 <style scoped>
+.avatar-uploader .avatar {
+  width: 178px;
+  height: 178px;
+  display: block;
+}
+
 .material-management {
   padding: 24px;
   background: #fff;
   min-height: 100vh;
 }
+
 .search-bar {
   margin-bottom: 8px;
 }
-.operation-area {
+
+.table-header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   margin-bottom: 8px;
+}
+
+.table-title {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.operation-area {
   display: flex;
   align-items: center;
   gap: 8px;
 }
+
 .pagination-container {
   margin-top: 16px;
   text-align: left;
+}
+</style>
+
+<style>
+.avatar-uploader .el-upload {
+  border: 1px dashed var(--el-border-color);
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: var(--el-transition-duration-fast);
+}
+
+.avatar-uploader .el-upload:hover {
+  border-color: var(--el-color-primary);
+}
+
+.el-icon.avatar-uploader-icon {
+  font-size: 28px;
+  color: #8c939d;
+  width: 178px;
+  height: 178px;
+  text-align: center;
 }
 </style>
