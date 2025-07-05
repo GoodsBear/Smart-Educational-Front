@@ -121,16 +121,6 @@
             <el-option label="老师" value="3a1aa8f8-5dfe-01db-8f07-9b94ab6e95ca" />
           </el-select>
         </el-form-item>
-        <el-form-item label="权限角色" prop="roleId" required>
-          <el-select v-model="addFormData.roleId" placeholder="请选择角色">
-            <el-option
-              v-for="item in roleOptions"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            />
-          </el-select>
-        </el-form-item>
         <el-form-item label="人员类型" prop="staffTypeId" required>
           <el-select v-model="addFormData.staffTypeId" placeholder="人员类型">
             <el-option label="内部" value="3a1aa9dd-dfb0-c706-496a-965d53a73a02" />
@@ -235,16 +225,6 @@
           <el-select v-model="editFormData.positionId" placeholder="请选择职位">
             <el-option label="管理" value="3a1aa8f8-4191-62eb-cae1-631ba2b08e4c" />
             <el-option label="老师" value="3a1aa8f8-5dfe-01db-8f07-9b94ab6e95ca" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="权限角色" prop="roleId" required>
-          <el-select v-model="editFormData.roleId" placeholder="请选择角色">
-            <el-option
-              v-for="item in roleOptions"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            />
           </el-select>
         </el-form-item>
         <el-form-item label="人员类型" prop="staffTypeId" required>
@@ -401,7 +381,6 @@ import { getOrganizationTree } from "@/api/organization/organization.api";
 import moment from "moment";
 import { Plus } from "@element-plus/icons-vue";
 import type { UploadProps } from "element-plus";
-import { selRole } from "@/api/RBAC/RoleManager/RoleManager"; // 新增：引入selRole方法
 // 类型定义
 interface StaffQuery {
   StaffName?: string;
@@ -419,7 +398,6 @@ interface StaffFormData {
   organization: string;
   staffGender: string;
   positionId: string;
-  roleId: string;
   staffTypeId: string;
   entryDate: string;
   education: string;
@@ -447,16 +425,6 @@ const statusForm = reactive({
 });
 
 const data = ref([]);
-const roleOptions = ref<any[]>([
-  {
-    value: "",
-    label: "",
-  },
-]);
-const getRoleList = async () => {
-  roleOptions.value = await selRole();
-  console.log(roleOptions.value);
-};
 
 const allColumns = [
   { label: "姓名", prop: "staffName", show: true },
@@ -488,7 +456,6 @@ const addFormData = reactive<StaffFormData>({
   organization: "",
   staffGender: "",
   positionId: "",
-  roleId: "",
   staffTypeId: "",
   entryDate: "",
   education: "",
@@ -508,7 +475,6 @@ const editFormData = reactive<StaffFormData>({
   organization: "",
   staffGender: "",
   positionId: "",
-  roleId: "",
   staffTypeId: "",
   entryDate: "",
   education: "",
@@ -612,14 +578,12 @@ const resetSearch = () => {
 // 显示新增对话框
 const showAddDialog = () => {
   resetAddForm();
-  getRoleList();
   addDialogVisible.value = true;
 };
 
 // 显示编辑对话框
 const showEditDialog = async (row: any) => {
   resetEditForm();
-  getRoleList();
   Object.assign(editFormData, row);
 
   // 处理 organization 字段
@@ -674,11 +638,23 @@ const submitAddForm = async () => {
 };
 
 const submitEditForm = async () => {
-  console.log("编辑员工", editFormData);
   try {
     await editFormRef.value?.validate();
 
-    await StaffAPI.updateStaff(editFormData.id, editFormData);
+    // organization 字段转字符串
+    let org = editFormData.organization;
+    if (Array.isArray(org)) {
+      org = org.join(",");
+    }
+
+    // 构造参数
+    const params = {
+      ...editFormData,
+      organization: org,
+    };
+
+    // staffId 单独传
+    await StaffAPI.updateStaff(editFormData.id, params);
     ElMessage.success("更新成功");
     editDialogVisible.value = false;
     fetchStaffList();
@@ -866,7 +842,6 @@ const resetAddForm = () => {
     organization: "",
     staffGender: "",
     positionId: "",
-    roleId: "",
     staffTypeId: "",
     entryDate: "",
     education: "",
@@ -887,7 +862,6 @@ const resetEditForm = () => {
     organization: "",
     staffGender: "",
     positionId: "",
-    roleId: "",
     staffTypeId: "",
     entryDate: "",
     education: "",
