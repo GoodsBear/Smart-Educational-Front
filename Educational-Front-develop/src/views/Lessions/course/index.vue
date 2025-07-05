@@ -117,13 +117,15 @@
         <el-col :span="12">
           <el-form-item label="所属科目" prop="subjectId">
             <el-select v-model="courseForm.subjectId" placeholder="请选择科目">
-              <!-- 科目选项 -->
+              <el-option v-for="item in SubjectList" :key="item.id" :label="item.subjectName" :value="item.id" />
             </el-select>
           </el-form-item>
         </el-col>
         <el-col :span="12">
           <el-form-item label="关联专题" prop="topicId">
-            <el-input v-model="courseForm.topicId"></el-input>
+            <el-select v-model="courseForm.topicId" placeholder="请选择专题">
+              <el-option v-for="item in TopicList" :key="item.id" :label="item.name" :value="item.id" />
+            </el-select>
           </el-form-item>
         </el-col>
       </el-row>
@@ -305,7 +307,9 @@ import { ref, reactive } from 'vue'
 import { updateCourseStatus, getCourseList, addCourse } from '@/api/Lession/CourseManager/Course'
 import moment from 'moment'
 import type { FormInstance, FormRules } from 'element-plus'
-import { getSubjectList, getSubjectById, getSubjectDropdown, deleteSubjects, updateSubject, addSubject } from '@/api/Lession/SubjectManager/Subject'
+import { getSubjectDropdown } from '@/api/Lession/SubjectManager/Subject'
+import { getSpecialSubjectDropdown } from '@/api/Lession/TopicManager/TopicManager'
+import {getOrganizationDropdown} from '@/api/Organization/organrization'
 
 
 
@@ -531,13 +535,13 @@ const handleAction = async (action: any) => {
   )
   // 调用后台API
 
-    const response = await updateCourseStatus({
-      status: status.value,
-      type: actionResult.value,
-    }, ids);
+  const response = await updateCourseStatus({
+    status: status.value,
+    type: actionResult.value,
+  }, ids);
 
-      ElMessage.success('课程【' + actions.value + '】成功');
-      handleQuery();
+  ElMessage.success('课程【' + actions.value + '】成功');
+  handleQuery();
 
 };
 
@@ -565,9 +569,17 @@ const handleCurrentChange = (val: number) => {
 }
 //#endregion
 //#region 下拉框数据
+
+//学校下拉数据
+const SchoolList = ref([{
+  id: '',
+  name: ''
+}])
 //学校选项
 const LoadSchool = () => {
-
+  const response = getOrganizationDropdown();
+  console.log(response)
+  SchoolList.value=response
 }
 //科目数据
 const SubjectList = ref([{
@@ -583,18 +595,30 @@ const LoadSubject = async () => {
 const LoadGrade = () => {
 
 }
+//专题下拉数据
+const TopicList = ref([{
+  id: '',
+  name: ''
+}])
 //专题选项
-const LoadTopic = () => {
-
+const LoadTopic = async () => {
+  const response = await getSpecialSubjectDropdown();
+  TopicList.value = response
 }
 
 
 //#endregion
 
-
+//钩子函数
 onMounted(() => {
+  //课程加载
   handleQuery()
+  //科目选项
   LoadSubject()
+  //科目选项
+  LoadTopic()
+  //校区选项
+  LoadSchool()
 })
 </script>
 
