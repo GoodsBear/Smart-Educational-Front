@@ -15,7 +15,7 @@
         <el-form-item label="讲师" prop="teacher">
           <!-- <el-input v-model="queryParams.teacher" placeholder="请输入讲师名称" clearable /> -->
           <el-select v-model="queryParams.teacher" placeholder="请输入讲师名称" style="width: 240px">
-            <el-option v-for="item in staffList" :key="item.id" :label="item.staffName" :value="item.id" />
+            <el-option v-for="item in staffList" :key="item.id" :label="item.staffName" :value="item.staffName" />
           </el-select>
         </el-form-item>
         <el-form-item>
@@ -38,11 +38,16 @@
       </template>
 
       <el-table v-loading="loading" :data="topicList" @selection-change="handleSelectionChange">
+
         <el-table-column type="selection" width="55" align="center" />
-        <el-table-column label="专题名称" align="center" prop="name" />
+        <el-table-column label="Logo" align="center" prop="logoPath">
+          <template #default="scope">
+            <img :src="scope.row.logoPath" class="avatar" />
+          </template>
+        </el-table-column><el-table-column label="专题名称" align="center" prop="name" />
         <el-table-column label="分类名称" align="center" prop="categoryName" />
         <el-table-column label="讲师" align="center" prop="teacher" />
-        <el-table-column label="Logo" align="center" prop="logoPath" />
+
         <el-table-column label="简介" align="center" prop="brief" />
         <el-table-column label="详情" align="center" prop="details" />
         <el-table-column label="成就展示" align="center" prop="achievementDisplay" />
@@ -51,11 +56,11 @@
             {{ formatDateTime(scope.row.creationTime) }}
           </template>
         </el-table-column>
-        <el-table-column label="修改时间" align="center" prop="lastModificationTime" width="180">
+        <!-- <el-table-column label="修改时间" align="center" prop="lastModificationTime" width="180">
           <template #default="scope">
-            {{ formatDateTime(scope.row.lastModificationTime) }}
+            {{ formatDateTime(scope.row.lastModificationTime) }}、
           </template>
-        </el-table-column>
+        </el-table-column> -->
         <el-table-column label="操作" align="center" width="150">
           <template #default="scope">
             <el-button type="primary" link @click="handleUpdate(scope.row)">
@@ -87,20 +92,24 @@
         <el-form-item label="讲师" prop="teacher">
           <!-- <el-input v-model="form.teacher" placeholder="请输入讲师名称" /> -->
           <el-select v-model="form.teacher" placeholder="请输入讲师名称" style="width: 240px">
-            <el-option v-for="item in staffList" :key="item.id" :label="item.staffName" :value="item.id" />
+            <el-option v-for="item in staffList" :key="item.id" :label="item.staffName" :value="item.staffName" />
           </el-select>
         </el-form-item>
+        <!-- <el-input v-model="form.logoPath" placeholder="请输入Logo路径" />
+        </el-form-item> -->
         <el-form-item label="Logo路径" prop="logoPath">
-          <el-input v-model="form.logoPath" placeholder="请输入Logo路径" />
+          <el-upload class="avatar-uploader" action="https://localhost:44375/api/upload/image" :show-file-list="false"
+            :on-success="handleAvatarSuccess" :before-upload="beforeAvatarUpload">
+            <img v-if="imageUrl" :src="imageUrl" class="avatar" />
+            <el-icon v-else class="avatar-uploader-icon">
+              <Plus />
+            </el-icon>
+          </el-upload>
         </el-form-item>
         <el-form-item v-model="form.brief" label="简介" prop="brief">
           <!-- <el-input  type="textarea" :rows="3" placeholder="请输入简介" /> -->
           <div style="border: 1px solid #ccc">
-            <Toolbar style="border-bottom: 1px solid #ccc" :editor="editorRef" :default-config="toolbarConfig"
-              :mode="mode" />
-            <Editor v-model="valueHtml" style="height: 500px; overflow-y: hidden;" :default-config="editorConfig"
-              :mode="mode" @on-created="handleCreated" />
-            {{ valueHtml }}
+            <Editor :api-key="apiKey" :init="TinyMCE_option" initial-value="Welcome to TinyMCE!" />
           </div>
         </el-form-item>
         <el-form-item label="详情" prop="details">
@@ -132,6 +141,9 @@ import {
   getCategoryList,
   getstaffList
 } from '@/api/Lession/TopicManager/TopicManager'
+import { Plus } from '@element-plus/icons-vue'
+import type { UploadProps } from 'element-plus'
+import WangEditor from '@/components/WangEditor/index.vue'
 // 列表数据
 const topicList = ref([])
 const loading = ref(true)
@@ -171,7 +183,7 @@ const rules = {
   name: [{ required: true, message: '专题名称不能为空', trigger: 'blur' }],
   categoryId: [{ required: true, message: '分类不能为空', trigger: 'blur' }],
   teacher: [{ required: true, message: '讲师不能为空', trigger: 'blur' }],
-  brief: [{ required: true, message: '简介不能为空', trigger: 'blur' }],
+  // brief: [{ required: true, message: '简介不能为空', trigger: 'blur' }],
   details: [{ required: true, message: '详情不能为空', trigger: 'blur' }]
 }
 
@@ -189,6 +201,15 @@ const loadCategories = async () => {
 const loadstaff = async () => {
   try {
     const response = await getstaffList()
+    staffList.value = response || []
+  } catch (error) {
+    console.error('获取教职员工下拉列表失败:', error)
+  }
+}
+//getTopicDetail详情反填
+const TopicDetail = async (id: any) => {
+  try {
+    const response = await getTopicDetail(id)
     staffList.value = response || []
   } catch (error) {
     console.error('获取教职员工下拉列表失败:', error)
@@ -263,13 +284,17 @@ const handleAdd = () => {
 }
 
 // 修改按钮操作
+
 const handleUpdate = async (row: any) => {
   try {
     reset()
-    const response = await getTopicDetail(row.id)
-    form.value = response.data
+    // const response = await getTopicDetail(row.id)
+    //Object.assign(form.value, response.data) // 保持响应式
+    //form.value = response.data
     open.value = true
     title.value = '修改专题'
+    TopicDetail(row.id)
+    form.value = row;
   } catch (error: any) {
     console.error('获取详情失败:', error.response?.data)
     ElMessage.error(error.response?.data?.error?.message || '获取详情失败')
@@ -288,6 +313,7 @@ const submitForm = async () => {
       // 修改
       try {
         await updateTopic(form.value.id, {
+          id: form.value.id,
           name: form.value.name,
           categoryId: form.value.categoryId,
           teacher: form.value.teacher,
@@ -397,28 +423,64 @@ onMounted(() => {
   loadstaff()
   getList()
 })
-import '@wangeditor/editor/dist/css/style.css' // 引入 css  可以在main.js中引入
-import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
-const editorRef = shallowRef()
-const valueHtml = ref('<p>hello</p>')
-const mode = 'default'
-const toolbarConfig = {}
-const editorConfig = { placeholder: '请输入内容...' }
-// 模拟 ajax 异步获取内容
-onMounted(() => {
-  setTimeout(() => {
-    valueHtml.value = '<p>模拟 Ajax 异步设置内容</p>'
-  }, 1500)
+
+
+// 图片上传相关
+const imageUrl = ref("");
+
+const handleAvatarSuccess: UploadProps["onSuccess"] = (response, uploadFile) => {
+  console.log("图片", response);
+  // debugger;
+  imageUrl.value = URL.createObjectURL(uploadFile.raw!);
+  form.value.logoPath = response;//.data.fileUrl;
+  // from.value.logoPath = imageUrl.value;
+};
+
+const beforeAvatarUpload: UploadProps["beforeUpload"] = (rawFile) => {
+  /*
+  if (rawFile.type !== "image/jpeg/gif/png") {
+    ElMessage.error("Avatar picture must be JPG format!");
+    return false;
+  } else
+   */ if (rawFile.size / 1024 / 1024 > 2) {
+    ElMessage.error("Avatar picture size can not exceed 2MB!");
+    return false;
+  }
+  return true;
+};
+//富文本
+
+import Editor from '@tinymce/tinymce-vue'
+import { reactive } from 'vue';
+
+const apiKey = 'c84dxh4zz5sav5fvpfj8ats9tqewf49axrzcpc6ftqzhep17' // 替换为你的 API 密钥
+
+const TinyMCE_option = reactive({
+  // 插件
+  plugins: [
+    'anchor', 'autolink', 'charmap', 'codesample', 'emoticons', 'image', 'link', 'lists', 'media', 'searchreplace', 'table', 'visualblocks', 'wordcount',
+    'checklist', 'mediaembed', 'casechange', 'export', 'formatpainter', 'pageembed', 'permanentpen', 'powerpaste', 'advtable', 'advcode', 'editimage', 'advtemplate', 'mentions', 'tinycomments', 'tableofcontents', 'footnotes', 'mergetags', 'autocorrect', 'inlinecss', 'markdown', 'importword', 'exportword', 'exportpdf'
+  ],
+  // 是否显示底部工具栏 默认为 true
+  statusbar: false,
+  // 工具栏
+  toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table mergetags | addcomment showcomments | align lineheight | checklist numlist bullist indent outdent | emoticons charmap | removeformat | selectiveDateButton',
+  // 使用者
+  tinycomments_mode: 'embedded',
+  tinycomments_author: '张三',
+  // 语言
+  language: 'zh_CN',
+  // 自定义功能键
+  setup: (editor) => {
+    const toDateHtml = (date) => `<time datetime="${date.toString()}">${date.toDateString()}</time>`;
+    editor.ui.registry.addButton('selectiveDateButton', {
+      icon: 'insert-time',
+      tooltip: '插入当前时间',
+      onAction: (_) => editor.insertContent(toDateHtml(new Date()))
+    });
+  }
 })
 
-onBeforeUnmount(() => {
-  const editor = editorRef.value
-  if (editor == null) return
-  editor.destroy()
-})
-const handleCreated = (editor) => {
-  editorRef.value = editor // 记录 editor 实例，重要！
-}
 </script>
 
 <style scoped>
@@ -430,3 +492,25 @@ const handleCreated = (editor) => {
   margin-bottom: 8px;
 }
 </style>
+<!-- <style>
+.avatar-uploader .el-upload {
+  border: 1px dashed var(--el-border-color);
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: var(--el-transition-duration-fast);
+}
+
+.avatar-uploader .el-upload:hover {
+  border-color: var(--el-color-primary);
+}
+
+.el-icon.avatar-uploader-icon {
+  font-size: 40px;
+  color: #8c939d;
+  width: 246px;
+  height: 246px;
+  text-align: center;
+}
+</style> -->
