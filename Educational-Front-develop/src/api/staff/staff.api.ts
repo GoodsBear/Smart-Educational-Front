@@ -87,6 +87,20 @@ const StaffAPI = {
       params: { newPassword },
     });
   },
+
+  /**
+   * 批量设置员工所属机构
+   * @param Ids 员工ID数组
+   * @param organizationIds 机构ID数组
+   * @returns 请求结果
+   */
+  setStaffOrganization(Ids: string[], organizationIds: string[]) {
+    return request({
+      url: `/api/app/staff-services/staff-oranization?Ids=${Ids}`,
+      method: "post",
+      data: organizationIds,
+    });
+  },
 };
 
 export default StaffAPI;
@@ -112,7 +126,6 @@ export interface StaffFormData {
   organization: string;
   staffGender: string;
   positionId: string; // UUID格式
-  roleId: string; // UUID格式
   staffTypeId: string; // UUID格式
   entryDate: string; // ISO日期格式
   status: number;
