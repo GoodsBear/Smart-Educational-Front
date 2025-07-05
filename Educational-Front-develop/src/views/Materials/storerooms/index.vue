@@ -5,22 +5,22 @@
       <div class="search-bar">
         <el-form :inline="true" :model="queryParams">
           <el-form-item label="选择物料：">
-            <el-select v-model="queryParams.materialName" placeholder="请选择" style="width: 200px;">
+            <el-select v-model="queryParams.MaterialId" placeholder="请选择" style="width: 200px;">
               <el-option v-for="item in materialname" :key="item.id" :label="item.materialName" :value="item.id" />
             </el-select>
           </el-form-item>
           <el-form-item label="涉及学生：">
-            <el-select v-model="queryParams.studentName" placeholder="请选择" style="width: 200px;">
+            <el-select v-model="queryParams.StudentId" placeholder="请选择" style="width: 200px;">
               <el-option v-for="item in studentname" :key="item.id" :label="item.name" :value="item.id" />
             </el-select>
           </el-form-item>
           <el-form-item label="申请员工：">
-            <el-select v-model="queryParams.staffName" placeholder="请选择" style="width: 200px;">
+            <el-select v-model="queryParams.StaffId" placeholder="请选择" style="width: 200px;">
               <el-option v-for="item in staffname" :key="item.id" :label="item.staffName" :value="item.id" />
             </el-select>
           </el-form-item>
           <el-form-item label="变动类型：">
-            <el-select v-model="queryParams.changeType" placeholder="请选择" style="width: 200px;">
+            <el-select v-model="queryParams.ChangeType" placeholder="请选择" style="width: 200px;">
               <el-option label="入库" :value="0" />
               <el-option label="出库" :value="1" />
             </el-select>
@@ -83,10 +83,10 @@ import staffAPI from '@/api/StudentsManager/Staff/Staff'
 const materialLogList = ref<any[]>([]);
 // 查询参数
 const queryParams = reactive({
-  materialName: "",
-  studentName: "",
-  staffName: "",
-  changeType: "",
+  MaterialId: "",
+  StudentId: "",
+  StaffId: "",
+  ChangeType: "",
   startTime: "",
   endTime: ""
 });
@@ -103,10 +103,10 @@ const handleQuery = () => {
 };
 //重置查询
 const handleReset = () => {
-  queryParams.materialName = "";
-  queryParams.studentName = "";
-  queryParams.staffName = "";
-  queryParams.changeType = "";
+  queryParams.MaterialId = "";
+  queryParams.StudentId = "";
+  queryParams.StaffId = "";
+  queryParams.ChangeType = "";
   queryParams.startTime = "";
   queryParams.endTime = "";
   pageParams.PageIndex = 1;
@@ -117,10 +117,10 @@ const fetchMaterialLogList = () => {
   const params: any = {
     pageIndex: pageParams.PageIndex,
     pageSize: pageParams.PageSize,
-    materialName: queryParams.materialName,
-    studentName: queryParams.studentName,
-    staffName: queryParams.staffName,
-    changeType: queryParams.changeType,
+    MaterialId: queryParams.MaterialId,
+    StudentId: queryParams.StudentId,
+    StaffId: queryParams.StaffId,
+    ChangeType: queryParams.ChangeType,
     startTime: queryParams.startTime,
     endTime: queryParams.endTime,
   };
