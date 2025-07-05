@@ -126,7 +126,6 @@ export interface StaffFormData {
   organization: string;
   staffGender: string;
   positionId: string; // UUID格式
-  roleId: string; // UUID格式
   staffTypeId: string; // UUID格式
   entryDate: string; // ISO日期格式
   status: number;
