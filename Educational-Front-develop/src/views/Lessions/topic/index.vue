@@ -36,7 +36,21 @@
         <el-table-column label="专题名称" align="center" prop="name" />
         <el-table-column label="分类名称" align="center" prop="categoryName" />
         <el-table-column label="讲师" align="center" prop="teacher" />
-        <el-table-column label="Logo" align="center" prop="logoPath" />
+        <el-table-column label="Logo" align="center" prop="logoPath">
+          <template #default="scope">
+            <el-image style="width: 60px; height: 60px" :src="scope.row.logoPath" fit="cover"
+              :preview-src-list="[scope.row.logoPath]" preview-teleported>
+              <template #error>
+                <div class="image-error">
+                  <el-icon>
+                    <Picture />
+                  </el-icon>
+                  <span>加载失败</span>
+                </div>
+              </template>
+            </el-image>
+          </template>
+        </el-table-column>
         <el-table-column label="简介" align="center" prop="brief" />
         <el-table-column label="详情" align="center" prop="details" />
         <el-table-column label="成就展示" align="center" prop="achievementDisplay" />
@@ -67,20 +81,8 @@
     </el-card>
 
     <!-- 添加或修改专题对话框 -->
-    <el-dialog 
-      :title="title" 
-      v-model="open" 
-      width="600px" 
-      destroy-on-close
-      :close-on-click-modal="false"
-    >
-      <el-form 
-        ref="topicForm"
-        :model="form" 
-        :rules="rules" 
-        label-width="100px"
-        status-icon
-      >
+    <el-dialog :title="title" v-model="open" width="600px" destroy-on-close :close-on-click-modal="false">
+      <el-form ref="topicForm" :model="form" :rules="rules" label-width="100px" status-icon>
         <el-form-item label="专题名称" prop="name">
           <el-input v-model="form.name" placeholder="请输入专题名称" />
         </el-form-item>
@@ -90,8 +92,18 @@
         <el-form-item label="讲师" prop="teacher">
           <el-input v-model="form.teacher" placeholder="请输入讲师名称" />
         </el-form-item>
-        <el-form-item label="Logo路径" prop="logoPath">
-          <el-input v-model="form.logoPath" placeholder="请输入Logo路径" />
+        <el-form-item label="Logo" prop="logoPath">
+          <el-upload class="logo-uploader" action="" :show-file-list="false" :on-success="handleLogoSuccess"
+            :before-upload="beforeLogoUpload" :http-request="customUpload">
+            <img v-if="logoImageUrl" :src="logoImageUrl" class="logo-image" />
+            <div v-else class="logo-uploader-placeholder">
+              <el-icon>
+                <Plus />
+              </el-icon>
+              <span>点击上传</span>
+            </div>
+          </el-upload>
+          <div class="logo-path" v-if="form.logoPath">当前路径: {{ form.logoPath }}</div>
         </el-form-item>
         <el-form-item label="简介" prop="brief">
           <el-input v-model="form.brief" type="textarea" :rows="3" placeholder="请输入简介" />
@@ -116,14 +128,16 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { 
-  createTopic, 
-  getTopicList, 
-  updateTopic, 
+import {
+  createTopic,
+  getTopicList,
+  updateTopic,
   getTopicDetail,
   batchDeleteTopic,
   getCategoryList
 } from '@/api/Lession/TopicManager/TopicManager'
+import { Picture, Plus } from '@element-plus/icons-vue'
+import { UploadImage } from '@/api/uoload/uoload.api'
 
 // 列表数据
 const topicList = ref([])
@@ -135,6 +149,7 @@ const multiple = ref(true)
 const selectedIdList = ref<string[]>([])
 const categoryOptions = ref([])
 const topicForm = ref()
+const logoImageUrl = ref('')
 
 // 查询参数
 const queryParams = ref({
@@ -144,6 +159,47 @@ const queryParams = ref({
   pageIndex: 1,
   pageSize: 10
 })
+
+// Logo上传相关方法
+const handleLogoSuccess = (res: any) => {
+  console.log('上传成功:', res)
+  // 根据API响应结构获取图片路径
+  form.value.logoPath = res.data || res
+  logoImageUrl.value = form.value.logoPath
+}
+
+const beforeLogoUpload = (file: File) => {
+  const isImage = ['image/jpeg', 'image/png', 'image/gif'].includes(file.type)
+  const isLt2M = file.size / 1024 / 1024 < 2
+
+  if (!isImage) {
+    ElMessage.error('上传Logo只能是图片格式!')
+    return false
+  }
+  if (!isLt2M) {
+    ElMessage.error('上传Logo图片大小不能超过 2MB!')
+    return false
+  }
+  return true
+}
+
+// 使用封装的UploadImage方法进行上传
+const customUpload = async (options: any) => {
+  const { file } = options
+  // 创建FormData对象
+  const formData = new FormData()
+  formData.append('file', file)
+
+  // 调用封装的UploadImage方法
+  try {
+    const result = await UploadImage(formData)
+    // 直接调用成功回调，不做额外判断
+    options.onSuccess(result)
+  } catch (error) {
+    console.error('上传失败:', error)
+    options.onError('上传失败')
+  }
+}
 
 // 表单参数
 const form = ref({
@@ -210,6 +266,8 @@ const reset = () => {
     achievementDisplay: '',
     concurrencyStamp: ''
   }
+  // 清空logo预览
+  logoImageUrl.value = ''
 }
 
 // 多选框选中数据
@@ -247,6 +305,8 @@ const handleUpdate = async (row: any) => {
     reset()
     const response = await getTopicDetail(row.id)
     form.value = response.data
+    // 设置logo预览
+    logoImageUrl.value = form.value.logoPath
     open.value = true
     title.value = '修改专题'
   } catch (error: any) {
@@ -262,7 +322,7 @@ const submitForm = async () => {
 
   try {
     await formEl.validate()
-    
+
     if (form.value.id) {
       // 修改
       try {
@@ -337,7 +397,7 @@ const handleBatchDelete = () => {
     ElMessage.warning('请选择要删除的数据')
     return
   }
-  
+
   ElMessageBox.confirm('确认批量删除所选专题吗？', '警告', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
@@ -353,16 +413,16 @@ const handleBatchDelete = () => {
 // 时间格式化
 const formatDateTime = (dateTimeStr: string) => {
   if (!dateTimeStr) return '-'
-  
+
   const date = new Date(dateTimeStr)
-  
+
   const year = date.getFullYear()
   const month = String(date.getMonth() + 1).padStart(2, '0')
   const day = String(date.getDate()).padStart(2, '0')
   const hours = String(date.getHours()).padStart(2, '0')
   const minutes = String(date.getMinutes()).padStart(2, '0')
   const seconds = String(date.getSeconds()).padStart(2, '0')
-  
+
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
 }
 
@@ -382,7 +442,69 @@ onMounted(() => {
 .search-wrapper {
   margin-bottom: 20px;
 }
+
 .mb8 {
   margin-bottom: 8px;
 }
-</style> 
+
+.image-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background-color: #f5f7fa;
+  color: #909399;
+  font-size: 12px;
+}
+
+.image-error .el-icon {
+  font-size: 24px;
+  margin-bottom: 8px;
+}
+
+/* Logo上传样式 */
+.logo-uploader {
+  width: 150px;
+  height: 150px;
+  border: 1px dashed #d9d9d9;
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.3s;
+}
+
+.logo-uploader:hover {
+  border-color: #409eff;
+}
+
+.logo-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.logo-uploader-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: #8c939d;
+}
+
+.logo-uploader-placeholder .el-icon {
+  font-size: 28px;
+  margin-bottom: 8px;
+}
+
+.logo-path {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #606266;
+}
+</style>

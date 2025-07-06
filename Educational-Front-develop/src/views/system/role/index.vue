@@ -564,8 +564,8 @@ function fetchData() {
     .then((response) => {
       if (response) {
         roleList.value = response.data || [];
-        total.value = response.totalCount || 0;
-        totalPage.value = response.totalPage || 1;
+        total.value = response.totleCount || 0;
+        totalPage.value = response.totlePage || 1;
       } else {
         roleList.value = [];
         total.value = 0;

@@ -262,19 +262,21 @@
       </template>
     </el-dialog>
 
-    <el-dialog v-model="transferDialogVisible" title="转机构" width="400px">
-      <el-form>
-        <el-form-item label="选择转入机构:">
-          <el-tree ref="transferOrgTreeRef" :data="transferOrgTree" show-checkbox node-key="id"
-            :default-checked-keys="selectedTransferOrg" :props="{ label: 'label', children: 'children' }"
-            style="width: 100%" @check="(checkedKeys) => (selectedTransferOrg.value = checkedKeys)" />
-        </el-form-item>
-      </el-form>
+    <!-- 转机构对话框 -->
+    <el-dialog v-model="transferDialogVisible" title="转机构" width="500px">
+      <div class="transfer-dialog-content">
+        <p>请选择要转入的机构：</p>
+        <el-tree ref="transferTreeRef" :data="data" show-checkbox node-key="id" default-expand-all highlight-current
+          :props="{ label: 'label' }" />
+      </div>
       <template #footer>
-        <el-button @click="transferDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="submitTransferOrg">提交</el-button>
+        <span class="dialog-footer">
+          <el-button @click="transferDialogVisible = false">取消</el-button>
+          <el-button type="primary" @click="submitTransfer">确认</el-button>
+        </span>
       </template>
     </el-dialog>
+
   </div>
 </template>
 
@@ -328,6 +330,9 @@ const statusDialogTitle = ref();
 const statusForm = reactive({
   status: "1", // 默认在职
 });
+// 转机构相关
+const transferDialogVisible = ref(false);
+const transferTreeRef = ref<any>(null);
 
 const data = ref([]);
 
@@ -700,6 +705,48 @@ const submitStatus = () => {
   statusDialogVisible.value = false;
 };
 
+// 显示转机构对话框
+const showTransferDialog = () => {
+  if (!Delarr.value || Delarr.value.length === 0) {
+    ElMessage.warning('请先选择要转机构的员工');
+    return;
+  }
+
+  transferDialogVisible.value = true;
+  nextTick(() => {
+    if (transferTreeRef.value) {
+      transferTreeRef.value.setCheckedKeys([]);
+    }
+  });
+};
+
+// 提交转机构
+const submitTransfer = async () => {
+  if (!transferTreeRef.value) {
+    ElMessage.warning('组件初始化失败');
+    return;
+  }
+
+  const selectedNodes = transferTreeRef.value.getCheckedNodes();
+  if (!selectedNodes || selectedNodes.length === 0) {
+    ElMessage.warning('请选择至少一个目标机构');
+    return;
+  }
+
+  // 获取选中的机构ID
+  const organizationIds = selectedNodes.map((node: any) => node.id);
+
+  try {
+    await StaffAPI.staffOrganization(Delarr.value, organizationIds);
+    ElMessage.success('转机构操作成功');
+    transferDialogVisible.value = false;
+    fetchStaffList(); // 刷新列表
+  } catch (error) {
+    console.error('转机构操作失败:', error);
+    ElMessage.error('转机构操作失败');
+  }
+};
+
 // 递归查找所有匹配名称的节点id
 function findIdsByNames(treeData: any, names: any) {
   const ids: any[] = [];
@@ -793,49 +840,7 @@ const resetEditForm = () => {
   editFormRef.value?.resetFields();
 };
 
-const transferDialogVisible = ref(false);
-const transferOrgTree = ref([]); // 机构树数据
-const transferOrgTreeRef = ref();
-const selectedTransferOrg = ref([]); // 选中的机构id数组
 
-const showTransferDialog = async () => {
-  // 校验是否选中员工
-  if (!Delarr.value || Delarr.value.length === 0) {
-    ElMessage.warning("请先选择要转机构的员工");
-    return;
-  }
-  // 获取机构树（根节点id一般为全0字符串）
-  const res = await getOrganizationTree("00000000-0000-0000-0000-000000000000");
-  transferOrgTree.value = res;
-  selectedTransferOrg.value = [];
-  transferDialogVisible.value = true;
-  // 可选：弹窗打开后默认展开全部
-  nextTick(() => {
-    transferOrgTreeRef.value?.expandAll?.();
-  });
-};
-
-const submitTransferOrg = async () => {
-  // 校验是否选中员工
-  if (!Delarr.value || Delarr.value.length === 0) {
-    ElMessage.warning("请先选择要转机构的员工");
-    return;
-  }
-  // 获取选中的机构id
-  const checked = transferOrgTreeRef.value.getCheckedKeys();
-  if (!checked.length) {
-    ElMessage.warning("请选择转入机构");
-    return;
-  }
-  try {
-    await StaffAPI.setStaffOrganization(Delarr.value, checked);
-    ElMessage.success("转机构成功");
-    transferDialogVisible.value = false;
-    fetchStaffList();
-  } catch (e) {
-    ElMessage.error("转机构失败");
-  }
-};
 </script>
 
 <style scoped>
@@ -895,5 +900,14 @@ const submitTransferOrg = async () => {
   width: 100px;
   height: 100px;
   display: block;
+}
+
+.transfer-dialog-content {
+  margin-bottom: 15px;
+}
+
+.transfer-dialog-content p {
+  margin-bottom: 15px;
+  font-weight: 500;
 }
 </style>

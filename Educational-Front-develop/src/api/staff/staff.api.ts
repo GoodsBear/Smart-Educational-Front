@@ -89,18 +89,19 @@ const StaffAPI = {
   },
 
   /**
-   * 批量设置员工所属机构
-   * @param Ids 员工ID数组
-   * @param organizationIds 机构ID数组
+   * 批量设置用户所属机构
+   * @param Ids 要设置的用户ID集合
+   * @param organizationIds 要设置的机构ID集合
    * @returns 请求结果
    */
-  setStaffOrganization(Ids: string[], organizationIds: string[]) {
+  staffOrganization(Ids: string[], organizationIds: string[]) {
     return request({
-      url: `/api/app/staff-services/staff-oranization?Ids=${Ids}`,
-      method: "post",
-      data: organizationIds,
+      url: '/api/app/staff-services/staff-oranization',
+      method: 'post',
+      params: { Ids },
+      data: organizationIds
     });
-  },
+  }
 };
 
 export default StaffAPI;
