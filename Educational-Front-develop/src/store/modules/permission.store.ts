@@ -98,12 +98,12 @@ export const usePermissionStore = defineStore("permission", () => {
               //component: () => import("@/views/tissue/money/index.vue"),
               //meta: { title: "薪资设置", icon: "ep:collection" },
               //},
-              {
-                path: "organization",
-                name: "Organization",
-                component: () => import("@/views/tissue/organization/index.vue"),
-                meta: { title: "组织管理", icon: "ep:collection" },
-              },
+              // {
+              // path: "organization",
+              // name: "Organization",
+              // component: () => import("@/views/tissue/organization/index.vue"),
+              // meta: { title: "组织管理", icon: "ep:collection" },
+              // },
               {
                 path: "position",
                 name: "Position",

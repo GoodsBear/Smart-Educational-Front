@@ -9,7 +9,12 @@
               <el-input v-model="queryParams.StaffName" placeholder="请输入" clearable />
             </el-form-item>
             <el-form-item label="状态">
-              <el-select v-model="queryParams.Status" placeholder="请选择状态" clearable class="status-select">
+              <el-select
+                v-model="queryParams.Status"
+                placeholder="请选择状态"
+                clearable
+                class="status-select"
+              >
                 <el-option label="在职" :value="1" />
                 <el-option label="离职" :value="0" />
               </el-select>
@@ -37,10 +42,20 @@
     <!-- 信息列表 Card -->
     <el-card class="table-card" shadow="never">
       <!-- 员工列表 -->
-      <el-table ref="tableRef" v-loading="loading" :data="staffList" style="width: 100%" @selection-change="ToAll">
+      <el-table
+        ref="tableRef"
+        v-loading="loading"
+        :data="staffList"
+        style="width: 100%"
+        @selection-change="ToAll"
+      >
         <el-table-column type="selection" width="50" />
         <template v-for="col in allColumns" :key="col.prop">
-          <el-table-column v-if="checkedProps.includes(col.prop)" :prop="col.prop" :label="col.label">
+          <el-table-column
+            v-if="checkedProps.includes(col.prop)"
+            :prop="col.prop"
+            :label="col.label"
+          >
             <template v-if="col.prop === 'staffName'" #default="{ row }">
               <el-link @click="goToDetail(row)">{{ row.staffName }}</el-link>
             </template>
@@ -54,7 +69,7 @@
             </template>
           </el-table-column>
         </template>
-        <el-table-column label="操作">
+        <el-table-column label="操作" width="150">
           <template #default="{ row }">
             <el-button size="small" @click="showEditDialog(row)">编辑</el-button>
             <el-button size="small" @click="changePassword(row)">改密</el-button>
@@ -64,9 +79,15 @@
 
       <!-- 分页 -->
       <div class="pagination">
-        <el-pagination v-model:current-page="queryParams.PageIndex" v-model:page-size="queryParams.PageSize"
-          :page-sizes="[10, 20, 50, 100]" layout="total, sizes, prev, pager, next, jumper" :total="total"
-          @size-change="fetchStaffList" @current-change="fetchStaffList" />
+        <el-pagination
+          v-model:current-page="queryParams.PageIndex"
+          v-model:page-size="queryParams.PageSize"
+          :page-sizes="[10, 20, 50, 100]"
+          layout="total, sizes, prev, pager, next, jumper"
+          :total="total"
+          @size-change="fetchStaffList"
+          @current-change="fetchStaffList"
+        />
       </div>
     </el-card>
 
@@ -86,7 +107,13 @@
           <el-input v-model="addFormData.staffPassword" placeholder="请输入登录密码" />
         </el-form-item>
         <el-form-item label="所属机构" prop="organization">
-          <el-tree ref="treeRef" :data="data" show-checkbox node-key="id" @check-change="handleCheck" />
+          <el-tree
+            ref="treeRef"
+            :data="data"
+            show-checkbox
+            node-key="id"
+            @check-change="handleCheck"
+          />
         </el-form-item>
         <el-form-item label="所属职位" prop="positionId" required>
           <el-select v-model="addFormData.positionId" placeholder="请选择职位">
@@ -116,24 +143,49 @@
           </el-select>
         </el-form-item>
         <el-form-item label="生日" prop="birthday">
-          <el-date-picker v-model="addFormData.birthday" type="date" placeholder="请选择生日" style="width: 100%" />
+          <el-date-picker
+            v-model="addFormData.birthday"
+            type="date"
+            placeholder="请选择生日"
+            style="width: 100%"
+          />
         </el-form-item>
         <el-form-item label="毕业学校" prop="graduationSchool">
           <el-input v-model="addFormData.graduationSchool" placeholder="请输入毕业学校" />
         </el-form-item>
         <el-form-item label="入职日期" prop="entryDate">
-          <el-date-picker v-model="addFormData.entryDate" type="date" placeholder="请选择入职日期" style="width: 100%" />
+          <el-date-picker
+            v-model="addFormData.entryDate"
+            type="date"
+            placeholder="请选择入职日期"
+            style="width: 100%"
+          />
         </el-form-item>
         <el-form-item label="简介" prop="introduction">
-          <el-input v-model="addFormData.introduction" type="textarea" :rows="2" placeholder="请输入简介" />
+          <el-input
+            v-model="addFormData.introduction"
+            type="textarea"
+            :rows="2"
+            placeholder="请输入简介"
+          />
         </el-form-item>
         <el-form-item label="状态" prop="status">
-          <el-switch v-model="addFormData.status" :active-value="1" :inactive-value="0" active-text="在职"
-            inactive-text="离职" />
+          <el-switch
+            v-model="addFormData.status"
+            :active-value="1"
+            :inactive-value="0"
+            active-text="在职"
+            inactive-text="离职"
+          />
         </el-form-item>
         <el-form-item label="照片" prop="photoUrl">
-          <el-upload class="avatar-uploader" action="https://localhost:44375/api/upload/image" :show-file-list="false"
-            :on-success="handleAvatarSuccess" :before-upload="beforeAvatarUpload">
+          <el-upload
+            class="avatar-uploader"
+            action="https://localhost:44375/api/upload/image"
+            :show-file-list="false"
+            :on-success="handleAvatarSuccess"
+            :before-upload="beforeAvatarUpload"
+          >
             <img v-if="imageUrl" :src="imageUrl" class="avatar" />
             <el-icon v-else class="avatar-uploader-icon">
               <Plus />
@@ -161,7 +213,13 @@
           <el-input v-model="editFormData.staffAccount" placeholder="请输入登录账号" />
         </el-form-item>
         <el-form-item label="所属机构" prop="organization">
-          <el-tree ref="treeRef" :data="data" show-checkbox node-key="id" @check-change="handleCheck" />
+          <el-tree
+            ref="treeRef"
+            :data="data"
+            show-checkbox
+            node-key="id"
+            @check-change="handleCheck"
+          />
         </el-form-item>
         <el-form-item label="所属职位" prop="positionId" required>
           <el-select v-model="editFormData.positionId" placeholder="请选择职位">
@@ -191,24 +249,49 @@
           </el-select>
         </el-form-item>
         <el-form-item label="生日" prop="birthday">
-          <el-date-picker v-model="editFormData.birthday" type="date" placeholder="请选择生日" style="width: 100%" />
+          <el-date-picker
+            v-model="editFormData.birthday"
+            type="date"
+            placeholder="请选择生日"
+            style="width: 100%"
+          />
         </el-form-item>
         <el-form-item label="毕业学校" prop="graduationSchool">
           <el-input v-model="editFormData.graduationSchool" placeholder="请输入毕业学校" />
         </el-form-item>
         <el-form-item label="入职日期" prop="entryDate">
-          <el-date-picker v-model="editFormData.entryDate" type="date" placeholder="请选择入职日期" style="width: 100%" />
+          <el-date-picker
+            v-model="editFormData.entryDate"
+            type="date"
+            placeholder="请选择入职日期"
+            style="width: 100%"
+          />
         </el-form-item>
         <el-form-item label="简介" prop="introduction">
-          <el-input v-model="editFormData.introduction" type="textarea" :rows="2" placeholder="请输入简介" />
+          <el-input
+            v-model="editFormData.introduction"
+            type="textarea"
+            :rows="2"
+            placeholder="请输入简介"
+          />
         </el-form-item>
         <el-form-item label="状态" prop="status">
-          <el-switch v-model="editFormData.status" :active-value="1" :inactive-value="0" active-text="在职"
-            inactive-text="离职" />
+          <el-switch
+            v-model="editFormData.status"
+            :active-value="1"
+            :inactive-value="0"
+            active-text="在职"
+            inactive-text="离职"
+          />
         </el-form-item>
         <el-form-item label="照片" prop="photoUrl">
-          <el-upload class="avatar-uploader" action="https://localhost:44375/api/upload/image" :show-file-list="false"
-            :on-success="handleAvatarSuccess" :before-upload="beforeAvatarUpload">
+          <el-upload
+            class="avatar-uploader"
+            action="https://localhost:44375/api/upload/image"
+            :show-file-list="false"
+            :on-success="handleAvatarSuccess"
+            :before-upload="beforeAvatarUpload"
+          >
             <img v-if="imageUrl" :src="imageUrl" class="avatar" />
             <el-icon v-else class="avatar-uploader-icon">
               <Plus />
@@ -251,7 +334,12 @@
     </el-dialog>
 
     <el-dialog v-model="passwordDialogVisible" title="重置密码" width="400px">
-      <el-form ref="passwordFormRef" :model="passwordForm" :rules="passwordRules" label-width="100px">
+      <el-form
+        ref="passwordFormRef"
+        :model="passwordForm"
+        :rules="passwordRules"
+        label-width="100px"
+      >
         <el-form-item label="输入新密码:" prop="newPassword">
           <el-input v-model="passwordForm.newPassword" type="password" placeholder="请输入新密码" />
         </el-form-item>
@@ -266,8 +354,15 @@
     <el-dialog v-model="transferDialogVisible" title="转机构" width="500px">
       <div class="transfer-dialog-content">
         <p>请选择要转入的机构：</p>
-        <el-tree ref="transferTreeRef" :data="data" show-checkbox node-key="id" default-expand-all highlight-current
-          :props="{ label: 'label' }" />
+        <el-tree
+          ref="transferTreeRef"
+          :data="data"
+          show-checkbox
+          node-key="id"
+          default-expand-all
+          highlight-current
+          :props="{ label: 'label' }"
+        />
       </div>
       <template #footer>
         <span class="dialog-footer">
@@ -276,7 +371,6 @@
         </span>
       </template>
     </el-dialog>
-
   </div>
 </template>
 
@@ -553,7 +647,7 @@ const submitEditForm = async () => {
 
     // 获取树选中的节点
     const selectedNodes = treeRef.value?.getCheckedNodes();
-    console.log('编辑表单 - 选中的节点:', selectedNodes);
+    console.log("编辑表单 - 选中的节点:", selectedNodes);
 
     // 创建一个数组保存选中的机构名称
     const selectedOrgNames: string[] = [];
@@ -567,15 +661,15 @@ const submitEditForm = async () => {
       });
     }
 
-    console.log('编辑表单 - 选中的机构名称:', selectedOrgNames);
+    console.log("编辑表单 - 选中的机构名称:", selectedOrgNames);
 
     // 使用选中的机构名称作为organization值
     const params = {
       ...editFormData,
-      organization: selectedOrgNames.length > 0 ? selectedOrgNames.join(',') : '',
+      organization: selectedOrgNames.length > 0 ? selectedOrgNames.join(",") : "",
     };
 
-    console.log('编辑表单 - 提交数据:', params);
+    console.log("编辑表单 - 提交数据:", params);
 
     // staffId 单独传
     await StaffAPI.updateStaff(editFormData.id, params);
@@ -675,7 +769,7 @@ const handleCheck = () => {
   console.log("选中变化时获取：", keys || "ref 未绑定");
 };
 
-const getSelected = () => { };
+const getSelected = () => {};
 
 // 打开弹窗并设置状态
 const openStatusDialog = (type: any) => {
@@ -708,7 +802,7 @@ const submitStatus = () => {
 // 显示转机构对话框
 const showTransferDialog = () => {
   if (!Delarr.value || Delarr.value.length === 0) {
-    ElMessage.warning('请先选择要转机构的员工');
+    ElMessage.warning("请先选择要转机构的员工");
     return;
   }
 
@@ -723,13 +817,13 @@ const showTransferDialog = () => {
 // 提交转机构
 const submitTransfer = async () => {
   if (!transferTreeRef.value) {
-    ElMessage.warning('组件初始化失败');
+    ElMessage.warning("组件初始化失败");
     return;
   }
 
   const selectedNodes = transferTreeRef.value.getCheckedNodes();
   if (!selectedNodes || selectedNodes.length === 0) {
-    ElMessage.warning('请选择至少一个目标机构');
+    ElMessage.warning("请选择至少一个目标机构");
     return;
   }
 
@@ -738,12 +832,12 @@ const submitTransfer = async () => {
 
   try {
     await StaffAPI.staffOrganization(Delarr.value, organizationIds);
-    ElMessage.success('转机构操作成功');
+    ElMessage.success("转机构操作成功");
     transferDialogVisible.value = false;
     fetchStaffList(); // 刷新列表
   } catch (error) {
-    console.error('转机构操作失败:', error);
-    ElMessage.error('转机构操作失败');
+    console.error("转机构操作失败:", error);
+    ElMessage.error("转机构操作失败");
   }
 };
 
@@ -839,8 +933,6 @@ const resetEditForm = () => {
   });
   editFormRef.value?.resetFields();
 };
-
-
 </script>
 
 <style scoped>
