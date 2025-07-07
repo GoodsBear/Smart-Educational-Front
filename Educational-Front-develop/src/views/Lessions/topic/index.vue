@@ -18,13 +18,11 @@
           <el-select v-model="queryParams.teacher" placeholder="请输入讲师名称" style="width: 240px">
             <el-option v-for="item in staffList" :key="item.id" :label="item.staffName" :value="item.staffName" />
           </el-select>
-
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="handleQuery">查询</el-button>
           <el-button @click="resetQuery">重置</el-button>
         </el-form-item>
-
       </el-form>
       <!-- {{ Name }} 
       <TopicB v-model:Name="Name"></TopicB>
@@ -46,7 +44,6 @@
       </template>
 
       <el-table v-loading="loading" :data="topicList" @selection-change="handleSelectionChange">
-
         <el-table-column type="selection" width="55" align="center" />
         <el-table-column label="Logo" align="center" width="250" prop="logoPath">
           <template #default="scope">
@@ -198,7 +195,7 @@ watch(Name, (newVal, oldVal) => {
   queryParams.value.teacher = newVal;
   // 执行自定义逻辑（如调用 API、更新其他状态等）
 });
-// 查询参数
+// 查询参数queryParams
 const queryParams = ref({
   name: '',
   categoryId: '',
@@ -235,8 +232,6 @@ const loadCategories = async () => {
   try {
     const response = await getCategoryList()
     categoryOptions.value = response || []
-    debugger;
-
   } catch (error) {
     console.error('获取分类列表失败:', error)
   }
@@ -255,7 +250,7 @@ const loadstaff = async () => {
 const TopicDetail = async (id: any) => {
   try {
     const response = await getTopicDetail(id)
-    from.value = response || []
+    form.value = response || []
   } catch (error) {
     console.error('获取教职员工下拉列表失败:', error)
   }
@@ -496,7 +491,7 @@ const beforeAvatarUpload: UploadProps["beforeUpload"] = (rawFile) => {
 
 import Editor from '@tinymce/tinymce-vue'
 import { reactive } from 'vue';
-import TopicB from './topicB.vue'
+// import TopicB from './topicB.vue'
 
 const apiKey = 'c84dxh4zz5sav5fvpfj8ats9tqewf49axrzcpc6ftqzhep17' // 替换为你的 API 密钥
 

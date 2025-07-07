@@ -1,19 +1,19 @@
-import request from '@/utils/request'
+import request from "@/utils/request";
 
 /**
  * @description 添加科目
  * @param {object} data 科目信息
  */
 export function addSubject(data: {
-  subjectName: string
-  sortWeight: number
-  subjectDescription: string
+  subjectName: string;
+  sortWeight: number;
+  subjectDescription: string;
 }) {
   return request({
-    url: '/api/app/subject-serives/subject',
-    method: 'post',
+    url: "/api/app/subject-serives/subject",
+    method: "post",
     data,
-  })
+  });
 }
 
 /**
@@ -21,9 +21,9 @@ export function addSubject(data: {
  */
 export function getSubjectDropdown() {
   return request({
-    url: '/api/app/subject-serives/subject',
-    method: 'get',
-  })
+    url: "/api/app/subject-serives/subject",
+    method: "get",
+  });
 }
 
 /**
@@ -32,10 +32,10 @@ export function getSubjectDropdown() {
  */
 export function deleteSubjects(data: string[]) {
   return request({
-    url: '/api/app/subject-serives/subject-delete',
-    method: 'post',
+    url: "/api/app/subject-serives/subject-delete",
+    method: "post",
     data,
-  })
+  });
 }
 
 /**
@@ -45,8 +45,8 @@ export function deleteSubjects(data: string[]) {
 export function getSubjectById(id: string) {
   return request({
     url: `/api/app/subject-serives/${id}/one`,
-    method: 'get',
-  })
+    method: "get",
+  });
 }
 
 /**
@@ -54,15 +54,15 @@ export function getSubjectById(id: string) {
  * @param {object} params 查询参数
  */
 export function getSubjectList(params: {
-  SubjectName?: string
-  PageIndex: number
-  PageSize: number
+  SubjectName?: string;
+  PageIndex: number;
+  PageSize: number;
 }) {
   return request({
-    url: '/api/app/subject-serives',
-    method: 'get',
+    url: "/api/app/subject-serives",
+    method: "get",
     params,
-  })
+  });
 }
 
 /**
@@ -73,14 +73,14 @@ export function getSubjectList(params: {
 export function updateSubject(
   id: string,
   data: {
-    subjectName: string
-    sortWeight: number
-    subjectDescription: string
+    subjectName: string;
+    sortWeight: number;
+    subjectDescription: string;
   }
 ) {
   return request({
     url: `/api/app/subject-serives/${id}`,
-    method: 'put',
+    method: "put",
     data,
-  })
-} 
+  });
+}
