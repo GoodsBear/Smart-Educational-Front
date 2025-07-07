@@ -81,8 +81,8 @@
     </el-card>
 
     <!-- 添加或修改专题对话框 -->
-    <el-dialog :title="title" v-model="open" width="600px" destroy-on-close :close-on-click-modal="false">
-      <el-form ref="topicForm" :model="form" :rules="rules" label-width="100px" status-icon>
+    <el-dialog :title="title" v-model="open" width="600px" append-to-body>
+      <el-form ref="topicForm" :model="form" :rules="rules" label-width="100px">
         <el-form-item label="专题名称" prop="name">
           <el-input v-model="form.name" placeholder="请输入专题名称" />
         </el-form-item>
@@ -126,7 +126,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   createTopic,
@@ -135,9 +135,7 @@ import {
   getTopicDetail,
   batchDeleteTopic,
   getCategoryList
-} from '@/api/Lession/TopicManager/TopicManager'
-import { Picture, Plus } from '@element-plus/icons-vue'
-import { UploadImage } from '@/api/uoload/uoload.api'
+} from '@/api/Lessions/TopicManager'
 
 // 列表数据
 const topicList = ref([])
@@ -148,8 +146,6 @@ const open = ref(false)
 const multiple = ref(true)
 const selectedIdList = ref<string[]>([])
 const categoryOptions = ref([])
-const topicForm = ref()
-const logoImageUrl = ref('')
 
 // 查询参数
 const queryParams = ref({
@@ -227,7 +223,7 @@ const rules = {
 const loadCategories = async () => {
   try {
     const response = await getCategoryList()
-    categoryOptions.value = response.data || []
+    categoryOptions.value = response.data.data || []
   } catch (error) {
     console.error('获取分类列表失败:', error)
   }
@@ -254,7 +250,6 @@ const getList = () => {
 
 // 表单重置
 const reset = () => {
-  console.log('重置表单')
   form.value = {
     id: '',
     name: '',
@@ -292,87 +287,56 @@ const resetQuery = () => {
 
 // 新增按钮操作
 const handleAdd = () => {
-  console.log('点击新增按钮')
   reset()
   open.value = true
-  console.log('对话框状态设置为:', open.value)
   title.value = '添加专题'
 }
 
 // 修改按钮操作
 const handleUpdate = async (row: any) => {
-  try {
-    reset()
-    const response = await getTopicDetail(row.id)
-    form.value = response.data
-    // 设置logo预览
-    logoImageUrl.value = form.value.logoPath
-    open.value = true
-    title.value = '修改专题'
-  } catch (error: any) {
-    console.error('获取详情失败:', error.response?.data)
-    ElMessage.error(error.response?.data?.error?.message || '获取详情失败')
-  }
+  reset()
+  const response = await getTopicDetail(row.id)
+  form.value = response.data.data
+  open.value = true
+  title.value = '修改专题'
 }
 
 // 提交按钮
-const submitForm = async () => {
-  const formEl = topicForm.value
-  if (!formEl) return
-
-  try {
-    await formEl.validate()
-
-    if (form.value.id) {
-      // 修改
-      try {
-        await updateTopic(form.value.id, {
-          name: form.value.name,
-          categoryId: form.value.categoryId,
-          teacher: form.value.teacher,
-          logoPath: form.value.logoPath,
-          brief: form.value.brief,
-          details: form.value.details,
-          achievementDisplay: form.value.achievementDisplay,
-          concurrencyStamp: form.value.concurrencyStamp
-        })
-        ElMessage.success('修改成功')
-        open.value = false
-        getList()
-      } catch (error: any) {
-        console.error('修改失败:', error.response?.data)
-        ElMessage.error(error.response?.data?.error?.message || '修改失败')
-      }
-    } else {
-      // 新增
-      try {
-        await createTopic({
-          name: form.value.name,
-          categoryId: form.value.categoryId,
-          teacher: form.value.teacher,
-          logoPath: form.value.logoPath,
-          brief: form.value.brief,
-          details: form.value.details,
-          achievementDisplay: form.value.achievementDisplay
-        })
-        ElMessage.success('新增成功')
-        open.value = false
-        getList()
-      } catch (error: any) {
-        console.error('新增失败:', error.response?.data)
-        ElMessage.error(error.response?.data?.error?.message || '新增失败')
-      }
-    }
-  } catch (error) {
-    console.error('表单验证失败:', error)
-    ElMessage.warning('请填写必填项')
-    return false
+const submitForm = () => {
+  if (form.value.id) {
+    updateTopic(form.value.id, {
+      name: form.value.name,
+      categoryId: form.value.categoryId,
+      teacher: form.value.teacher,
+      logoPath: form.value.logoPath,
+      brief: form.value.brief,
+      details: form.value.details,
+      achievementDisplay: form.value.achievementDisplay,
+      concurrencyStamp: form.value.concurrencyStamp
+    }).then(() => {
+      ElMessage.success('修改成功')
+      open.value = false
+      getList()
+    })
+  } else {
+    createTopic({
+      name: form.value.name,
+      categoryId: form.value.categoryId,
+      teacher: form.value.teacher,
+      logoPath: form.value.logoPath,
+      brief: form.value.brief,
+      details: form.value.details,
+      achievementDisplay: form.value.achievementDisplay
+    }).then(() => {
+      ElMessage.success('新增成功')
+      open.value = false
+      getList()
+    })
   }
 }
 
 // 取消按钮
 const cancel = () => {
-  console.log('点击取消按钮')
   open.value = false
   reset()
 }
@@ -426,13 +390,7 @@ const formatDateTime = (dateTimeStr: string) => {
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
 }
 
-// 监听对话框状态
-watch(() => open.value, (newVal) => {
-  console.log('对话框状态变化:', newVal)
-})
-
 onMounted(() => {
-  console.log('组件已挂载')
   loadCategories()
   getList()
 })

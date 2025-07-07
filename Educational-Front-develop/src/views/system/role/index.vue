@@ -4,7 +4,12 @@
     <div class="search-container">
       <el-form ref="queryFormRef" :model="queryParams" :inline="true">
         <el-form-item prop="roleName" label="角色名称">
-          <el-input v-model="queryParams.roleName" placeholder="请输入角色名称" clearable @keyup.enter="handleQuery" />
+          <el-input
+            v-model="queryParams.roleName"
+            placeholder="请输入角色名称"
+            clearable
+            @keyup.enter="handleQuery"
+          />
         </el-form-item>
         <el-form-item class="search-buttons">
           <el-button type="primary" :icon="Search" @click="handleQuery">搜索</el-button>
@@ -18,7 +23,12 @@
       <div class="data-table__toolbar">
         <div class="data-table__toolbar--actions">
           <el-button type="success" :icon="Plus" @click="handleAdd">新增</el-button>
-          <el-button type="danger" :disabled="selectedRoles.length === 0" :icon="Delete" @click="handleBatchDelete">
+          <el-button
+            type="danger"
+            :disabled="selectedRoles.length === 0"
+            :icon="Delete"
+            @click="handleBatchDelete"
+          >
             删除
           </el-button>
         </div>
@@ -43,8 +53,12 @@
 
       <!-- 分页 -->
       <div class="pagination-container">
-        <Pagination v-model:total="total" v-model:page="queryParams.pageIndex" v-model:limit="queryParams.pageSize"
-          @pagination="handlePagination" />
+        <pagination
+          v-model:total="total"
+          v-model:page="queryParams.pageIndex"
+          v-model:limit="queryParams.pageSize"
+          @pagination="handlePagination"
+        />
         <div class="pagination-info">
           共 {{ total }} 条 第{{ queryParams.pageIndex }}页/{{ totalPage }}页
         </div>
@@ -52,13 +66,29 @@
     </el-card>
 
     <!-- 添加/修改角色对话框 -->
-    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="500px" append-to-body @closed="resetForm">
-      <el-form ref="roleFormRef" :model="roleForm" :rules="rules" label-width="100px">
+    <el-dialog
+      v-model="dialogVisible"
+      :title="dialogTitle"
+      width="500px"
+      append-to-body
+      @closed="resetForm"
+    >
+      <el-form
+        ref="roleFormRef"
+        :model="roleForm"
+        :rules="rules"
+        label-width="100px"
+      >
         <el-form-item label="角色名称" prop="roleName">
           <el-input v-model="roleForm.roleName" placeholder="请输入角色名称" />
         </el-form-item>
         <el-form-item label="角色描述" prop="roleDesc">
-          <el-input v-model="roleForm.roleDesc" type="textarea" placeholder="请输入角色描述" :rows="3" />
+          <el-input
+            v-model="roleForm.roleDesc"
+            type="textarea"
+            placeholder="请输入角色描述"
+            :rows="3"
+          />
         </el-form-item>
       </el-form>
       <template #footer>

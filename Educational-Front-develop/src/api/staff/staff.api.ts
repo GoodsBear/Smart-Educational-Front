@@ -39,9 +39,8 @@ const StaffAPI = {
    */
   deleteStaff(ids: string) {
     return request({
-      url: `${STAFF_BASE_URL}/staff/`,
+      url: `${STAFF_BASE_URL}/staff/${ids}`,
       method: "delete",
-      params: ids,
     });
   },
 
@@ -132,9 +131,9 @@ export interface StaffFormData {
   status: number;
   education: string;
   birthday: string; // ISO日期格式
-  graduationSchool: string;
+  graduationschool: string;
   introduction: string;
-  photoUrl: string;
+  photour1: string;
 }
 
 /** 员工列表项 */

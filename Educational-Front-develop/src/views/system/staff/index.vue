@@ -192,6 +192,7 @@
             </el-icon>
           </el-upload>
         </el-form-item>
+        <!-- 其他表单字段... -->
       </el-form>
       <template #footer>
         <span class="dialog-footer">
@@ -375,10 +376,9 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive, onMounted, nextTick } from "vue";
+import { ref, reactive, onMounted } from "vue";
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from "element-plus";
 import StaffAPI from "@/api/staff/staff.api"; // 导入您封装的API方法
-import { getOrganizationTree } from "@/api/organization/organization.api";
 import moment from "moment";
 import { Plus } from "@element-plus/icons-vue";
 import type { UploadProps } from "element-plus";
@@ -403,9 +403,9 @@ interface StaffFormData {
   entryDate: string;
   education: string;
   birthday: string;
-  graduationSchool: string;
+  graduationschool: string;
   introduction: string;
-  photoUrl: string;
+  photour1: string;
   [key: string]: any;
 }
 
@@ -464,9 +464,9 @@ const addFormData = reactive<StaffFormData>({
   entryDate: "",
   education: "",
   birthday: "",
-  graduationSchool: "",
+  graduationschool: "",
   introduction: "",
-  photoUrl: "",
+  photour1: "",
 });
 
 // 编辑表单
@@ -506,17 +506,11 @@ const addRules = reactive<FormRules<StaffFormData>>({
     { required: true, message: "请输入手机号", trigger: "blur" },
     { pattern: /^1[3-9]\d{9}$/, message: "手机号格式不正确", trigger: "blur" },
   ],
-  positionId: [{ required: true, message: "请选择职位", trigger: "change" }],
-  staffGender: [{ required: true, message: "请选择性别", trigger: "change" }],
-  education: [{ required: true, message: "请选择学历", trigger: "change" }],
-  birthday: [{ required: true, message: "请选择生日", trigger: "change" }],
-  graduationSchool: [{ required: true, message: "请输入毕业学校", trigger: "blur" }],
-  entryDate: [{ required: true, message: "请选择入职日期", trigger: "change" }],
-  introduction: [
-    { required: true, message: "请输入简介", trigger: "blur" },
-    { min: 2, max: 200, message: "简介长度在 2 到 200 个字符", trigger: "blur" },
-  ],
-  photoUrl: [{ required: true, message: "请上传照片", trigger: "change" }],
+});
+
+// 生命周期钩子
+onMounted(() => {
+  fetchStaffList();
 });
 
 const editRules = reactive<FormRules<StaffFormData>>({
@@ -682,14 +676,6 @@ const submitEditForm = async () => {
   }
 };
 
-const Delarr = ref([]);
-
-const ToAll = (selection: any) => {
-  console.log(selection);
-  Delarr.value = selection.map((item: any) => item.id);
-  console.log(Delarr.value);
-};
-
 // 删除员工
 const handleDelete = async () => {
   const selection = tableRef.value.getSelectionRows() as StaffFormData[]; // 明确类型
@@ -697,15 +683,13 @@ const handleDelete = async () => {
     ElMessage.warning("请先选择要删除的员工");
     return;
   }
-  const params = {
-    ids: Delarr.value,
-  };
+  const ids = selection.map((item: StaffFormData) => item.id).join(",");
   ElMessageBox.confirm("确定要删除选中的员工吗?", "提示", {
     confirmButtonText: "确定",
     cancelButtonText: "取消",
     type: "warning",
   }).then(async () => {
-    await StaffAPI.deleteStaff(params);
+    await StaffAPI.deleteStaff(ids);
     ElMessage.success("删除成功");
     fetchStaffList();
   });
