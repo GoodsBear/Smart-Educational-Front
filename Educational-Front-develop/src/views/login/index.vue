@@ -12,13 +12,8 @@
       <div class="login-right">
         <div class="login-container">
           <h2 class="login-welcome">欢迎使用</h2>
-          <el-form
-            ref="loginFormRef"
-            :model="loginFormData"
-            :rules="loginRules"
-            size="large"
-            :validate-on-rule-change="false"
-          >
+          <el-form ref="loginFormRef" :model="loginFormData" :rules="loginRules" size="large"
+            :validate-on-rule-change="false">
             <!-- 用户名 -->
             <el-form-item prop="StaffAccount">
               <el-input v-model="loginFormData.StaffAccount" :placeholder="t('login.username')">
@@ -33,14 +28,8 @@
             <!-- 密码 -->
             <el-tooltip :visible="isCapsLock" :content="t('login.capsLock')" placement="right">
               <el-form-item prop="StaffPassword">
-                <el-input
-                  v-model.trim="loginFormData.StaffPassword"
-                  :placeholder="t('login.password')"
-                  type="password"
-                  show-password
-                  @keyup="checkCapsLock"
-                  @keyup.enter="handleLoginSubmit"
-                >
+                <el-input v-model.trim="loginFormData.StaffPassword" :placeholder="t('login.password')" type="password"
+                  show-password @keyup="checkCapsLock" @keyup.enter="handleLoginSubmit">
                   <template #prefix>
                     <el-icon>
                       <Lock />
@@ -51,27 +40,16 @@
             </el-tooltip>
 
             <el-form-item>
-              <el-input
-                v-model="loginFormData.CaptchaCode"
-                placeholder="请输入验证码"
-                style="width: 120px"
-              />
+              <el-input v-model="loginFormData.CaptchaCode" placeholder="请输入验证码" style="width: 120px" />
               <template v-if="!captchaImgUrl">
-                <el-button
-                  :disabled="!loginFormData.StaffAccount || captchaLoading"
-                  style="margin-left: 8px"
-                  @click="getCaptchaImg"
-                >
+                <el-button :disabled="!loginFormData.StaffAccount || captchaLoading" style="margin-left: 8px"
+                  @click="getCaptchaImg">
                   获取验证码
                 </el-button>
               </template>
               <template v-else>
-                <img
-                  :src="captchaImgUrl"
-                  style="height: 32px; margin-left: 8px; cursor: pointer"
-                  title="点击刷新验证码"
-                  @click="getCaptchaImg"
-                />
+                <img :src="captchaImgUrl" style="height: 32px; margin-left: 8px; cursor: pointer" title="点击刷新验证码"
+                  @click="getCaptchaImg" />
               </template>
             </el-form-item>
 
@@ -108,12 +86,7 @@
 
             <!-- 登录按钮 -->
             <el-form-item>
-              <el-button
-                :loading="loading"
-                type="primary"
-                class="w-full"
-                @click="handleLoginSubmit"
-              >
+              <el-button :loading="loading" type="primary" class="w-full" @click="handleLoginSubmit">
                 {{ t("login.login") }}
               </el-button>
             </el-form-item>
@@ -141,7 +114,8 @@ import { ref, watch, reactive } from "vue";
 import MyUserAPI from "@/api/myuser.api";
 import logo from "@/assets/icons/b_ecd07cbf1b39cf913b555c732b89b120.jpg";
 import illustration from "@/assets/icons/65A3D8E6A127C519E4752FFFCBD6E5D9.gif";
-
+import { useStore } from "@/store/pinia/user.pinia"
+const userinfo = useStore();
 const { t } = useI18n();
 
 // 获取路由实例
@@ -214,9 +188,7 @@ async function handleLoginSubmit() {
     // 1. 表单验证
     const valid = await loginFormRef.value?.validate();
     if (!valid) return;
-
     loading.value = true;
-
     // 2. 调用登录API
     const userStore = useUserStore();
     console.log("提交数据", loginFormData);
@@ -224,7 +196,8 @@ async function handleLoginSubmit() {
 
     // 3. 登录成功
     ElMessage.success(t("login.loginSuccess"));
-
+    userinfo.userinfo.token = userStore.token;
+    userinfo.userinfo.staffid = userStore.userInfo.userId;
     // 4. 获取重定向地址或默认跳转到仪表盘
     //const redirect = route.query.redirect?.toString() || '/dashboard';
     await router.replace({ path: "/dashboard" });
@@ -331,21 +304,25 @@ body {
   justify-content: center;
   align-items: center;
   padding-left: 8vw;
+
   .login-logo {
     width: 80px;
     margin-bottom: 24px;
   }
+
   .login-title {
     font-size: 2.2rem;
     font-weight: bold;
     color: #222;
     margin-bottom: 8px;
   }
+
   .login-desc {
     font-size: 1.1rem;
     color: #666;
     margin-bottom: 32px;
   }
+
   .login-illustration {
     width: 380px;
     max-width: 90%;
@@ -370,12 +347,14 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+
   .login-welcome {
     text-align: center;
     margin-bottom: 24px;
     font-weight: 600;
     font-size: 1.5rem;
   }
+
   .login-tips {
     margin-top: 18px;
     color: #888;

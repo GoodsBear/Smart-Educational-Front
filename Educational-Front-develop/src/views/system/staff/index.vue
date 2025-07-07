@@ -464,7 +464,7 @@ const fetchStaffList = async () => {
     const response = await StaffAPI.getList(params);
     console.log("接口返回", response);
     staffList.value = response.data;
-    total.value = response.total;
+    total.value = response.totleCount;
   } catch (error) {
     ElMessage.error("获取员工列表失败");
   } finally {

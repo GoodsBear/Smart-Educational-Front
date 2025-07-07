@@ -12,22 +12,13 @@
         </el-form-item>
         <el-form-item label="所属机构">
           <el-select v-model="queryParams.orgaizationId" placeholder="请选择机构" style="width:200px" clearable>
-            <el-option 
-              v-for="item in orgList" 
-              :key="item.id" 
-              :label="item.name" 
-              :value="item.id" 
-            />
+            <el-option v-for="item in orgList" :key="item.id" :label="item.name" :value="item.id" />
           </el-select>
         </el-form-item>
         <el-form-item label="所属年级">
           <el-select v-model="queryParams.gradeId" placeholder="请选择年级" style="width:200px" clearable>
-            <el-option 
-              v-for="item in gradeList" 
-              :key="item.id || item.gradeId" 
-              :label="item.gradeName || item.name" 
-              :value="item.id || item.gradeId" 
-            />
+            <el-option v-for="item in gradeList" :key="item.id || item.gradeId" :label="item.gradeName || item.name"
+              :value="item.id || item.gradeId" />
           </el-select>
         </el-form-item>
         <el-form-item>
@@ -43,18 +34,13 @@
       <div class="card-header">
         <span>结业学员列表</span>
         <div class="button-group">
-          <el-button type="success" @click="handleToOnline" :disabled="!selectedIds.length">转为在线学员</el-button>
+          <el-button type="success" :disabled="!selectedIds.length" @click="handleToOnline">转为在线学员</el-button>
           <el-button type="primary" @click="handleAdd">新增</el-button>
         </div>
       </div>
       <!-- 表格区域 -->
-      <el-table 
-        v-loading="loading" 
-        :data="studentList" 
-        border 
-        style="width: 100%"
-        @selection-change="handleSelectionChange"
-      >
+      <el-table v-loading="loading" :data="studentList" border style="width: 100%"
+        @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="55" align="center" />
         <el-table-column label="编号" type="index" width="60" align="center" />
         <el-table-column label="学员姓名" prop="name" align="center" />
@@ -85,16 +71,9 @@
       </el-table>
 
       <!-- 分页区域 -->
-      <el-pagination
-        v-model:current-page="queryParams.pageIndex"
-        v-model:page-size="queryParams.pageSize"
-        :total="total"
-        :page-sizes="[10, 20, 30, 50]"
-        layout="total, sizes, prev, pager, next, jumper"
-        class="pagination"
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-      />
+      <el-pagination v-model:current-page="queryParams.pageIndex" v-model:page-size="queryParams.pageSize"
+        :total="total" :page-sizes="[10, 20, 30, 50]" layout="total, sizes, prev, pager, next, jumper"
+        class="pagination" @size-change="handleSizeChange" @current-change="handleCurrentChange" />
     </el-card>
   </div>
 </template>
@@ -103,10 +82,9 @@
 import { ref, onMounted, reactive } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import studentApi from '@/api/StudentsManager/Student/Student'
-import { formatDate } from '@/utils/date'
 import { useRouter } from 'vue-router'
 
-const router = useRouter()
+const router = useRouter();
 
 // 查询参数
 const queryParams = reactive({
@@ -153,7 +131,7 @@ const getStudentList = async () => {
     loading.value = true
     const res = await studentApi.getFinishStudents(queryParams)
     console.log('结业学员数据:', res)
-    
+
     if (res) {
       studentList.value = res.data
       total.value = res.totleCount || 0
@@ -176,7 +154,7 @@ const getOrganizationList = async () => {
   try {
     const res = await studentApi.getOrganizationList()
     console.log('机构数据:', res)
-    
+
     // 直接将返回结果赋值给orgList
     orgList.value = res
     console.log('机构列表:', orgList.value)
@@ -191,7 +169,7 @@ const getGradeList = async () => {
   try {
     const res = await studentApi.getGradeList()
     console.log('年级数据:', res)
-    
+
     // 直接将返回结果赋值给gradeList
     gradeList.value = res
     console.log('年级列表:', gradeList.value)
@@ -322,7 +300,7 @@ const handleToOnline = () => {
       console.error('转换失败:', error)
       ElMessage.error('转换失败')
     }
-  }).catch(() => {})
+  }).catch(() => { })
 }
 
 // 页面加载时获取列表

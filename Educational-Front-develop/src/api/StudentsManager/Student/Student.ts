@@ -65,7 +65,13 @@ const api = {
       params: { guid }
     })
   },
-
+  // 学员下拉框
+  SelectStudent() {
+    return request({
+      url: '/api/app/student-services/student',
+      method: 'get',
+    })
+  },
   // 更新学员信息
   updateStudent(guid: string, data: StudentInfo) {
     return request({
