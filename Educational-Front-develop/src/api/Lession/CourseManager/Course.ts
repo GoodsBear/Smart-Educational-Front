@@ -27,7 +27,7 @@ export function addCourse(data: {
   isOpenRecommend: boolean,
   classQrCode: string,
   stockNum: number,
-  stopSaleDate: string,
+  stopSaleDate: Date,
   detailImageList: string[],
   teacherRemark: string,
   serviceRemark: string

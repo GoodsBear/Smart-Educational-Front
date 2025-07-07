@@ -28,7 +28,7 @@
             </el-form-item>
             <el-form-item label="适用年级">
               <el-select v-model="queryParams.GradeId" placeholder="请选择年级" style="width: 150px;" clearable>
-                <el-option label="Zone two" value="beijing" />
+                <el-option v-for="item in GradeList" :key="item.id" :label="item.gradeName" :value="item.id" />
               </el-select>
             </el-form-item>
 
@@ -92,7 +92,7 @@
       </el-table>
 
       <div class="pagination-container">
-        <el-pagination v-model:current-page="queryParams.PageIndex" v-model:page-size="queryParams.PageSize"
+        <el-pagination v-model:current-page="queryParams.PageIndex"  v-model:page-size="queryParams.PageSize"
           :total="total" :page-sizes="[10, 20, 30, 50]" layout="total, sizes, prev, pager, next, jumper"
           @size-change="handleSizeChange" @current-change="handleCurrentChange" />
       </div>
@@ -101,8 +101,7 @@
 
   <!-- 新增课程抽屉 -->
 
-  <el-drawer v-model="drawer" close-on-press-escape size="850" :with-header="false">
-    <h2 style="background-color: #48c;">&emsp;{{ title }}</h2>
+  <el-drawer v-model="drawer" close-on-press-escape size="850" :title="title" :with-header="true">
     <el-form ref="ruleFormRef" :model="courseForm" :rules="rules" label-width="auto">
       <!-- 基本信息 -->
       <el-form-item label="课程名称" prop="courseName">
@@ -160,7 +159,7 @@
           </el-form-item>
         </el-col>
         <el-col :span="12">
-          <!-- 留空 -->
+         
         </el-col>
       </el-row>
       <el-row>
