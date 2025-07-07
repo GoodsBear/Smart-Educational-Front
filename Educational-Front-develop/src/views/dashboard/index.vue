@@ -156,7 +156,7 @@
     </el-row>
 
     <!-- 用户列表卡片 -->
-    <el-card shadow="never" class="mt-5">
+    <!-- <el-card shadow="never" class="mt-5">
       <template #header>
         <div class="flex justify-between items-center">
           <span>用户列表</span>
@@ -183,7 +183,7 @@
           </template>
         </el-table-column>
       </el-table>
-    </el-card>
+    </el-card> -->
   </div>
 </template>
 
@@ -230,12 +230,12 @@ const userList = ref([
 ]);
 
 // 处理编辑
-const handleEdit = (row) => {
+const handleEdit = (row: any) => {
   ElMessage.success(`编辑用户: ${row.name}`);
 };
 
 // 处理删除
-const handleDelete = (row) => {
+const handleDelete = (row: any) => {
   ElMessage.warning(`删除用户: ${row.name}`);
 };
 </script>
