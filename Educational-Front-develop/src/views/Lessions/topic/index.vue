@@ -72,14 +72,13 @@
         </el-table-column>
         <el-table-column label="创建时间" align="center" prop="creationTime" width="180">
           <template #default="scope">
-            {{ formatDateTime(scope.row.creationTime).substring(0, 10) }}
-            {{ formatDateTime(scope.row.creationTime).substring(11, 19) }} </template>
+            {{ moment(scope.row.creationTime).format("YYYY-MM-DD HH:mm:ss") }}
+          </template>
         </el-table-column>
 
         <el-table-column label="修改时间" align="center" prop="lastModificationTime" width="180">
           <template #default="scope">
-            {{ formatDateTime(scope.row.lastModificationTime).substring(0, 10) }}
-            {{ formatDateTime(scope.row.lastModificationTime).substring(11, 19) }}
+            {{ moment(scope.row.lastModificationTime).format("YYYY-MM-DD HH:mm:ss") }}
           </template>
         </el-table-column>
         <!-- <el-table-column label="修改时间" align="center" prop="lastModificationTime" width="180">
@@ -168,6 +167,7 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import moment from 'moment'
 import {
   createTopic,
   getTopicList,
@@ -189,8 +189,16 @@ const title = ref('')
 const open = ref(false)
 const multiple = ref(true)
 const selectedIdList = ref<string[]>([])
-const categoryOptions = ref([])
-const staffList = ref([])
+const categoryOptions = ref([{
+  id: "",
+  categoryName: ""
+}])
+const staffList = ref([
+  {
+    id: "",
+    staffName: ""
+  }
+])
 const topicForm = ref()
 const Name = ref<string>("");
 watch(Name, (newVal, oldVal) => {
@@ -255,7 +263,7 @@ const loadstaff = async () => {
 const TopicDetail = async (id: any) => {
   try {
     const response = await getTopicDetail(id)
-    from.value = response || []
+    form.value = response || []
   } catch (error) {
     console.error('获取教职员工下拉列表失败:', error)
   }
@@ -516,15 +524,15 @@ const TinyMCE_option = reactive({
   // 语言
   language: 'zh_CN',
   // 自定义功能键
-  setup: (editor) => {
-    const toDateHtml = (date) => `<time datetime="${date.toString()}">${date.toDateString()}</time>`;
+  setup: (editor: any) => {
+    const toDateHtml = (date: any) => `<time datetime="${date.toString()}">${date.toDateString()}</time>`;
     editor.ui.registry.addButton('selectiveDateButton', {
       icon: 'insert-time',
       tooltip: '插入当前时间',
-      onAction: (_) => editor.insertContent(toDateHtml(new Date()))
+      onAction: () => editor.insertContent(toDateHtml(new Date()))
     });
     // 内容存入v-model前的处理
-    editor.on('SaveContent', (e) => {
+    editor.on('SaveContent', (e: any) => {
       // 示例：移除所有script标签，防止XSS攻击
       e.content = e.content.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
       // 示例：将所有段落的class添加统一前缀
