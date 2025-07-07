@@ -13,13 +13,12 @@
           </el-select>
         </el-form-item>
         <el-form-item label="讲师" prop="teacher">
-
-          <el-input v-model="queryParams.teacher" placeholder="请输入讲师名称" clearable style="width: 240px;" />
-
-          <!-- <el-select v-model="queryParams.teacher" placeholder="请输入讲师名称" style="width: 240px">
-          
+          <!-- <el-input v-model="queryParams.teacher" placeholder="请输入讲师名称" clearable style="width: 240px;"
+            @click="ShowTopicB == true" /> -->
+          <el-select v-model="queryParams.teacher" placeholder="请输入讲师名称" style="width: 240px">
+            <el-option v-for="item in staffList" :key="item.id" :label="item.staffName" :value="item.staffName" />
           </el-select>
-            <el-option v-for="item in staffList" :key="item.id" :label="item.staffName" :value="item.staffName" /> -->
+
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="handleQuery">查询</el-button>
@@ -28,10 +27,10 @@
 
       </el-form>
       <!-- {{ Name }} 
-      <TopicB v-model:Name="Name"></TopicB>-->
-      <div>
+      <TopicB v-model:Name="Name"></TopicB>
+      <div :class="ShowTopicB">
         <TopicB v-model:Name="Name"></TopicB>
-      </div>
+      </div>-->
     </el-card>
 
     <el-card shadow="never">
@@ -49,20 +48,38 @@
       <el-table v-loading="loading" :data="topicList" @selection-change="handleSelectionChange">
 
         <el-table-column type="selection" width="55" align="center" />
-        <el-table-column label="Logo" align="center" prop="logoPath">
+        <el-table-column label="Logo" align="center" width="250" prop="logoPath">
           <template #default="scope">
-            <img :src="scope.row.logoPath" class="avatar" />
+            <img :src="scope.row.logoPath" class="avatar" default: />
           </template>
         </el-table-column><el-table-column label="专题名称" align="center" prop="name" />
         <el-table-column label="分类名称" align="center" prop="categoryName" />
         <el-table-column label="讲师" align="center" prop="teacher" />
-
-        <el-table-column label="简介" align="center" prop="brief" />
-        <el-table-column label="详情" align="center" prop="details" />
-        <el-table-column label="成就展示" align="center" prop="achievementDisplay" />
+        <el-table-column label="简介" align="center" prop="brief">
+          <template #default="scope">
+            <div v-html="scope.row.brief"></div>
+          </template>
+        </el-table-column>
+        <el-table-column label="详情" align="center" prop="details">
+          <template #default="scope">
+            <div v-html="scope.row.details"></div>
+          </template>
+        </el-table-column>
+        <el-table-column label="成就展示" align="center" prop="achievementDisplay">
+          <template #default="scope">
+            <div v-html="scope.row.achievementDisplay"></div>
+          </template>
+        </el-table-column>
         <el-table-column label="创建时间" align="center" prop="creationTime" width="180">
           <template #default="scope">
-            {{ formatDateTime(scope.row.creationTime) }}
+            {{ formatDateTime(scope.row.creationTime).substring(0, 10) }}
+            {{ formatDateTime(scope.row.creationTime).substring(11, 19) }} </template>
+        </el-table-column>
+
+        <el-table-column label="修改时间" align="center" prop="lastModificationTime" width="180">
+          <template #default="scope">
+            {{ formatDateTime(scope.row.lastModificationTime).substring(0, 10) }}
+            {{ formatDateTime(scope.row.lastModificationTime).substring(11, 19) }}
           </template>
         </el-table-column>
         <!-- <el-table-column label="修改时间" align="center" prop="lastModificationTime" width="180">
@@ -85,7 +102,10 @@
       <pagination v-if="total > 0" v-model:page="queryParams.pageIndex" v-model:limit="queryParams.pageSize"
         :total="total" @pagination="getList" />
     </el-card>
-
+    <!-- 下拉组件 -->
+    <!-- <el-dialog v-model="ShowTopicB" :title="title" width="600px" destroy-on-close :close-on-click-modal="false">
+      <TopicB v-model:Name="Name"></TopicB>
+    </el-dialog> -->
     <!-- 添加或修改专题对话框 -->
     <el-dialog v-model="open" :title="title" width="600px" destroy-on-close :close-on-click-modal="false">
       <el-form ref="topicForm" :model="form" :rules="rules" label-width="100px" status-icon>
@@ -104,8 +124,6 @@
             <el-option v-for="item in staffList" :key="item.id" :label="item.staffName" :value="item.staffName" />
           </el-select>
         </el-form-item>
-        <!-- <el-input v-model="form.logoPath" placeholder="请输入Logo路径" />
-        </el-form-item> -->
         <el-form-item label="Logo路径" prop="logoPath">
           <el-upload class="avatar-uploader" action="https://localhost:44375/api/upload/image" :show-file-list="false"
             :on-success="handleAvatarSuccess" :before-upload="beforeAvatarUpload">
@@ -119,7 +137,6 @@
           <!-- <el-input  type="textarea" :rows="3" placeholder="请输入简介" /> -->
           <div style="border: 1px solid #ccc">
             <Editor v-model="form.brief" :api-key="apiKey" :init="TinyMCE_option" />
-            <!-- <Editor v-model="form.brief" :api-key="apiKey" :init="TinyMCE_option" initial-value="Welcome to TinyMCE!" /> -->
           </div>
         </el-form-item>
         <el-form-item label="详情" prop="details">
@@ -189,7 +206,8 @@ const queryParams = ref({
   pageIndex: 1,
   pageSize: 10
 })
-
+//控制下拉讲师的
+const ShowTopicB = ref(false);
 // 表单参数
 const form = ref({
   id: '',
@@ -217,6 +235,8 @@ const loadCategories = async () => {
   try {
     const response = await getCategoryList()
     categoryOptions.value = response || []
+    debugger;
+
   } catch (error) {
     console.error('获取分类列表失败:', error)
   }
@@ -235,7 +255,7 @@ const loadstaff = async () => {
 const TopicDetail = async (id: any) => {
   try {
     const response = await getTopicDetail(id)
-    staffList.value = response || []
+    from.value = response || []
   } catch (error) {
     console.error('获取教职员工下拉列表失败:', error)
   }
@@ -325,7 +345,6 @@ const handleUpdate = async (row: any) => {
     ElMessage.error(error.response?.data?.error?.message || '获取详情失败')
   }
 }
-
 // 提交按钮
 const submitForm = async () => {
   const formEl = topicForm.value
@@ -504,6 +523,13 @@ const TinyMCE_option = reactive({
       tooltip: '插入当前时间',
       onAction: (_) => editor.insertContent(toDateHtml(new Date()))
     });
+    // 内容存入v-model前的处理
+    editor.on('SaveContent', (e) => {
+      // 示例：移除所有script标签，防止XSS攻击
+      e.content = e.content.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+      // 示例：将所有段落的class添加统一前缀
+      e.content = e.content.replace(/<p([^>]*)>/g, '<p class="custom-paragraph $1">');
+    });
   }
 })
 
@@ -518,25 +544,3 @@ const TinyMCE_option = reactive({
   margin-bottom: 8px;
 }
 </style>
-<!-- <style>
-.avatar-uploader .el-upload {
-  border: 1px dashed var(--el-border-color);
-  border-radius: 6px;
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-  transition: var(--el-transition-duration-fast);
-}
-
-.avatar-uploader .el-upload:hover {
-  border-color: var(--el-color-primary);
-}
-
-.el-icon.avatar-uploader-icon {
-  font-size: 40px;
-  color: #8c939d;
-  width: 246px;
-  height: 246px;
-  text-align: center;
-}
-</style> -->

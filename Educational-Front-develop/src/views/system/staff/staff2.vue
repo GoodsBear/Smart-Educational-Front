@@ -7,7 +7,6 @@
           <el-form-item label="姓名">
             <el-input v-model="queryParams.StaffName" placeholder="请输入" clearable />
           </el-form-item>
-
         </el-form>
         <div class="search-btns">
           <el-button type="primary" @click="handleSearch">搜索</el-button>
