@@ -12,7 +12,7 @@
             </el-form-item>
             <el-form-item label="适用学校">
               <el-select v-model="queryParams.CampusId" placeholder="请选择学校" style="width: 150px;" clearable>
-                <el-option label="Zone two" value="beijing" />
+                <el-option v-for="item in SchoolList" :key="item.id" :label="item.name" :value="item.id" />
               </el-select>
             </el-form-item>
             <el-form-item label="科目">
@@ -35,7 +35,7 @@
             <el-button type="primary" class="filter-item" @click="handleQuery">
               搜索
             </el-button>
-            <el-button class="filter-item" round @click="handleResetQuery">
+            <el-button size="small" class="filter-item" round @click="handleResetQuery">
               ✖
             </el-button>
           </el-form>
@@ -110,7 +110,7 @@
       </el-form-item>
       <el-form-item label="适用学校" prop="campusId">
         <el-select v-model="courseForm.campusId" placeholder="请选择学校">
-          <!-- 学校选项 -->
+          <el-option v-for="item in SchoolList" :key="item.id" :label="item.name" :value="item.id" />
         </el-select>
       </el-form-item>
       <el-row>
@@ -133,7 +133,7 @@
         <el-col :span="12">
           <el-form-item label="适用年级" prop="gradeId">
             <el-select v-model="courseForm.gradeId" placeholder="请选择年级">
-              <!-- 年级选项 -->
+              <el-option v-for="item in GradeList" :key="item.id" :label="item.gradeName" :value="item.id" />
             </el-select>
           </el-form-item>
         </el-col>
@@ -310,6 +310,7 @@ import type { FormInstance, FormRules } from 'element-plus'
 import { getSubjectDropdown } from '@/api/Lession/SubjectManager/Subject'
 import { getSpecialSubjectDropdown } from '@/api/Lession/TopicManager/TopicManager'
 import {getOrganizationDropdown} from '@/api/Organization/organrization'
+import {getGradeDropdown} from '@/api/Lession/ClassAndGrade/Grade'
 
 
 
@@ -576,8 +577,8 @@ const SchoolList = ref([{
   name: ''
 }])
 //学校选项
-const LoadSchool = () => {
-  const response = getOrganizationDropdown();
+const LoadSchool = async () => {
+  const response = await getOrganizationDropdown();
   console.log(response)
   SchoolList.value=response
 }
@@ -591,8 +592,16 @@ const LoadSubject = async () => {
   const response = await getSubjectDropdown()
   SubjectList.value = response
 }
+
 //年级选项
-const LoadGrade = () => {
+const GradeList = ref([{
+  id: '',
+  gradeName: ''
+}])
+//年级选项
+const LoadGrade = async () => {
+  const response = await getGradeDropdown()
+  GradeList.value = response
 
 }
 //专题下拉数据
@@ -619,6 +628,8 @@ onMounted(() => {
   LoadTopic()
   //校区选项
   LoadSchool()
+  //年级选项
+  LoadGrade()
 })
 </script>
 
