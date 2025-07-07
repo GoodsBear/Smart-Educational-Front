@@ -2,21 +2,35 @@
 <template>
   <div class="app-container">
     <el-card shadow="never" class="search-wrapper">
-      <el-form :model="queryParams" ref="queryForm" :inline="true">
+      <el-form ref="queryForm" :model="queryParams" :inline="true">
         <el-form-item label="专题名称" prop="name">
           <el-input v-model="queryParams.name" placeholder="请输入专题名称" clearable />
         </el-form-item>
         <el-form-item label="分类" prop="categoryId">
-          <el-input v-model="queryParams.categoryId" placeholder="请输入分类ID" clearable />
+          <!-- <el-input v-model="queryParams.categoryId" placeholder="请输入分类ID" clearable /> -->
+          <el-select v-model="queryParams.categoryId" placeholder="专题级别" style="width: 240px">
+            <el-option v-for="item in categoryOptions" :key="item.id" :label="item.categoryName" :value="item.id" />
+          </el-select>
         </el-form-item>
         <el-form-item label="讲师" prop="teacher">
-          <el-input v-model="queryParams.teacher" placeholder="请输入讲师名称" clearable />
+          <!-- <el-input v-model="queryParams.teacher" placeholder="请输入讲师名称" clearable style="width: 240px;"
+            @click="ShowTopicB == true" /> -->
+          <el-select v-model="queryParams.teacher" placeholder="请输入讲师名称" style="width: 240px">
+            <el-option v-for="item in staffList" :key="item.id" :label="item.staffName" :value="item.staffName" />
+          </el-select>
+
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="handleQuery">查询</el-button>
           <el-button @click="resetQuery">重置</el-button>
         </el-form-item>
+
       </el-form>
+      <!-- {{ Name }} 
+      <TopicB v-model:Name="Name"></TopicB>
+      <div :class="ShowTopicB">
+        <TopicB v-model:Name="Name"></TopicB>
+      </div>-->
     </el-card>
 
     <el-card shadow="never">
@@ -26,30 +40,53 @@
             <el-button type="primary" @click="handleAdd">新增</el-button>
           </el-col>
           <el-col :span="1.5">
-            <el-button type="danger" @click="handleBatchDelete" :disabled="multiple">批量删除</el-button>
+            <el-button type="danger" :disabled="multiple" @click="handleBatchDelete">批量删除</el-button>
           </el-col>
         </el-row>
       </template>
 
       <el-table v-loading="loading" :data="topicList" @selection-change="handleSelectionChange">
+
         <el-table-column type="selection" width="55" align="center" />
-        <el-table-column label="专题名称" align="center" prop="name" />
+        <el-table-column label="Logo" align="center" width="250" prop="logoPath">
+          <template #default="scope">
+            <img :src="scope.row.logoPath" class="avatar" default: />
+          </template>
+        </el-table-column><el-table-column label="专题名称" align="center" prop="name" />
         <el-table-column label="分类名称" align="center" prop="categoryName" />
         <el-table-column label="讲师" align="center" prop="teacher" />
-        <el-table-column label="Logo" align="center" prop="logoPath" />
-        <el-table-column label="简介" align="center" prop="brief" />
-        <el-table-column label="详情" align="center" prop="details" />
-        <el-table-column label="成就展示" align="center" prop="achievementDisplay" />
+        <el-table-column label="简介" align="center" prop="brief">
+          <template #default="scope">
+            <div v-html="scope.row.brief"></div>
+          </template>
+        </el-table-column>
+        <el-table-column label="详情" align="center" prop="details">
+          <template #default="scope">
+            <div v-html="scope.row.details"></div>
+          </template>
+        </el-table-column>
+        <el-table-column label="成就展示" align="center" prop="achievementDisplay">
+          <template #default="scope">
+            <div v-html="scope.row.achievementDisplay"></div>
+          </template>
+        </el-table-column>
         <el-table-column label="创建时间" align="center" prop="creationTime" width="180">
           <template #default="scope">
-            {{ formatDateTime(scope.row.creationTime) }}
-          </template>
+            {{ formatDateTime(scope.row.creationTime).substring(0, 10) }}
+            {{ formatDateTime(scope.row.creationTime).substring(11, 19) }} </template>
         </el-table-column>
+
         <el-table-column label="修改时间" align="center" prop="lastModificationTime" width="180">
           <template #default="scope">
-            {{ formatDateTime(scope.row.lastModificationTime) }}
+            {{ formatDateTime(scope.row.lastModificationTime).substring(0, 10) }}
+            {{ formatDateTime(scope.row.lastModificationTime).substring(11, 19) }}
           </template>
         </el-table-column>
+        <!-- <el-table-column label="修改时间" align="center" prop="lastModificationTime" width="180">
+          <template #default="scope">
+            {{ formatDateTime(scope.row.lastModificationTime) }}、
+          </template>
+        </el-table-column> -->
         <el-table-column label="操作" align="center" width="150">
           <template #default="scope">
             <el-button type="primary" link @click="handleUpdate(scope.row)">
@@ -62,45 +99,60 @@
         </el-table-column>
       </el-table>
 
-      <pagination v-if="total > 0" :total="total" v-model:page="queryParams.pageIndex"
-        v-model:limit="queryParams.pageSize" @pagination="getList" />
+      <pagination v-if="total > 0" v-model:page="queryParams.pageIndex" v-model:limit="queryParams.pageSize"
+        :total="total" @pagination="getList" />
     </el-card>
-
+    <!-- 下拉组件 -->
+    <!-- <el-dialog v-model="ShowTopicB" :title="title" width="600px" destroy-on-close :close-on-click-modal="false">
+      <TopicB v-model:Name="Name"></TopicB>
+    </el-dialog> -->
     <!-- 添加或修改专题对话框 -->
-    <el-dialog 
-      :title="title" 
-      v-model="open" 
-      width="600px" 
-      destroy-on-close
-      :close-on-click-modal="false"
-    >
-      <el-form 
-        ref="topicForm"
-        :model="form" 
-        :rules="rules" 
-        label-width="100px"
-        status-icon
-      >
+    <el-dialog v-model="open" :title="title" width="600px" destroy-on-close :close-on-click-modal="false">
+      <el-form ref="topicForm" :model="form" :rules="rules" label-width="100px" status-icon>
         <el-form-item label="专题名称" prop="name">
           <el-input v-model="form.name" placeholder="请输入专题名称" />
         </el-form-item>
         <el-form-item label="分类" prop="categoryId">
-          <el-input v-model="form.categoryId" placeholder="请输入分类ID" />
+          <!-- <el-input v-model="form.categoryId" placeholder="请输入分类ID" /> -->
+          <el-select v-model="form.categoryId" placeholder="请输入分类ID" style="width: 240px">
+            <el-option v-for="item in categoryOptions" :key="item.id" :label="item.categoryName" :value="item.id" />
+          </el-select>
         </el-form-item>
         <el-form-item label="讲师" prop="teacher">
-          <el-input v-model="form.teacher" placeholder="请输入讲师名称" />
+          <!-- <el-input v-model="form.teacher" placeholder="请输入讲师名称" /> -->
+          <el-select v-model="form.teacher" placeholder="请输入讲师名称" style="width: 240px">
+            <el-option v-for="item in staffList" :key="item.id" :label="item.staffName" :value="item.staffName" />
+          </el-select>
         </el-form-item>
         <el-form-item label="Logo路径" prop="logoPath">
-          <el-input v-model="form.logoPath" placeholder="请输入Logo路径" />
+          <el-upload class="avatar-uploader" action="https://localhost:44375/api/upload/image" :show-file-list="false"
+            :on-success="handleAvatarSuccess" :before-upload="beforeAvatarUpload">
+            <img v-if="form.logoPath" :src="form.logoPath" class="avatar" />
+            <el-icon v-else class="avatar-uploader-icon">
+              <Plus />
+            </el-icon>
+          </el-upload>
         </el-form-item>
-        <el-form-item label="简介" prop="brief">
-          <el-input v-model="form.brief" type="textarea" :rows="3" placeholder="请输入简介" />
+        <el-form-item v-model="form.brief" label="简介" prop="brief">
+          <!-- <el-input  type="textarea" :rows="3" placeholder="请输入简介" /> -->
+          <div style="border: 1px solid #ccc">
+            <Editor v-model="form.brief" :api-key="apiKey" :init="TinyMCE_option" />
+          </div>
         </el-form-item>
         <el-form-item label="详情" prop="details">
-          <el-input v-model="form.details" type="textarea" :rows="4" placeholder="请输入详情" />
+          <div style="border: 1px solid #ccc">
+            <Editor v-model="form.details" :api-key="apiKey" :init="TinyMCE_option" />
+            <!-- <Editor v-model="form.brief" :api-key="apiKey" :init="TinyMCE_option" initial-value="Welcome to TinyMCE!" /> -->
+          </div>
+          <!-- <el-input v-model="form.details" type="textarea" :rows="4" placeholder="请输入详情" /> -->
         </el-form-item>
+
         <el-form-item label="成就展示" prop="achievementDisplay">
-          <el-input v-model="form.achievementDisplay" type="textarea" :rows="3" placeholder="请输入成就展示" />
+          <div style="border: 1px solid #ccc">
+            <Editor v-model="form.achievementDisplay" :api-key="apiKey" :init="TinyMCE_option" />
+            <!-- <Editor v-model="form.brief" :api-key="apiKey" :init="TinyMCE_option" initial-value="Welcome to TinyMCE!" /> -->
+          </div>
+          <!-- <el-input v-model="form.achievementDisplay" type="textarea" :rows="3" placeholder="请输入成就展示" /> -->
         </el-form-item>
       </el-form>
       <template #footer>
@@ -116,15 +168,19 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { 
-  createTopic, 
-  getTopicList, 
-  updateTopic, 
+import {
+  createTopic,
+  getTopicList,
+  updateTopic,
   getTopicDetail,
   batchDeleteTopic,
-  getCategoryList
+  getCategoryList,
+  getstaffList
 } from '@/api/Lession/TopicManager/TopicManager'
+import { Plus } from '@element-plus/icons-vue'
+import type { UploadProps } from 'element-plus'
 
+// import WangEditor from '@/components/WangEditor/index.vue'
 // 列表数据
 const topicList = ref([])
 const loading = ref(true)
@@ -134,8 +190,14 @@ const open = ref(false)
 const multiple = ref(true)
 const selectedIdList = ref<string[]>([])
 const categoryOptions = ref([])
+const staffList = ref([])
 const topicForm = ref()
-
+const Name = ref<string>("");
+watch(Name, (newVal, oldVal) => {
+  console.log('Name 变化:', newVal, oldVal);
+  queryParams.value.teacher = newVal;
+  // 执行自定义逻辑（如调用 API、更新其他状态等）
+});
 // 查询参数
 const queryParams = ref({
   name: '',
@@ -144,7 +206,8 @@ const queryParams = ref({
   pageIndex: 1,
   pageSize: 10
 })
-
+//控制下拉讲师的
+const ShowTopicB = ref(false);
 // 表单参数
 const form = ref({
   id: '',
@@ -163,7 +226,7 @@ const rules = {
   name: [{ required: true, message: '专题名称不能为空', trigger: 'blur' }],
   categoryId: [{ required: true, message: '分类不能为空', trigger: 'blur' }],
   teacher: [{ required: true, message: '讲师不能为空', trigger: 'blur' }],
-  brief: [{ required: true, message: '简介不能为空', trigger: 'blur' }],
+  // brief: [{ required: true, message: '简介不能为空', trigger: 'blur' }],
   details: [{ required: true, message: '详情不能为空', trigger: 'blur' }]
 }
 
@@ -171,12 +234,36 @@ const rules = {
 const loadCategories = async () => {
   try {
     const response = await getCategoryList()
-    categoryOptions.value = response.data || []
+    categoryOptions.value = response || []
+    debugger;
+
   } catch (error) {
     console.error('获取分类列表失败:', error)
   }
 }
 
+// 获取教职员工下拉列表
+const loadstaff = async () => {
+  try {
+    const response = await getstaffList()
+    staffList.value = response || []
+  } catch (error) {
+    console.error('获取教职员工下拉列表失败:', error)
+  }
+}
+//getTopicDetail详情反填
+const TopicDetail = async (id: any) => {
+  try {
+    const response = await getTopicDetail(id)
+    from.value = response || []
+  } catch (error) {
+    console.error('获取教职员工下拉列表失败:', error)
+  }
+}
+
+watch(categoryOptions, (val) => {
+  console.log('categoryOptions:', val)
+})
 // 查询专题列表
 const getList = () => {
   loading.value = true
@@ -188,7 +275,7 @@ const getList = () => {
     PageSize: queryParams.value.pageSize
   }).then(response => {
     topicList.value = response.data || []
-    total.value = response.totalCount
+    total.value = response.totleCount
     loading.value = false
   }).catch(error => {
     console.error('获取专题列表失败:', error)
@@ -242,19 +329,22 @@ const handleAdd = () => {
 }
 
 // 修改按钮操作
+
 const handleUpdate = async (row: any) => {
   try {
     reset()
-    const response = await getTopicDetail(row.id)
-    form.value = response.data
+    // const response = await getTopicDetail(row.id)
+    //Object.assign(form.value, response.data) // 保持响应式
+    //form.value = response.data
     open.value = true
     title.value = '修改专题'
+    TopicDetail(row.id)
+    form.value = row;
   } catch (error: any) {
     console.error('获取详情失败:', error.response?.data)
     ElMessage.error(error.response?.data?.error?.message || '获取详情失败')
   }
 }
-
 // 提交按钮
 const submitForm = async () => {
   const formEl = topicForm.value
@@ -262,11 +352,12 @@ const submitForm = async () => {
 
   try {
     await formEl.validate()
-    
+
     if (form.value.id) {
       // 修改
       try {
         await updateTopic(form.value.id, {
+          id: form.value.id,
           name: form.value.name,
           categoryId: form.value.categoryId,
           teacher: form.value.teacher,
@@ -337,7 +428,6 @@ const handleBatchDelete = () => {
     ElMessage.warning('请选择要删除的数据')
     return
   }
-  
   ElMessageBox.confirm('确认批量删除所选专题吗？', '警告', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
@@ -350,19 +440,19 @@ const handleBatchDelete = () => {
   })
 }
 
+
 // 时间格式化
 const formatDateTime = (dateTimeStr: string) => {
   if (!dateTimeStr) return '-'
-  
+
   const date = new Date(dateTimeStr)
-  
+
   const year = date.getFullYear()
   const month = String(date.getMonth() + 1).padStart(2, '0')
   const day = String(date.getDate()).padStart(2, '0')
   const hours = String(date.getHours()).padStart(2, '0')
   const minutes = String(date.getMinutes()).padStart(2, '0')
   const seconds = String(date.getSeconds()).padStart(2, '0')
-  
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
 }
 
@@ -374,15 +464,83 @@ watch(() => open.value, (newVal) => {
 onMounted(() => {
   console.log('组件已挂载')
   loadCategories()
+  loadstaff()
   getList()
 })
+
+
+// 图片上传相关
+const imageUrl = ref("");
+
+const handleAvatarSuccess: UploadProps["onSuccess"] = (response, uploadFile) => {
+  console.log("图片", response);
+  // debugger;
+  imageUrl.value = URL.createObjectURL(uploadFile.raw!);
+  form.value.logoPath = response;//.data.fileUrl;
+  // from.value.logoPath = imageUrl.value;
+};
+
+const beforeAvatarUpload: UploadProps["beforeUpload"] = (rawFile) => {
+  /*
+  if (rawFile.type !== "image/jpeg/gif/png") {
+    ElMessage.error("Avatar picture must be JPG format!");
+    return false;
+  } else
+   */ if (rawFile.size / 1024 / 1024 > 2) {
+    ElMessage.error("Avatar picture size can not exceed 2MB!");
+    return false;
+  }
+  return true;
+};
+//富文本
+
+import Editor from '@tinymce/tinymce-vue'
+import { reactive } from 'vue';
+import TopicB from './topicB.vue'
+
+const apiKey = 'c84dxh4zz5sav5fvpfj8ats9tqewf49axrzcpc6ftqzhep17' // 替换为你的 API 密钥
+
+const TinyMCE_option = reactive({
+  // 插件
+  plugins: [
+    'anchor', 'autolink', 'charmap', 'codesample', 'emoticons', 'image', 'link', 'lists', 'media', 'searchreplace', 'table', 'visualblocks', 'wordcount',
+    'checklist', 'mediaembed', 'casechange', 'export', 'formatpainter', 'pageembed', 'permanentpen', 'powerpaste', 'advtable', 'advcode', 'editimage', 'advtemplate', 'mentions', 'tinycomments', 'tableofcontents', 'footnotes', 'mergetags', 'autocorrect', 'inlinecss', 'markdown', 'importword', 'exportword', 'exportpdf'
+  ],
+  // 是否显示底部工具栏 默认为 true
+  statusbar: false,
+  // 工具栏
+  toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table mergetags | addcomment showcomments | align lineheight | checklist numlist bullist indent outdent | emoticons charmap | removeformat | selectiveDateButton',
+  // 使用者
+  tinycomments_mode: 'embedded',
+  tinycomments_author: '张三',
+  // 语言
+  language: 'zh_CN',
+  // 自定义功能键
+  setup: (editor) => {
+    const toDateHtml = (date) => `<time datetime="${date.toString()}">${date.toDateString()}</time>`;
+    editor.ui.registry.addButton('selectiveDateButton', {
+      icon: 'insert-time',
+      tooltip: '插入当前时间',
+      onAction: (_) => editor.insertContent(toDateHtml(new Date()))
+    });
+    // 内容存入v-model前的处理
+    editor.on('SaveContent', (e) => {
+      // 示例：移除所有script标签，防止XSS攻击
+      e.content = e.content.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+      // 示例：将所有段落的class添加统一前缀
+      e.content = e.content.replace(/<p([^>]*)>/g, '<p class="custom-paragraph $1">');
+    });
+  }
+})
+
 </script>
 
 <style scoped>
 .search-wrapper {
   margin-bottom: 20px;
 }
+
 .mb8 {
   margin-bottom: 8px;
 }
-</style> 
+</style>
