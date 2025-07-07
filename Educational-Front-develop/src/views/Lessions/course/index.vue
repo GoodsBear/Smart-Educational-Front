@@ -274,8 +274,6 @@
         </el-col>
       </el-row>
 
-
-
       <el-form-item label="详情介绍图集" prop="detailImageList">
         <el-upload action="upload_url" list-type="picture-card" :file-list="courseForm.detailImageList">
           <el-button type="primary">上传</el-button>
