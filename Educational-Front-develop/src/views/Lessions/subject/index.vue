@@ -42,7 +42,7 @@
       </el-table>
       <!-- 分页 -->
       <div class="pagination-container">
-        <el-pagination v-model:current-page="queryParams.pageNum" v-model:page-size="queryParams.pageSize"
+        <el-pagination v-model:current-page="queryParams.PageIndex" v-model:page-size="queryParams.PageSize"
           :total="total" :page-sizes="[10, 20, 30, 50]" layout="total, sizes, prev, pager, next, jumper"
           @size-change="handleSizeChange" @current-change="handleCurrentChange" />
       </div>
@@ -163,7 +163,7 @@ const handleSizeChange = (val: number) => {
 
 // 处理页码变化
 const handleCurrentChange = (val: number) => {
-  queryParams.value.pageNum = val
+  queryParams.value.PageIndex = val
   handleQuery()
 }
 // 表单重置
@@ -171,7 +171,7 @@ const reset = () => {
   console.log('重置表单')
   form.value = {
     subjectName: '',
-    sortWeight: '',
+    sortWeight: 0,
     subjectDescription: ''
   }
 }
@@ -262,7 +262,7 @@ const handleBatchDelete = () => {
     })
   })
 }
-
+//
 </script>
 
 <style scoped>
