@@ -604,66 +604,66 @@ const TinyMCE_option = reactive({
 .mb8 {
   margin-bottom: 8px;
 }
-</style>
+
 
 .image-error {
-display: flex;
-flex-direction: column;
-align-items: center;
-justify-content: center;
-width: 100%;
-height: 100%;
-background-color: #f5f7fa;
-color: #909399;
-font-size: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background-color: #f5f7fa;
+  color: #909399;
+  font-size: 12px;
 }
 
 .image-error .el-icon {
-font-size: 24px;
-margin-bottom: 8px;
+  font-size: 24px;
+  margin-bottom: 8px;
 }
 
 /* Logo上传样式 */
 .logo-uploader {
-width: 150px;
-height: 150px;
-border: 1px dashed #d9d9d9;
-border-radius: 6px;
-cursor: pointer;
-position: relative;
-overflow: hidden;
-transition: border-color 0.3s;
+  width: 150px;
+  height: 150px;
+  border: 1px dashed #d9d9d9;
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.3s;
 }
 
 .logo-uploader:hover {
-border-color: #409eff;
+  border-color: #409eff;
 }
 
 .logo-image {
-width: 100%;
-height: 100%;
-object-fit: cover;
-display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .logo-uploader-placeholder {
-display: flex;
-flex-direction: column;
-align-items: center;
-justify-content: center;
-width: 100%;
-height: 100%;
-color: #8c939d;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: #8c939d;
 }
 
 .logo-uploader-placeholder .el-icon {
-font-size: 28px;
-margin-bottom: 8px;
+  font-size: 28px;
+  margin-bottom: 8px;
 }
 
 .logo-path {
-margin-top: 8px;
-font-size: 12px;
-color: #606266;
+  margin-top: 8px;
+  font-size: 12px;
+  color: #606266;
 }
 </style>
