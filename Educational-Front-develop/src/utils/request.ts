@@ -81,6 +81,8 @@ service.interceptors.response.use(
 
     const { isSuc, data, msg, code } = response.data;
 
+    console.log(`⬅️ 接收响应: ${response.config.method} ${response.config.url}`, { isSuc, code, msg, data });
+
     // 请求成功：检查 isSuc 和 code
     if (isSuc === true && code.toString() === ResultEnum.SUCCESS) {
       return data;

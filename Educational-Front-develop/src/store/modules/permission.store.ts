@@ -79,7 +79,26 @@ export const usePermissionStore = defineStore("permission", () => {
               },
             ],
           },
-
+          {
+            path: "/material",
+            component: Layout,
+            redirect: "/material/user",
+            meta: { title: "物料管理", icon: "ep:setting" },
+            children: [
+              {
+                path: "material",
+                name: "Material",
+                component: () => import("@/views/Materials/material/index.vue"),
+                meta: { title: "物料列表", icon: "ep:collection" },
+              },
+              {
+                path: "storerooms",
+                name: "Storerooms",
+                component: () => import("@/views/Materials/storerooms/index.vue"),
+                meta: { title: "出入库记录", icon: "ep:collection" },
+              },
+            ],
+          },
           {
             path: "/tissue",
             component: Layout,
