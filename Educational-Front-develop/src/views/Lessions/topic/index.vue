@@ -13,16 +13,25 @@
           </el-select>
         </el-form-item>
         <el-form-item label="讲师" prop="teacher">
-          <!-- <el-input v-model="queryParams.teacher" placeholder="请输入讲师名称" clearable /> -->
-          <el-select v-model="queryParams.teacher" placeholder="请输入讲师名称" style="width: 240px">
-            <el-option v-for="item in staffList" :key="item.id" :label="item.staffName" :value="item.staffName" />
+
+          <el-input v-model="queryParams.teacher" placeholder="请输入讲师名称" clearable style="width: 240px;" />
+
+          <!-- <el-select v-model="queryParams.teacher" placeholder="请输入讲师名称" style="width: 240px">
+          
           </el-select>
+            <el-option v-for="item in staffList" :key="item.id" :label="item.staffName" :value="item.staffName" /> -->
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="handleQuery">查询</el-button>
           <el-button @click="resetQuery">重置</el-button>
         </el-form-item>
+
       </el-form>
+      <!-- {{ Name }} 
+      <TopicB v-model:Name="Name"></TopicB>-->
+      <div>
+        <TopicB v-model:Name="Name"></TopicB>
+      </div>
     </el-card>
 
     <el-card shadow="never">
@@ -100,7 +109,7 @@
         <el-form-item label="Logo路径" prop="logoPath">
           <el-upload class="avatar-uploader" action="https://localhost:44375/api/upload/image" :show-file-list="false"
             :on-success="handleAvatarSuccess" :before-upload="beforeAvatarUpload">
-            <img v-if="imageUrl" :src="imageUrl" class="avatar" />
+            <img v-if="form.logoPath" :src="form.logoPath" class="avatar" />
             <el-icon v-else class="avatar-uploader-icon">
               <Plus />
             </el-icon>
@@ -109,14 +118,24 @@
         <el-form-item v-model="form.brief" label="简介" prop="brief">
           <!-- <el-input  type="textarea" :rows="3" placeholder="请输入简介" /> -->
           <div style="border: 1px solid #ccc">
-            <Editor :api-key="apiKey" :init="TinyMCE_option" initial-value="Welcome to TinyMCE!" />
+            <Editor v-model="form.brief" :api-key="apiKey" :init="TinyMCE_option" />
+            <!-- <Editor v-model="form.brief" :api-key="apiKey" :init="TinyMCE_option" initial-value="Welcome to TinyMCE!" /> -->
           </div>
         </el-form-item>
         <el-form-item label="详情" prop="details">
-          <el-input v-model="form.details" type="textarea" :rows="4" placeholder="请输入详情" />
+          <div style="border: 1px solid #ccc">
+            <Editor v-model="form.details" :api-key="apiKey" :init="TinyMCE_option" />
+            <!-- <Editor v-model="form.brief" :api-key="apiKey" :init="TinyMCE_option" initial-value="Welcome to TinyMCE!" /> -->
+          </div>
+          <!-- <el-input v-model="form.details" type="textarea" :rows="4" placeholder="请输入详情" /> -->
         </el-form-item>
+
         <el-form-item label="成就展示" prop="achievementDisplay">
-          <el-input v-model="form.achievementDisplay" type="textarea" :rows="3" placeholder="请输入成就展示" />
+          <div style="border: 1px solid #ccc">
+            <Editor v-model="form.achievementDisplay" :api-key="apiKey" :init="TinyMCE_option" />
+            <!-- <Editor v-model="form.brief" :api-key="apiKey" :init="TinyMCE_option" initial-value="Welcome to TinyMCE!" /> -->
+          </div>
+          <!-- <el-input v-model="form.achievementDisplay" type="textarea" :rows="3" placeholder="请输入成就展示" /> -->
         </el-form-item>
       </el-form>
       <template #footer>
@@ -143,7 +162,8 @@ import {
 } from '@/api/Lession/TopicManager/TopicManager'
 import { Plus } from '@element-plus/icons-vue'
 import type { UploadProps } from 'element-plus'
-import WangEditor from '@/components/WangEditor/index.vue'
+
+// import WangEditor from '@/components/WangEditor/index.vue'
 // 列表数据
 const topicList = ref([])
 const loading = ref(true)
@@ -155,7 +175,12 @@ const selectedIdList = ref<string[]>([])
 const categoryOptions = ref([])
 const staffList = ref([])
 const topicForm = ref()
-
+const Name = ref<string>("");
+watch(Name, (newVal, oldVal) => {
+  console.log('Name 变化:', newVal, oldVal);
+  queryParams.value.teacher = newVal;
+  // 执行自定义逻辑（如调用 API、更新其他状态等）
+});
 // 查询参数
 const queryParams = ref({
   name: '',
@@ -230,7 +255,7 @@ const getList = () => {
     PageSize: queryParams.value.pageSize
   }).then(response => {
     topicList.value = response.data || []
-    total.value = response.totalCount
+    total.value = response.totleCount
     loading.value = false
   }).catch(error => {
     console.error('获取专题列表失败:', error)
@@ -452,6 +477,7 @@ const beforeAvatarUpload: UploadProps["beforeUpload"] = (rawFile) => {
 
 import Editor from '@tinymce/tinymce-vue'
 import { reactive } from 'vue';
+import TopicB from './topicB.vue'
 
 const apiKey = 'c84dxh4zz5sav5fvpfj8ats9tqewf49axrzcpc6ftqzhep17' // 替换为你的 API 密钥
 
