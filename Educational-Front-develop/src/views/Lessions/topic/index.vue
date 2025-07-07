@@ -177,8 +177,9 @@ import {
   getCategoryList,
   getstaffList
 } from '@/api/Lession/TopicManager/TopicManager'
-import { Plus } from '@element-plus/icons-vue'
 import type { UploadProps } from 'element-plus'
+import { Picture, Plus } from '@element-plus/icons-vue'
+import { UploadImage } from '@/api/uoload/uoload.api'
 
 // import WangEditor from '@/components/WangEditor/index.vue'
 // 列表数据
@@ -206,6 +207,8 @@ watch(Name, (newVal, oldVal) => {
   queryParams.value.teacher = newVal;
   // 执行自定义逻辑（如调用 API、更新其他状态等）
 });
+const logoImageUrl = ref('')
+
 // 查询参数
 const queryParams = ref({
   name: '',
@@ -216,6 +219,48 @@ const queryParams = ref({
 })
 //控制下拉讲师的
 const ShowTopicB = ref(false);
+
+// Logo上传相关方法
+const handleLogoSuccess = (res: any) => {
+  console.log('上传成功:', res)
+  // 根据API响应结构获取图片路径
+  form.value.logoPath = res.data || res
+  logoImageUrl.value = form.value.logoPath
+}
+
+const beforeLogoUpload = (file: File) => {
+  const isImage = ['image/jpeg', 'image/png', 'image/gif'].includes(file.type)
+  const isLt2M = file.size / 1024 / 1024 < 2
+
+  if (!isImage) {
+    ElMessage.error('上传Logo只能是图片格式!')
+    return false
+  }
+  if (!isLt2M) {
+    ElMessage.error('上传Logo图片大小不能超过 2MB!')
+    return false
+  }
+  return true
+}
+
+// 使用封装的UploadImage方法进行上传
+const customUpload = async (options: any) => {
+  const { file } = options
+  // 创建FormData对象
+  const formData = new FormData()
+  formData.append('file', file)
+
+  // 调用封装的UploadImage方法
+  try {
+    const result = await UploadImage(formData)
+    // 直接调用成功回调，不做额外判断
+    options.onSuccess(result)
+  } catch (error) {
+    console.error('上传失败:', error)
+    options.onError('上传失败')
+  }
+}
+
 // 表单参数
 const form = ref({
   id: '',
@@ -305,6 +350,8 @@ const reset = () => {
     achievementDisplay: '',
     concurrencyStamp: ''
   }
+  // 清空logo预览
+  logoImageUrl.value = ''
 }
 
 // 多选框选中数据
@@ -344,6 +391,10 @@ const handleUpdate = async (row: any) => {
     // const response = await getTopicDetail(row.id)
     //Object.assign(form.value, response.data) // 保持响应式
     //form.value = response.data
+    const response = await getTopicDetail(row.id)
+    form.value = response.data
+    // 设置logo预览
+    logoImageUrl.value = form.value.logoPath
     open.value = true
     title.value = '修改专题'
     TopicDetail(row.id)
@@ -436,6 +487,7 @@ const handleBatchDelete = () => {
     ElMessage.warning('请选择要删除的数据')
     return
   }
+
   ElMessageBox.confirm('确认批量删除所选专题吗？', '警告', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
@@ -461,6 +513,7 @@ const formatDateTime = (dateTimeStr: string) => {
   const hours = String(date.getHours()).padStart(2, '0')
   const minutes = String(date.getMinutes()).padStart(2, '0')
   const seconds = String(date.getSeconds()).padStart(2, '0')
+
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
 }
 
@@ -550,5 +603,67 @@ const TinyMCE_option = reactive({
 
 .mb8 {
   margin-bottom: 8px;
+}
+</style>
+
+.image-error {
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+width: 100%;
+height: 100%;
+background-color: #f5f7fa;
+color: #909399;
+font-size: 12px;
+}
+
+.image-error .el-icon {
+font-size: 24px;
+margin-bottom: 8px;
+}
+
+/* Logo上传样式 */
+.logo-uploader {
+width: 150px;
+height: 150px;
+border: 1px dashed #d9d9d9;
+border-radius: 6px;
+cursor: pointer;
+position: relative;
+overflow: hidden;
+transition: border-color 0.3s;
+}
+
+.logo-uploader:hover {
+border-color: #409eff;
+}
+
+.logo-image {
+width: 100%;
+height: 100%;
+object-fit: cover;
+display: block;
+}
+
+.logo-uploader-placeholder {
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+width: 100%;
+height: 100%;
+color: #8c939d;
+}
+
+.logo-uploader-placeholder .el-icon {
+font-size: 28px;
+margin-bottom: 8px;
+}
+
+.logo-path {
+margin-top: 8px;
+font-size: 12px;
+color: #606266;
 }
 </style>
