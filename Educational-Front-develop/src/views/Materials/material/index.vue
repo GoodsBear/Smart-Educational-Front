@@ -106,11 +106,11 @@
     <!-- 入库弹窗 -->
     <el-dialog v-model="stockInDialogVisible" title="物料入库" width="30%">
       <el-form :model="stockForm" :rules="stockInRules" ref="stockInFormRef" label-width="100px">
-        <el-form-item label="入库数量:" prop="count" required>
-          <el-input-number v-model="stockForm.count" :min="1" style="width: 100%" />
+        <el-form-item label="入库数量:" prop="changeSum" required>
+          <el-input-number v-model="stockForm.changeSum" :min="1" style="width: 100%" />
         </el-form-item>
-        <el-form-item label="入库说明:" prop="description" required>
-          <el-input v-model="stockForm.remark" type="textarea" placeholder="请输入入库说明" />
+        <el-form-item label="入库说明:" prop="reason" required>
+          <el-input v-model="stockForm.reason" type="textarea" placeholder="请输入入库说明" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -121,11 +121,11 @@
     <!-- 出库弹窗 -->
     <el-dialog v-model="stockOutDialogVisible" title="物料出库" width="30%">
       <el-form :model="stockForm" :rules="stockOutRules" ref="stockOutFormRef" label-width="100px">
-        <el-form-item label="出库数量:" prop="count" required>
-          <el-input-number v-model="stockForm.count" :min="1" style="width: 100%" />
+        <el-form-item label="出库数量:" prop="changeSum" required>
+          <el-input-number v-model="stockForm.changeSum" :min="1" style="width: 100%" />
         </el-form-item>
         <el-form-item label="原因说明:" prop="reason" required>
-          <el-input v-model="stockForm.remark" type="textarea" placeholder="请输入原因说明" />
+          <el-input v-model="stockForm.reason" type="textarea" placeholder="请输入原因说明" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -157,6 +157,7 @@ import moment from "moment";
 import { Plus } from '@element-plus/icons-vue'
 import type { UploadProps } from 'element-plus'
 import OrganizationAPI from "@/api/Organization/organizations.api";
+import { materialRetordIn, materialRetordOut } from '@/api/Materials/storerooms.api';
 // 查询参数
 const queryParams = reactive({
   materialName: "",
@@ -335,45 +336,49 @@ const handlestartEnable = (status: boolean) => {
 const stockInDialogVisible = ref(false);
 const stockOutDialogVisible = ref(false);
 const stockForm = reactive({
-  id: "",
-  count: 1,
-  remark: ""
+  materialId: "",
+  changeSum: 1,
+  reason: "",
+  staffId: ""
 });
 const stockInFormRef = ref<FormInstance>();
 const stockOutFormRef = ref<FormInstance>();
 const stockInRules: FormRules = {
-  count: [
+  changeSum: [
     { required: true, message: "请输入入库数量", trigger: "blur" }
   ],
-  remark: [
+  reason: [
     { required: true, message: "请输入入库说明", trigger: "blur" }
   ]
 };
 const stockOutRules: FormRules = {
-  count: [
+  changeSum: [
     { required: true, message: "请输入出库数量", trigger: "blur" }
   ],
-  remark: [
+  reason: [
     { required: true, message: "请输入原因说明", trigger: "blur" }
   ]
 };
 // 入库/出库弹窗
 const showStockInDialog = (row: any) => {
-  stockForm.id = row.id;
-  stockForm.count = 1;
-  stockForm.remark = "";
+  stockForm.materialId = row.id;
+  console.log("入库获取id=>", row.id);
+  stockForm.staffId = "3a1ae2bb-d04c-4f58-d353-b43049a572fe";
+  stockForm.changeSum = 1;
+  stockForm.reason = "";
   stockInDialogVisible.value = true;
 };
 const showStockOutDialog = (row: any) => {
-  stockForm.id = row.id;
-  stockForm.count = 1;
-  stockForm.remark = "";
+  stockForm.materialId = row.id;
+  stockForm.staffId = "3a1add4f-706a-114a-d090-919def54ff5a";
+  stockForm.changeSum = 1;
+  stockForm.reason = "";
   stockOutDialogVisible.value = true;
 };
 const submitStockIn = () => {
   (stockInFormRef.value as FormInstance).validate((valid) => {
     if (!valid) return;
-    stockInMaterial(stockForm.id, { count: stockForm.count, remark: stockForm.remark }).then(() => {
+    materialRetordIn(stockForm).then(() => {
       ElMessage.success("入库成功");
       stockInDialogVisible.value = false;
       fetchMaterialList();
@@ -383,7 +388,7 @@ const submitStockIn = () => {
 const submitStockOut = () => {
   (stockOutFormRef.value as FormInstance).validate((valid) => {
     if (!valid) return;
-    stockOutMaterial(stockForm.id, { count: stockForm.count, remark: stockForm.remark }).then(() => {
+    materialRetordOut(stockForm).then(() => {
       ElMessage.success("出库成功");
       stockOutDialogVisible.value = false;
       fetchMaterialList();
