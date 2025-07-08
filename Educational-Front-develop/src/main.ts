@@ -4,6 +4,11 @@ import setupPlugins from "@/plugins";
 import { ApiDetector } from "@/utils/apiDetector";
 import { usePermissionStore } from "@/store";
 import { ElMessage } from "element-plus";
+import { createPinia } from 'pinia'
+import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
+
+const pinia = createPinia()
+pinia.use(piniaPluginPersistedstate)
 
 // 暗黑主题样式
 import "element-plus/theme-chalk/dark/css-vars.css";
@@ -13,11 +18,15 @@ import "@/styles/dark/css-vars.css";
 import "@/styles/index.scss";
 import "uno.css";
 
+//element-plus图标
+import * as ElementPlusIconsVue from '@element-plus/icons-vue'
+
 // 过渡动画
 import "animate.css";
 
 // 自动为某些默认事件（如 touchstart、wheel 等）添加 { passive: true },提升滚动性能并消除控制台的非被动事件监听警告
 import "default-passive-events";
+import { error } from "console";
 
 console.log("🚀 应用启动...");
 
@@ -45,14 +54,23 @@ ApiDetector.testConnection("https://localhost:44375/")
   });
 
 const app = createApp(App);
+// 注册Element Plus 图标
+for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
+  app.component(key, component)
+}
+
 // 注册插件
 app.use(setupPlugins);
-
+app.use(pinia);
 // 添加全局错误处理
 app.config.errorHandler = (err, instance, info) => {
   console.error("Vue应用错误:", err);
   console.error("错误信息:", info);
 };
+
+app.config.errorHandler=(error)=>{
+  console.error("Vue应用错误:", error);
+}
 
 // 先初始化路由，再挂载应用
 const permissionStore = usePermissionStore();

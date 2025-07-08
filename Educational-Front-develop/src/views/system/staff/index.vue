@@ -54,7 +54,7 @@
             </template>
           </el-table-column>
         </template>
-        <el-table-column label="操作">
+        <el-table-column label="操作" width="150">
           <template #default="{ row }">
             <el-button size="small" @click="showEditDialog(row)">编辑</el-button>
             <el-button size="small" @click="changePassword(row)">改密</el-button>
@@ -140,6 +140,7 @@
             </el-icon>
           </el-upload>
         </el-form-item>
+        <!-- 其他表单字段... -->
       </el-form>
       <template #footer>
         <span class="dialog-footer">
@@ -262,27 +263,27 @@
       </template>
     </el-dialog>
 
-    <el-dialog v-model="transferDialogVisible" title="转机构" width="400px">
-      <el-form>
-        <el-form-item label="选择转入机构:">
-          <el-tree ref="transferOrgTreeRef" :data="transferOrgTree" show-checkbox node-key="id"
-            :default-checked-keys="selectedTransferOrg" :props="{ label: 'label', children: 'children' }"
-            style="width: 100%" @check="(checkedKeys) => (selectedTransferOrg.value = checkedKeys)" />
-        </el-form-item>
-      </el-form>
+    <!-- 转机构对话框 -->
+    <el-dialog v-model="transferDialogVisible" title="转机构" width="500px">
+      <div class="transfer-dialog-content">
+        <p>请选择要转入的机构：</p>
+        <el-tree ref="transferTreeRef" :data="data" show-checkbox node-key="id" default-expand-all highlight-current
+          :props="{ label: 'label' }" />
+      </div>
       <template #footer>
-        <el-button @click="transferDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="submitTransferOrg">提交</el-button>
+        <span class="dialog-footer">
+          <el-button @click="transferDialogVisible = false">取消</el-button>
+          <el-button type="primary" @click="submitTransfer">确认</el-button>
+        </span>
       </template>
     </el-dialog>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive, onMounted, nextTick } from "vue";
+import { ref, reactive, onMounted } from "vue";
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from "element-plus";
 import StaffAPI from "@/api/staff/staff.api"; // 导入您封装的API方法
-import { getOrganizationTree } from "@/api/organization/organization.api";
 import moment from "moment";
 import { Plus } from "@element-plus/icons-vue";
 import type { UploadProps } from "element-plus";
@@ -307,9 +308,9 @@ interface StaffFormData {
   entryDate: string;
   education: string;
   birthday: string;
-  graduationSchool: string;
+  graduationschool: string;
   introduction: string;
-  photoUrl: string;
+  photour1: string;
   [key: string]: any;
 }
 
@@ -328,6 +329,9 @@ const statusDialogTitle = ref();
 const statusForm = reactive({
   status: "1", // 默认在职
 });
+// 转机构相关
+const transferDialogVisible = ref(false);
+const transferTreeRef = ref<any>(null);
 
 const data = ref([]);
 
@@ -365,9 +369,9 @@ const addFormData = reactive<StaffFormData>({
   entryDate: "",
   education: "",
   birthday: "",
-  graduationSchool: "",
+  graduationschool: "",
   introduction: "",
-  photoUrl: "",
+  photour1: "",
 });
 
 // 编辑表单
@@ -407,17 +411,11 @@ const addRules = reactive<FormRules<StaffFormData>>({
     { required: true, message: "请输入手机号", trigger: "blur" },
     { pattern: /^1[3-9]\d{9}$/, message: "手机号格式不正确", trigger: "blur" },
   ],
-  positionId: [{ required: true, message: "请选择职位", trigger: "change" }],
-  staffGender: [{ required: true, message: "请选择性别", trigger: "change" }],
-  education: [{ required: true, message: "请选择学历", trigger: "change" }],
-  birthday: [{ required: true, message: "请选择生日", trigger: "change" }],
-  graduationSchool: [{ required: true, message: "请输入毕业学校", trigger: "blur" }],
-  entryDate: [{ required: true, message: "请选择入职日期", trigger: "change" }],
-  introduction: [
-    { required: true, message: "请输入简介", trigger: "blur" },
-    { min: 2, max: 200, message: "简介长度在 2 到 200 个字符", trigger: "blur" },
-  ],
-  photoUrl: [{ required: true, message: "请上传照片", trigger: "change" }],
+});
+
+// 生命周期钩子
+onMounted(() => {
+  fetchStaffList();
 });
 
 const editRules = reactive<FormRules<StaffFormData>>({
@@ -546,17 +544,31 @@ const submitEditForm = async () => {
   try {
     await editFormRef.value?.validate();
 
-    // organization 字段转字符串
-    let org = editFormData.organization;
-    if (Array.isArray(org)) {
-      org = org.join(",");
+    // 获取树选中的节点
+    const selectedNodes = treeRef.value?.getCheckedNodes();
+    console.log("编辑表单 - 选中的节点:", selectedNodes);
+
+    // 创建一个数组保存选中的机构名称
+    const selectedOrgNames: string[] = [];
+
+    // 将选中的节点label(机构名称)添加到数组中
+    if (selectedNodes && selectedNodes.length > 0) {
+      selectedNodes.forEach((node: any) => {
+        if (node.label) {
+          selectedOrgNames.push(node.label);
+        }
+      });
     }
 
-    // 构造参数
+    console.log("编辑表单 - 选中的机构名称:", selectedOrgNames);
+
+    // 使用选中的机构名称作为organization值
     const params = {
       ...editFormData,
-      organization: org,
+      organization: selectedOrgNames.length > 0 ? selectedOrgNames.join(",") : "",
     };
+
+    console.log("编辑表单 - 提交数据:", params);
 
     // staffId 单独传
     await StaffAPI.updateStaff(editFormData.id, params);
@@ -564,16 +576,9 @@ const submitEditForm = async () => {
     editDialogVisible.value = false;
     fetchStaffList();
   } catch (error) {
-    console.error(error);
+    console.error("编辑表单提交失败:", error);
+    ElMessage.error("更新失败");
   }
-};
-
-const Delarr = ref([]);
-
-const ToAll = (selection: any) => {
-  console.log(selection);
-  Delarr.value = selection.map((item: any) => item.id);
-  console.log(Delarr.value);
 };
 
 // 删除员工
@@ -583,15 +588,13 @@ const handleDelete = async () => {
     ElMessage.warning("请先选择要删除的员工");
     return;
   }
-  const params = {
-    ids: Delarr.value,
-  };
+  const ids = selection.map((item: StaffFormData) => item.id).join(",");
   ElMessageBox.confirm("确定要删除选中的员工吗?", "提示", {
     confirmButtonText: "确定",
     cancelButtonText: "取消",
     type: "warning",
   }).then(async () => {
-    await StaffAPI.deleteStaff(params);
+    await StaffAPI.deleteStaff(ids);
     ElMessage.success("删除成功");
     fetchStaffList();
   });
@@ -683,6 +686,48 @@ const submitStatus = () => {
   });
 
   statusDialogVisible.value = false;
+};
+
+// 显示转机构对话框
+const showTransferDialog = () => {
+  if (!Delarr.value || Delarr.value.length === 0) {
+    ElMessage.warning("请先选择要转机构的员工");
+    return;
+  }
+
+  transferDialogVisible.value = true;
+  nextTick(() => {
+    if (transferTreeRef.value) {
+      transferTreeRef.value.setCheckedKeys([]);
+    }
+  });
+};
+
+// 提交转机构
+const submitTransfer = async () => {
+  if (!transferTreeRef.value) {
+    ElMessage.warning("组件初始化失败");
+    return;
+  }
+
+  const selectedNodes = transferTreeRef.value.getCheckedNodes();
+  if (!selectedNodes || selectedNodes.length === 0) {
+    ElMessage.warning("请选择至少一个目标机构");
+    return;
+  }
+
+  // 获取选中的机构ID
+  const organizationIds = selectedNodes.map((node: any) => node.id);
+
+  try {
+    await StaffAPI.staffOrganization(Delarr.value, organizationIds);
+    ElMessage.success("转机构操作成功");
+    transferDialogVisible.value = false;
+    fetchStaffList(); // 刷新列表
+  } catch (error) {
+    console.error("转机构操作失败:", error);
+    ElMessage.error("转机构操作失败");
+  }
 };
 
 // 递归查找所有匹配名称的节点id
@@ -777,50 +822,6 @@ const resetEditForm = () => {
   });
   editFormRef.value?.resetFields();
 };
-
-const transferDialogVisible = ref(false);
-const transferOrgTree = ref([]); // 机构树数据
-const transferOrgTreeRef = ref();
-const selectedTransferOrg = ref([]); // 选中的机构id数组
-
-const showTransferDialog = async () => {
-  // 校验是否选中员工
-  if (!Delarr.value || Delarr.value.length === 0) {
-    ElMessage.warning("请先选择要转机构的员工");
-    return;
-  }
-  // 获取机构树（根节点id一般为全0字符串）
-  const res = await getOrganizationTree("00000000-0000-0000-0000-000000000000");
-  transferOrgTree.value = res;
-  selectedTransferOrg.value = [];
-  transferDialogVisible.value = true;
-  // 可选：弹窗打开后默认展开全部
-  nextTick(() => {
-    transferOrgTreeRef.value?.expandAll?.();
-  });
-};
-
-const submitTransferOrg = async () => {
-  // 校验是否选中员工
-  if (!Delarr.value || Delarr.value.length === 0) {
-    ElMessage.warning("请先选择要转机构的员工");
-    return;
-  }
-  // 获取选中的机构id
-  const checked = transferOrgTreeRef.value.getCheckedKeys();
-  if (!checked.length) {
-    ElMessage.warning("请选择转入机构");
-    return;
-  }
-  try {
-    await StaffAPI.setStaffOrganization(Delarr.value, checked);
-    ElMessage.success("转机构成功");
-    transferDialogVisible.value = false;
-    fetchStaffList();
-  } catch (e) {
-    ElMessage.error("转机构失败");
-  }
-};
 </script>
 
 <style scoped>
@@ -880,5 +881,14 @@ const submitTransferOrg = async () => {
   width: 100px;
   height: 100px;
   display: block;
+}
+
+.transfer-dialog-content {
+  margin-bottom: 15px;
+}
+
+.transfer-dialog-content p {
+  margin-bottom: 15px;
+  font-weight: 500;
 }
 </style>

@@ -1,44 +1,51 @@
 <template>
     <div class="position-management">
         <!-- 搜索栏 -->
-        <div class="search-bar">
-            <el-form :inline="true" :model="queryParams">
-                <el-form-item label="搜索名称：">
-                    <el-input v-model="queryParams.PositionName" placeholder="请输入" clearable />
-                </el-form-item>
-                <el-form-item>
-                    <el-button type="primary" @click="fetchPositionList">查询</el-button>
-                </el-form-item>
-            </el-form>
+        <el-card style="max-width: 10000px">
+            <div class="search-bar">
+                <el-form :inline="true" :model="queryParams">
+                    <el-form-item label="搜索名称：">
+                        <el-input v-model="queryParams.PositionName" placeholder="请输入" clearable />
+                    </el-form-item>
+                    <el-form-item>
+                        <el-button type="primary" @click="fetchPositionList">查询</el-button>
+                    </el-form-item>
+                </el-form>
 
-        </div>
-        <!-- 操作按钮区 -->
-        <div class="operation-area">
-            <el-button type="primary" @click="showAddDialog">新增</el-button>
-            <el-button @click="handleDelete">删除</el-button>
-            <el-button @click="fetchPositionList">刷新</el-button>
-            <el-button @click="showColumnDialog = true">自定义显示列</el-button>
-        </div>
-        <!-- 职位列表表格 -->
-        <!-- <el-table :data="positionList" border style="width: 100%; margin-top: 10px"
+            </div>
+        </el-card>
+        <el-card style="max-width: 10000px;margin-top: 10px">
+            <!-- 表格标题和操作按钮区 -->
+            <div class="table-header-bar">
+                <div class="table-title">职位列表</div>
+                <div class="operation-area">
+                    <el-button type="primary" @click="showAddDialog">新增</el-button>
+                    <el-button @click="handleDelete">删除</el-button>
+                    <el-button @click="fetchPositionList">刷新</el-button>
+                    <el-button @click="showColumnDialog = true">自定义显示列</el-button>
+                </div>
+            </div>
+            <!-- 职位列表表格 -->
+            <!-- <el-table :data="positionList" border style="width: 100%; margin-top: 10px"
             header-cell-class-name="table-header" @selection-change="selectAll"> -->
-        <el-table ref="tableRef" :data="positionList" style="width: 100%" @selection-change="selectAll">
-            <el-table-column type="selection" width="50" />
-            <el-table-column v-for="col in showColumns" :key="col.prop" :prop="col.prop" :label="col.label" />
-            <el-table-column label="操作" width="180">
-                <template #default="{ row }">
-                    <el-button type="text" @click="showEditDialog(row)">编辑</el-button>
-                </template>
-            </el-table-column>
-        </el-table>
-        <!-- 分页 -->
-        <div class="pagination-container">
-            <pagination v-model:total="pageParams.TotalCount" v-model:page="pageParams.PageIndex"
-                v-model:limit="pageParams.PageSize" @pagination="handlePagination" />
-            <!-- <div class="pagination-info">
+            <el-table ref="tableRef" :data="positionList" style="width: 100%" @selection-change="selectAll">
+                <el-table-column type="selection" width="50" />
+                <el-table-column v-for="col in showColumns" :key="col.prop" :prop="col.prop" :label="col.label" />
+                <el-table-column label="操作" width="180">
+                    <template #default="{ row }">
+                        <el-button type="text" @click="showEditDialog(row)">编辑</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+            <!-- 分页 -->
+            <div class="pagination-container">
+                <pagination v-model:total="pageParams.TotalCount" v-model:page="pageParams.PageIndex"
+                    v-model:limit="pageParams.PageSize" @pagination="handlePagination" />
+                <!-- <div class="pagination-info">
                 共 {{ pageParams.TotalCount }} 条 第{{ pageParams.PageIndex }}页/{{ pageParams.TotalPage }}页
             </div> -->
-        </div>
+            </div>
+        </el-card>
 
         <!-- 新增/编辑对话框 -->
         <el-dialog v-model="dialogVisible" :title="dialogTitle" width="30%" @closed="resetForm">
@@ -266,6 +273,18 @@ onMounted(() => {
 .search-bar-right {
     display: flex;
     gap: 8px;
+}
+
+.table-header-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.table-title {
+    font-size: 18px;
+    font-weight: bold;
 }
 
 .operation-area {

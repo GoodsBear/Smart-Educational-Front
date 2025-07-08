@@ -10,13 +10,22 @@ const StaffAPI = {
    * @returns 成员列表数据
    */
   getList(queryParams?: StaffQuery) {
-    return request<any[]>({
+    return request<DeptListResponse>({
       url: `/api/app/staff-services/staff-list`,
       method: "get",
       params: queryParams,
     });
   },
-
+  /**
+   * 获取成员下拉框
+   *
+   */
+  selectStaff() {
+    return request<DeptListResponse>({
+      url: `/api/app/staff-services/staff`,
+      method: "get",
+    });
+  },
   /**
    * 新增员工
    *
@@ -39,9 +48,8 @@ const StaffAPI = {
    */
   deleteStaff(ids: string) {
     return request({
-      url: `${STAFF_BASE_URL}/staff/`,
+      url: `${STAFF_BASE_URL}/staff/${ids}`,
       method: "delete",
-      params: ids,
     });
   },
 
@@ -89,18 +97,19 @@ const StaffAPI = {
   },
 
   /**
-   * 批量设置员工所属机构
-   * @param Ids 员工ID数组
-   * @param organizationIds 机构ID数组
+   * 批量设置用户所属机构
+   * @param Ids 要设置的用户ID集合
+   * @param organizationIds 要设置的机构ID集合
    * @returns 请求结果
    */
-  setStaffOrganization(Ids: string[], organizationIds: string[]) {
+  staffOrganization(Ids: string[], organizationIds: string[]) {
     return request({
-      url: `/api/app/staff-services/staff-oranization?Ids=${Ids}`,
-      method: "post",
-      data: organizationIds,
+      url: '/api/app/staff-services/staff-oranization',
+      method: 'post',
+      params: { Ids },
+      data: organizationIds
     });
-  },
+  }
 };
 
 export default StaffAPI;
@@ -123,7 +132,7 @@ export interface StaffFormData {
   staffAccount: string;
   staffPassword?: string; // 密码在更新时可选
   staffPhone: string;
-  organization: string;
+  organization: string; // 可能存储机构名称字符串或ID
   staffGender: string;
   positionId: string; // UUID格式
   staffTypeId: string; // UUID格式
@@ -131,9 +140,10 @@ export interface StaffFormData {
   status: number;
   education: string;
   birthday: string; // ISO日期格式
-  graduationSchool: string;
+  graduationschool: string;
   introduction: string;
   photoUrl: string;
+  [key: string]: any; // 允许动态属性访问
 }
 
 /** 员工列表项 */

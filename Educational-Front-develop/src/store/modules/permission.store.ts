@@ -146,6 +146,12 @@ export const usePermissionStore = defineStore("permission", () => {
                   permission: ["system:announcement:list"],
                 },
               },
+              {
+                path: "staff",
+                name: "Staff",
+                component: () => import("@/views/system/staff/index.vue"),
+                meta: { title: "员工管理", icon: "ep:collection" },
+              },
             ],
           },
 
@@ -223,7 +229,7 @@ export const usePermissionStore = defineStore("permission", () => {
         // 打印当前路由表以便调试
         console.log(
           "📋 当前路由表:",
-          router.getRoutes().map((r: RouteRecordRaw) => r.path)
+          router.getRoutes().map((r: any) => r.path)
         );
         console.log("✅ 静态菜单生成完成");
         resolve(staticRoutes);

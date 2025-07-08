@@ -31,6 +31,7 @@ const service = axios.create({
   headers: { "Content-Type": "application/json;charset=utf-8" },
   paramsSerializer: (params) => qs.stringify(params),
   withCredentials: false, // 禁用跨源凭据
+  maxRedirects:0,
 });
 
 // 打印baseURL值，方便调试
@@ -81,8 +82,11 @@ service.interceptors.response.use(
 
     const { isSuc, data, msg, code } = response.data;
 
+    console.log(`⬅️ 接收响应: ${response.config.method} ${response.config.url}`, { isSuc, code, msg, data });
+
     // 请求成功：检查 isSuc 和 code
     if (isSuc === true && code.toString() === ResultEnum.SUCCESS) {
+      
       return data;
     }
 
