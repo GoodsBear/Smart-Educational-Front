@@ -92,7 +92,7 @@
       </el-table>
 
       <div class="pagination-container">
-        <el-pagination v-model:current-page="queryParams.PageIndex"  v-model:page-size="queryParams.PageSize"
+        <el-pagination v-model:current-page="queryParams.PageIndex" v-model:page-size="queryParams.PageSize"
           :total="total" :page-sizes="[10, 20, 30, 50]" layout="total, sizes, prev, pager, next, jumper"
           @size-change="handleSizeChange" @current-change="handleCurrentChange" />
       </div>
@@ -159,7 +159,6 @@
           </el-form-item>
         </el-col>
         <el-col :span="12">
-         
         </el-col>
       </el-row>
       <el-row>
@@ -308,8 +307,10 @@ import moment from 'moment'
 import type { FormInstance, FormRules } from 'element-plus'
 import { getSubjectDropdown } from '@/api/Lession/SubjectManager/Subject'
 import { getSpecialSubjectDropdown } from '@/api/Lession/TopicManager/TopicManager'
-import {getOrganizationDropdown} from '@/api/Organization/organrization'
-import {getGradeDropdown} from '@/api/Lession/ClassAndGrade/Grade'
+import { getOrganizationDropdown } from '@/api/Organization/organrization'
+import { getGradeDropdown } from '@/api/Lession/ClassAndGrade/Grade'
+// import { getOrganizationDropdown } from '@/api/Organization/organization.api'
+// import { getGradeDropdown } from '@/api/Lession/ClassAndGrade/Grade'
 
 
 
@@ -579,7 +580,7 @@ const SchoolList = ref([{
 const LoadSchool = async () => {
   const response = await getOrganizationDropdown();
   console.log(response)
-  SchoolList.value=response
+  SchoolList.value = response
 }
 //科目数据
 const SubjectList = ref([{
