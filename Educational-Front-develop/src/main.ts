@@ -27,7 +27,7 @@ import "default-passive-events";
 console.log("🚀 应用启动...");
 
 // 检测后端API是否可用
-ApiDetector.testConnection(`${import.meta.env.VITE_APP_BASE_API}`)
+ApiDetector.testConnection(`${import.meta.env.VITE_APP_API_URL}`)
   .then((status) => {
     console.log(`🔌 API连接状态: ${status}`);
 

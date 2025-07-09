@@ -26,7 +26,7 @@ interface BackendApiResponse<T = any> {
  * - 如果后端服务未启动，可以将baseURL设置为空字符串，前端将使用模拟数据
  */
 const service = axios.create({
-  baseURL: import.meta.env.VITE_APP_BASE_API,
+  baseURL: import.meta.env.VITE_APP_API_URL,
   timeout: 50000,
   headers: { "Content-Type": "application/json;charset=utf-8" },
   paramsSerializer: (params) => qs.stringify(params),
@@ -75,7 +75,7 @@ service.interceptors.request.use(
 service.interceptors.response.use(
   (response: AxiosResponse<BackendApiResponse>) => {
 
-    debugger
+    // debugger
 
     // 如果响应是二进制流，则直接返回（用于文件下载、Excel 导出等）
     if (response.config.responseType === "blob") {
@@ -132,7 +132,7 @@ service.interceptors.response.use(
 
     // 使用后端返回的msg作为错误信息
     const { msg } = response.data as BackendApiResponse; // 确保这里使用新的BackendApiResponse类型
-    debugger
+    // debugger
     ElMessage.error(msg || "请求失败");
     return Promise.reject(new Error(msg || "Request Error"));
   }
