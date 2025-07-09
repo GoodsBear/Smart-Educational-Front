@@ -119,7 +119,7 @@ const userinfo = useStore();
 const { t } = useI18n();
 
 // 获取路由实例
-const route = useRoute();
+// const route = useRoute();
 const router = useRouter();
 
 const loginFormRef = ref<FormInstance>();
@@ -129,14 +129,14 @@ const isCapsLock = ref(false);
 // 验证码图片Base64字符串 - 已注释
 // const captchaBase64 = ref();
 // 记住我
-const rememberMe = Auth.getRememberMe();
+// const rememberMe = Auth.getRememberMe();
 
-// 是否使用模拟数据（开发模式）
-const useMockData = ref(localStorage.getItem("useMockData") === "true");
-// 显示诊断工具（开发环境）
-const showDiagnosticTools = ref(import.meta.env.DEV);
-// 连接状态信息
-const connectionStatus = ref("");
+// // 是否使用模拟数据（开发模式）
+// const useMockData = ref(localStorage.getItem("useMockData") === "true");
+// // 显示诊断工具（开发环境）
+// const showDiagnosticTools = ref(import.meta.env.DEV);
+// // 连接状态信息
+// const connectionStatus = ref("");
 
 // 1. 读取本地存储
 const savedAccount = localStorage.getItem('rememberAccount') || '';
@@ -243,11 +243,11 @@ function toOtherForm(type: "register" | "resetPwd") {
   emit("update:modelValue", type);
 }
 
-// 监听模拟数据模式变化
-function handleMockDataChange(val: any) {
-  localStorage.setItem("useMockData", val ? "true" : "false");
-  console.log(`模拟数据模式: ${val ? "开启" : "关闭"}`);
-}
+// // 监听模拟数据模式变化
+// function handleMockDataChange(val: any) {
+//   localStorage.setItem("useMockData", val ? "true" : "false");
+//   console.log(`模拟数据模式: ${val ? "开启" : "关闭"}`);
+// }
 
 const captchaImgUrl = ref("");
 const captchaLoading = ref(false);
@@ -262,7 +262,7 @@ const getCaptchaImg = async () => {
     const res = await MyUserAPI.getCaptcha(loginFormData.StaffAccount);
     captchaImgUrl.value = URL.createObjectURL(res.data || res);
     loginFormData.CaptchaKey = loginFormData.StaffAccount;
-  } catch (e) {
+  } catch {
     ElMessage.error("获取验证码失败");
   } finally {
     captchaLoading.value = false;
