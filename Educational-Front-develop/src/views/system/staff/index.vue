@@ -289,7 +289,7 @@ import { ref, reactive, onMounted, nextTick } from "vue";
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from "element-plus";
 import StaffAPI from "@/api/staff/staff.api"; // 导入您封装的API方法
 import PositionAPI from "@/api/Organization/position.api";
-import { getOrganizationTree } from "@/api/organization/organization.api";
+import { getOrganizationTree } from "@/api/Organization/organization.api";
 import moment from "moment";
 import { Plus } from "@element-plus/icons-vue";
 import type { UploadProps } from "element-plus";
@@ -333,7 +333,7 @@ const showColumnDialog = ref(false);
 const statusDialogVisible = ref(false);
 const statusDialogTitle = ref();
 const statusForm = reactive({
-  status: "1", // 默认在职
+  status: 1, // 默认在职
 });
 // 转机构相关
 const transferDialogVisible = ref(false);
@@ -472,7 +472,7 @@ const fetchStaffList = async () => {
     console.log("接口返回", response);
     staffList.value = response.data;
     total.value = response.totleCount;
-  } catch (error) {
+  } catch {
     ElMessage.error("获取员工列表失败");
   } finally {
     loading.value = false;
@@ -690,8 +690,6 @@ const handleCheck = () => {
   console.log("选中变化时获取：", keys || "ref 未绑定");
 };
 
-const getSelected = () => { };
-
 // 打开弹窗并设置状态
 const openStatusDialog = (type: any) => {
   statusDialogVisible.value = true;
@@ -809,7 +807,7 @@ const submitPassword = async () => {
     await StaffAPI.updateStaffPassword(currentStaffId.value, passwordForm.newPassword);
     ElMessage.success("密码修改成功");
     passwordDialogVisible.value = false;
-  } catch (e) {
+  } catch {
     ElMessage.error("密码修改失败");
   }
 };

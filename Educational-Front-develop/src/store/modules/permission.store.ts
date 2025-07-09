@@ -20,7 +20,7 @@ export const usePermissionStore = defineStore("permission", () => {
    * 生成静态路由数据并注册到全局路由
    */
   function generateRoutes() {
-    return new Promise<RouteRecordRaw[]>((resolve, reject) => {
+    return new Promise<RouteRecordRaw[]>((resolve) => {
       try {
         console.log("🔧 生成静态菜单...");
 
@@ -242,7 +242,7 @@ export const usePermissionStore = defineStore("permission", () => {
             if (route.name) {
               try {
                 router.removeRoute(route.name);
-              } catch (e) {
+              } catch {
                 // 忽略移除不存在路由的错误
               }
             }

@@ -105,9 +105,7 @@
 <script setup lang="ts">
 import type { FormInstance } from "element-plus";
 import { useI18n } from "vue-i18n";
-import { Auth } from "@/utils/auth";
 import { ElMessage } from "element-plus";
-import { ApiDetector } from "@/utils/apiDetector";
 import { useUserStore } from "@/store/modules/user.store";
 import { useRoute, useRouter } from "vue-router";
 import { ref, watch, reactive } from "vue";
