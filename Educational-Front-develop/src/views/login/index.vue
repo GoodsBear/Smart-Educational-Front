@@ -138,12 +138,17 @@ const showDiagnosticTools = ref(import.meta.env.DEV);
 // 连接状态信息
 const connectionStatus = ref("");
 
+// 1. 读取本地存储
+const savedAccount = localStorage.getItem('rememberAccount') || '';
+const savedPassword = localStorage.getItem('rememberPassword') || '';
+
+// 2. 初始化表单
 const loginFormData = reactive({
-  StaffAccount: "",
-  StaffPassword: "",
+  StaffAccount: savedAccount,
+  StaffPassword: savedPassword,
   CaptchaKey: "",
   CaptchaCode: "",
-  rememberMe,
+  rememberMe: !!(savedAccount && savedPassword),
 });
 
 const loginRules = computed(() => {
@@ -193,6 +198,15 @@ async function handleLoginSubmit() {
     const userStore = useUserStore();
     console.log("提交数据", loginFormData);
     await userStore.login(loginFormData);
+
+    // 新增：记住账号密码
+    if (loginFormData.rememberMe) {
+      localStorage.setItem('rememberAccount', loginFormData.StaffAccount);
+      localStorage.setItem('rememberPassword', loginFormData.StaffPassword);
+    } else {
+      localStorage.removeItem('rememberAccount');
+      localStorage.removeItem('rememberPassword');
+    }
 
     // 3. 登录成功
     ElMessage.success(t("login.loginSuccess"));

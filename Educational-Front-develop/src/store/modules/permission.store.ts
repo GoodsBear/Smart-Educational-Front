@@ -51,7 +51,7 @@ export const usePermissionStore = defineStore("permission", () => {
             path: "/Students",
             component: Layout,
             redirect: "/Students/OnlineStudents",
-            meta: { title: "学员管理", icon: "ep:user-filled" },
+            meta: { title: "学员", icon: "ep:user-filled" },
             children: [
               {
                 path: "OnlineStudents",
@@ -83,7 +83,7 @@ export const usePermissionStore = defineStore("permission", () => {
             path: "/material",
             component: Layout,
             redirect: "/material/user",
-            meta: { title: "物料管理", icon: "ep:setting" },
+            meta: { title: "物料", icon: "ep:setting" },
             children: [
               {
                 path: "material",
@@ -103,7 +103,7 @@ export const usePermissionStore = defineStore("permission", () => {
             path: "/tissue",
             component: Layout,
             redirect: "/tissue/user",
-            meta: { title: "组织管理", icon: "ep:setting" },
+            meta: { title: "组织", icon: "ep:setting" },
             children: [
               {
                 path: "staff",
@@ -135,7 +135,7 @@ export const usePermissionStore = defineStore("permission", () => {
             path: "/system",
             component: Layout,
             redirect: "/system/user",
-            meta: { title: "系统管理", icon: "ep:setting" },
+            meta: { title: "系统", icon: "ep:setting" },
             children: [
               {
                 path: "user",
@@ -149,12 +149,12 @@ export const usePermissionStore = defineStore("permission", () => {
                 component: () => import("@/views/system/role/index.vue"),
                 meta: { title: "角色管理", icon: "ep:key" },
               },
-              {
-                path: "dict",
-                name: "Dict",
-                component: () => import("@/views/system/dict/index.vue"),
-                meta: { title: "字典管理", icon: "ep:collection" },
-              },
+              // {
+              //   path: "dict",
+              //   name: "Dict",
+              //   component: () => import("@/views/system/dict/index.vue"),
+              //   meta: { title: "字典管理", icon: "ep:collection" },
+              // },
               {
                 path: "announcement",
                 component: () => import("@/views/system/announcement/index.vue"),
@@ -174,7 +174,7 @@ export const usePermissionStore = defineStore("permission", () => {
             redirect: "/educational/course",
             name: "Educational",
             meta: {
-              title: "课程管理",
+              title: "课程",
               icon: "education",
               order: 1,
             },

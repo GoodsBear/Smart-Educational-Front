@@ -51,7 +51,7 @@
         <el-table-column type="selection" width="55" align="center" />
         <el-table-column label="Logo" align="center" prop="logoPath">
           <template #default="scope">
-            <img :src="scope.row.logoPath" class="avatar" />
+            <img :src="scope.row.logoPath" class="avatar" :style="'width:40px;height:40px'" />
           </template>
         </el-table-column><el-table-column label="专题名称" align="center" prop="name" />
         <el-table-column label="分类名称" align="center" prop="categoryName" />

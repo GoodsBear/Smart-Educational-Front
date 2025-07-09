@@ -49,11 +49,7 @@
     </div>
 
     <!-- 系统设置 -->
-    <div
-      v-if="defaultSettings.showSettings"
-      class="navbar-actions__item"
-      @click="handleSettingsClick"
-    >
+    <div v-if="defaultSettings.showSettings" class="navbar-actions__item" @click="handleSettingsClick">
       <div class="i-svg:setting" />
     </div>
   </div>
@@ -130,7 +126,9 @@ function logout() {
     lockScroll: false,
   }).then(() => {
     userStore.logout().then(() => {
-      router.push(`/login?redirect=${route.fullPath}`);
+      router.push(`/login?redirect=${route.fullPath}`).then(() => {
+        window.location.reload();
+      });
     });
   });
 }
@@ -154,7 +152,8 @@ function handleSettingsClick() {
     display: flex;
     align-items: center;
     justify-content: center;
-    min-width: 44px; /* 增加最小点击区域到44px，符合人机交互标准 */
+    min-width: 44px;
+    /* 增加最小点击区域到44px，符合人机交互标准 */
     height: 100%;
     min-height: 44px;
     padding: 0 8px;
@@ -163,7 +162,7 @@ function handleSettingsClick() {
     transition: all 0.3s;
 
     // 确保子元素居中
-    > * {
+    >* {
       display: flex;
       align-items: center;
       justify-content: center;

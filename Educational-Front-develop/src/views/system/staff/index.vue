@@ -90,8 +90,7 @@
         </el-form-item>
         <el-form-item label="所属职位" prop="positionId" required>
           <el-select v-model="addFormData.positionId" placeholder="请选择职位">
-            <el-option label="管理" value="3a1aa8f8-4191-62eb-cae1-631ba2b08e4c" />
-            <el-option label="老师" value="3a1aa8f8-5dfe-01db-8f07-9b94ab6e95ca" />
+            <el-option v-for="item in positionOptions" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
         <el-form-item label="人员类型" prop="staffTypeId" required>
@@ -165,8 +164,7 @@
         </el-form-item>
         <el-form-item label="所属职位" prop="positionId" required>
           <el-select v-model="editFormData.positionId" placeholder="请选择职位">
-            <el-option label="管理" value="3a1aa8f8-4191-62eb-cae1-631ba2b08e4c" />
-            <el-option label="老师" value="3a1aa8f8-5dfe-01db-8f07-9b94ab6e95ca" />
+            <el-option v-for="item in positionOptions" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
         <el-form-item label="人员类型" prop="staffTypeId" required>
@@ -284,6 +282,7 @@
 import { ref, reactive, onMounted, nextTick } from "vue";
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from "element-plus";
 import StaffAPI from "@/api/staff/staff.api"; // 导入您封装的API方法
+import PositionAPI from "@/api/Organization/position.api";
 import { getOrganizationTree } from "@/api/organization/organization.api";
 import moment from "moment";
 import { Plus } from "@element-plus/icons-vue";
@@ -335,6 +334,7 @@ const transferDialogVisible = ref(false);
 const transferTreeRef = ref<any>(null);
 
 const data = ref([]);
+const positionOptions = ref<{ label: string; value: string }[]>([]);
 
 const allColumns = [
   { label: "姓名", prop: "staffName", show: true },
@@ -664,6 +664,14 @@ onMounted(async () => {
   fetchStaffList();
   const response = await getOrganizationTree("00000000-0000-0000-0000-000000000000");
   data.value = response;
+
+  // 获取职位下拉数据
+  const posRes = await PositionAPI.getPositionSelectList();
+  // 假设返回数组为 [{ positionName, id }, ...]
+  positionOptions.value = (posRes || []).map((item: any) => ({
+    label: item.positionName,
+    value: item.id,
+  }));
   console.log("获取机构信息", data.value);
   console.log("组件已挂载，treeRef 状态：", treeRef.value ? "正常" : "异常");
 });
@@ -818,6 +826,11 @@ const resetAddForm = () => {
     photoUrl: "",
   });
   addFormRef.value?.resetFields();
+  imageUrl.value = "";         // 清空图片
+  shanji.value = [];           // 清空机构ID数组
+  if (treeRef.value) {
+    treeRef.value.setCheckedKeys([]); // 清空树选中
+  }
 };
 
 const resetEditForm = () => {
