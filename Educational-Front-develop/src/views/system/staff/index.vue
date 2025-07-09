@@ -1,280 +1,286 @@
 <template>
-  <div class="staff-management">
-    <!-- 搜索栏 Card -->
-    <el-card class="search-card" shadow="never">
-      <div class="search-bar">
-        <div class="search-fields">
-          <el-form :inline="true" :model="queryParams" class="search-form">
-            <el-form-item label="姓名">
-              <el-input v-model="queryParams.StaffName" placeholder="请输入" clearable />
-            </el-form-item>
-            <el-form-item label="状态">
-              <el-select v-model="queryParams.Status" placeholder="请选择状态" clearable class="status-select">
-                <el-option label="在职" :value="1" />
-                <el-option label="离职" :value="0" />
-              </el-select>
-            </el-form-item>
-          </el-form>
-          <div class="search-btns">
-            <el-button type="primary" @click="handleSearch">搜索</el-button>
-            <el-button @click="resetSearch">重置</el-button>
+  <div class="staff-page">
+    <div class="left-tree">
+      <!-- 机构树形结构 -->
+      <el-tree :data="orgTreeData" node-key="id" :props="{ label: 'label', children: 'children' }" default-expand-all
+        @node-click="handleOrgNodeClick" />
+    </div>
+    <div class="right-content">
+      <!-- 查询条件 -->
+      <el-card class="search-card" shadow="never">
+        <div class="search-bar">
+          <div class="search-fields">
+            <el-form :inline="true" :model="queryParams" class="search-form">
+              <el-form-item label="姓名">
+                <el-input v-model="queryParams.StaffName" placeholder="请输入" clearable />
+              </el-form-item>
+              <el-form-item label="状态">
+                <el-select v-model="queryParams.Status" placeholder="请选择状态" clearable class="status-select">
+                  <el-option label="在职" :value="1" />
+                  <el-option label="离职" :value="0" />
+                </el-select>
+              </el-form-item>
+            </el-form>
+            <div class="search-btns">
+              <el-button type="primary" @click="handleSearch">搜索</el-button>
+              <el-button @click="resetSearch">重置</el-button>
+            </div>
+          </div>
+          <div class="action-btns">
+            <el-button type="primary" @click="showAddDialog">添加员工</el-button>
+            <el-button>设置角色</el-button>
+            <el-button @click="handleDelete">删除</el-button>
+            <el-button @click="showTransferDialog">转机构</el-button>
+            <el-button @click="handleChangeStatus('离职')">转为离职</el-button>
+            <el-button @click="handleChangeStatus('在职')">转为在职</el-button>
+            <el-button>转学员</el-button>
+            <el-button>导出</el-button>
+            <el-button @click="showColumnDialog = true">自定义显示列</el-button>
           </div>
         </div>
-        <div class="action-btns">
-          <el-button type="primary" @click="showAddDialog">添加员工</el-button>
-          <el-button>设置角色</el-button>
-          <el-button @click="handleDelete">删除</el-button>
-          <el-button @click="showTransferDialog">转机构</el-button>
-          <el-button @click="handleChangeStatus('离职')">转为离职</el-button>
-          <el-button @click="handleChangeStatus('在职')">转为在职</el-button>
-          <el-button>转学员</el-button>
-          <el-button>导出</el-button>
-          <el-button @click="showColumnDialog = true">自定义显示列</el-button>
-        </div>
-      </div>
-    </el-card>
-
-    <!-- 信息列表 Card -->
-    <el-card class="table-card" shadow="never">
-      <!-- 员工列表 -->
-      <el-table ref="tableRef" v-loading="loading" :data="staffList" style="width: 100%" @selection-change="ToAll">
-        <el-table-column type="selection" width="50" />
-        <template v-for="col in allColumns" :key="col.prop">
-          <el-table-column v-if="checkedProps.includes(col.prop)" :prop="col.prop" :label="col.label">
-            <template v-if="col.prop === 'staffName'" #default="{ row }">
-              <el-link @click="goToDetail(row)">{{ row.staffName }}</el-link>
-            </template>
-            <template v-else-if="col.prop === 'entryDate'" #default="{ row }">
-              {{ row.entryDate ? moment(row.entryDate).format("YYYY-MM-DD") : "" }}
-            </template>
-            <template v-else-if="col.prop === 'status'" #default="{ row }">
-              <el-tag :type="row.status === 1 ? 'success' : 'info'">
-                {{ row.status === 1 ? "在职" : "离职" }}
-              </el-tag>
+      </el-card>
+      <!-- 信息列表 -->
+      <el-card class="table-card" shadow="never">
+        <!-- 员工列表 -->
+        <el-table ref="tableRef" v-loading="loading" :data="staffList" style="width: 100%" @selection-change="ToAll">
+          <el-table-column type="selection" width="50" />
+          <template v-for="col in allColumns" :key="col.prop">
+            <el-table-column v-if="checkedProps.includes(col.prop)" :prop="col.prop" :label="col.label">
+              <template v-if="col.prop === 'staffName'" #default="{ row }">
+                <el-link @click="goToDetail(row)">{{ row.staffName }}</el-link>
+              </template>
+              <template v-else-if="col.prop === 'entryDate'" #default="{ row }">
+                {{ row.entryDate ? moment(row.entryDate).format("YYYY-MM-DD") : "" }}
+              </template>
+              <template v-else-if="col.prop === 'status'" #default="{ row }">
+                <el-tag :type="row.status === 1 ? 'success' : 'info'">
+                  {{ row.status === 1 ? "在职" : "离职" }}
+                </el-tag>
+              </template>
+            </el-table-column>
+          </template>
+          <el-table-column label="操作">
+            <template #default="{ row }">
+              <el-button size="small" @click="showEditDialog(row)">编辑</el-button>
+              <el-button size="small" @click="changePassword(row)">改密</el-button>
             </template>
           </el-table-column>
+        </el-table>
+
+        <!-- 分页 -->
+        <div class="pagination">
+          <el-pagination v-model:current-page="queryParams.PageIndex" v-model:page-size="queryParams.PageSize"
+            :page-sizes="[10, 20, 50, 100]" layout="total, sizes, prev, pager, next, jumper" :total="total"
+            @size-change="fetchStaffList" @current-change="fetchStaffList" />
+        </div>
+      </el-card>
+
+      <!-- 新增/编辑对话框 -->
+      <el-dialog v-model="addDialogVisible" title="新增员工" width="60%" @closed="resetAddForm">
+        <el-form ref="addFormRef" :model="addFormData" :rules="addRules" label-width="110px">
+          <el-form-item label="姓名" prop="staffName" required>
+            <el-input v-model="addFormData.staffName" placeholder="请输入姓名" />
+          </el-form-item>
+          <el-form-item label="电话" prop="staffPhone" required>
+            <el-input v-model="addFormData.staffPhone" placeholder="请输入电话" />
+          </el-form-item>
+          <el-form-item label="登录账号" prop="staffAccount" required>
+            <el-input v-model="addFormData.staffAccount" placeholder="请输入登录账号" />
+          </el-form-item>
+          <el-form-item label="登录密码" prop="staffPassword" required>
+            <el-input v-model="addFormData.staffPassword" placeholder="请输入登录密码" />
+          </el-form-item>
+          <el-form-item label="所属机构" prop="organization">
+            <el-tree ref="treeRef" :data="data" show-checkbox node-key="id" @check-change="handleCheck" />
+          </el-form-item>
+          <el-form-item label="所属职位" prop="positionId" required>
+            <el-select v-model="addFormData.positionId" placeholder="请选择职位">
+              <el-option v-for="item in positionOptions" :key="item.value" :label="item.label" :value="item.value" />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="人员类型" prop="staffTypeId" required>
+            <el-select v-model="addFormData.staffTypeId" placeholder="人员类型">
+              <el-option label="内部" value="3a1aa9dd-dfb0-c706-496a-965d53a73a02" />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="性别" prop="staffGender" required>
+            <el-select v-model="addFormData.staffGender" placeholder="请选择性别">
+              <el-option label="男" value="男" />
+              <el-option label="女" value="女" />
+              <el-option label="未知" value="未知" />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="学历" prop="education">
+            <el-select v-model="addFormData.education" placeholder="请选择学历">
+              <el-option label="未知" value="未知" />
+              <el-option label="大专" value="大专" />
+              <el-option label="本科" value="本科" />
+              <el-option label="硕士" value="硕士" />
+              <el-option label="博士" value="博士" />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="生日" prop="birthday">
+            <el-date-picker v-model="addFormData.birthday" type="date" placeholder="请选择生日" style="width: 100%" />
+          </el-form-item>
+          <el-form-item label="毕业学校" prop="graduationSchool">
+            <el-input v-model="addFormData.graduationSchool" placeholder="请输入毕业学校" />
+          </el-form-item>
+          <el-form-item label="入职日期" prop="entryDate">
+            <el-date-picker v-model="addFormData.entryDate" type="date" placeholder="请选择入职日期" style="width: 100%" />
+          </el-form-item>
+          <el-form-item label="简介" prop="introduction">
+            <el-input v-model="addFormData.introduction" type="textarea" :rows="2" placeholder="请输入简介" />
+          </el-form-item>
+          <el-form-item label="状态" prop="status">
+            <el-switch v-model="addFormData.status" :active-value="1" :inactive-value="0" active-text="在职"
+              inactive-text="离职" />
+          </el-form-item>
+          <el-form-item label="照片" prop="photoUrl">
+            <el-upload class="avatar-uploader" action="https://localhost:44375/api/upload/image" :show-file-list="false"
+              :on-success="handleAvatarSuccess" :before-upload="beforeAvatarUpload">
+              <img v-if="imageUrl" :src="imageUrl" class="avatar" />
+              <el-icon v-else class="avatar-uploader-icon">
+                <Plus />
+              </el-icon>
+            </el-upload>
+          </el-form-item>
+        </el-form>
+        <template #footer>
+          <span class="dialog-footer">
+            <el-button @click="addDialogVisible = false">取消</el-button>
+            <el-button type="primary" @click="submitAddForm">确认</el-button>
+          </span>
         </template>
-        <el-table-column label="操作">
-          <template #default="{ row }">
-            <el-button size="small" @click="showEditDialog(row)">编辑</el-button>
-            <el-button size="small" @click="changePassword(row)">改密</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
+      </el-dialog>
 
-      <!-- 分页 -->
-      <div class="pagination">
-        <el-pagination v-model:current-page="queryParams.PageIndex" v-model:page-size="queryParams.PageSize"
-          :page-sizes="[10, 20, 50, 100]" layout="total, sizes, prev, pager, next, jumper" :total="total"
-          @size-change="fetchStaffList" @current-change="fetchStaffList" />
-      </div>
-    </el-card>
+      <el-dialog v-model="editDialogVisible" title="编辑员工" width="60%" @closed="resetEditForm">
+        <el-form ref="editFormRef" :model="editFormData" :rules="editRules" label-width="110px">
+          <el-form-item label="姓名" prop="staffName" required>
+            <el-input v-model="editFormData.staffName" placeholder="请输入姓名" />
+          </el-form-item>
+          <el-form-item label="电话" prop="staffPhone" required>
+            <el-input v-model="editFormData.staffPhone" placeholder="请输入电话" />
+          </el-form-item>
+          <el-form-item label="登录账号" prop="staffAccount" required>
+            <el-input v-model="editFormData.staffAccount" placeholder="请输入登录账号" />
+          </el-form-item>
+          <el-form-item label="所属机构" prop="organization">
+            <el-tree ref="treeRef" :data="data" show-checkbox node-key="id" @check-change="handleCheck" />
+          </el-form-item>
+          <el-form-item label="所属职位" prop="positionId" required>
+            <el-select v-model="editFormData.positionId" placeholder="请选择职位">
+              <el-option v-for="item in positionOptions" :key="item.value" :label="item.label" :value="item.value" />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="人员类型" prop="staffTypeId" required>
+            <el-select v-model="editFormData.staffTypeId" placeholder="人员类型">
+              <el-option label="内部" value="3a1aa9dd-dfb0-c706-496a-965d53a73a02" />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="性别" prop="staffGender" required>
+            <el-select v-model="editFormData.staffGender" placeholder="请选择性别">
+              <el-option label="男" value="男" />
+              <el-option label="女" value="女" />
+              <el-option label="未知" value="未知" />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="学历" prop="education">
+            <el-select v-model="editFormData.education" placeholder="请选择学历">
+              <el-option label="未知" value="未知" />
+              <el-option label="大专" value="大专" />
+              <el-option label="本科" value="本科" />
+              <el-option label="硕士" value="硕士" />
+              <el-option label="博士" value="博士" />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="生日" prop="birthday">
+            <el-date-picker v-model="editFormData.birthday" type="date" placeholder="请选择生日" style="width: 100%" />
+          </el-form-item>
+          <el-form-item label="毕业学校" prop="graduationSchool">
+            <el-input v-model="editFormData.graduationSchool" placeholder="请输入毕业学校" />
+          </el-form-item>
+          <el-form-item label="入职日期" prop="entryDate">
+            <el-date-picker v-model="editFormData.entryDate" type="date" placeholder="请选择入职日期" style="width: 100%" />
+          </el-form-item>
+          <el-form-item label="简介" prop="introduction">
+            <el-input v-model="editFormData.introduction" type="textarea" :rows="2" placeholder="请输入简介" />
+          </el-form-item>
+          <el-form-item label="状态" prop="status">
+            <el-switch v-model="editFormData.status" :active-value="1" :inactive-value="0" active-text="在职"
+              inactive-text="离职" />
+          </el-form-item>
+          <el-form-item label="照片" prop="photoUrl">
+            <el-upload class="avatar-uploader" action="https://localhost:44375/api/upload/image" :show-file-list="false"
+              :on-success="handleAvatarSuccess" :before-upload="beforeAvatarUpload">
+              <img v-if="imageUrl" :src="imageUrl" class="avatar" />
+              <el-icon v-else class="avatar-uploader-icon">
+                <Plus />
+              </el-icon>
+            </el-upload>
+          </el-form-item>
+        </el-form>
+        <template #footer>
+          <el-button @click="editDialogVisible = false">取消</el-button>
+          <el-button type="primary" @click="submitEditForm">保存</el-button>
+        </template>
+      </el-dialog>
 
-    <!-- 新增/编辑对话框 -->
-    <el-dialog v-model="addDialogVisible" title="新增员工" width="60%" @closed="resetAddForm">
-      <el-form ref="addFormRef" :model="addFormData" :rules="addRules" label-width="110px">
-        <el-form-item label="姓名" prop="staffName" required>
-          <el-input v-model="addFormData.staffName" placeholder="请输入姓名" />
-        </el-form-item>
-        <el-form-item label="电话" prop="staffPhone" required>
-          <el-input v-model="addFormData.staffPhone" placeholder="请输入电话" />
-        </el-form-item>
-        <el-form-item label="登录账号" prop="staffAccount" required>
-          <el-input v-model="addFormData.staffAccount" placeholder="请输入登录账号" />
-        </el-form-item>
-        <el-form-item label="登录密码" prop="staffPassword" required>
-          <el-input v-model="addFormData.staffPassword" placeholder="请输入登录密码" />
-        </el-form-item>
-        <el-form-item label="所属机构" prop="organization">
-          <el-tree ref="treeRef" :data="data" show-checkbox node-key="id" @check-change="handleCheck" />
-        </el-form-item>
-        <el-form-item label="所属职位" prop="positionId" required>
-          <el-select v-model="addFormData.positionId" placeholder="请选择职位">
-            <el-option v-for="item in positionOptions" :key="item.value" :label="item.label" :value="item.value" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="人员类型" prop="staffTypeId" required>
-          <el-select v-model="addFormData.staffTypeId" placeholder="人员类型">
-            <el-option label="内部" value="3a1aa9dd-dfb0-c706-496a-965d53a73a02" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="性别" prop="staffGender" required>
-          <el-select v-model="addFormData.staffGender" placeholder="请选择性别">
-            <el-option label="男" value="男" />
-            <el-option label="女" value="女" />
-            <el-option label="未知" value="未知" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="学历" prop="education">
-          <el-select v-model="addFormData.education" placeholder="请选择学历">
-            <el-option label="未知" value="未知" />
-            <el-option label="大专" value="大专" />
-            <el-option label="本科" value="本科" />
-            <el-option label="硕士" value="硕士" />
-            <el-option label="博士" value="博士" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="生日" prop="birthday">
-          <el-date-picker v-model="addFormData.birthday" type="date" placeholder="请选择生日" style="width: 100%" />
-        </el-form-item>
-        <el-form-item label="毕业学校" prop="graduationSchool">
-          <el-input v-model="addFormData.graduationSchool" placeholder="请输入毕业学校" />
-        </el-form-item>
-        <el-form-item label="入职日期" prop="entryDate">
-          <el-date-picker v-model="addFormData.entryDate" type="date" placeholder="请选择入职日期" style="width: 100%" />
-        </el-form-item>
-        <el-form-item label="简介" prop="introduction">
-          <el-input v-model="addFormData.introduction" type="textarea" :rows="2" placeholder="请输入简介" />
-        </el-form-item>
-        <el-form-item label="状态" prop="status">
-          <el-switch v-model="addFormData.status" :active-value="1" :inactive-value="0" active-text="在职"
-            inactive-text="离职" />
-        </el-form-item>
-        <el-form-item label="照片" prop="photoUrl">
-          <el-upload class="avatar-uploader" action="https://localhost:44375/api/upload/image" :show-file-list="false"
-            :on-success="handleAvatarSuccess" :before-upload="beforeAvatarUpload">
-            <img v-if="imageUrl" :src="imageUrl" class="avatar" />
-            <el-icon v-else class="avatar-uploader-icon">
-              <Plus />
-            </el-icon>
-          </el-upload>
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <span class="dialog-footer">
-          <el-button @click="addDialogVisible = false">取消</el-button>
-          <el-button type="primary" @click="submitAddForm">确认</el-button>
-        </span>
-      </template>
-    </el-dialog>
+      <el-dialog v-model="showColumnDialog" title="自定义显示列" width="400px">
+        <el-checkbox-group v-model="checkedProps">
+          <el-checkbox v-for="col in allColumns" :key="col.prop" :label="col.prop">
+            {{ col.label }}
+          </el-checkbox>
+        </el-checkbox-group>
+        <template #footer>
+          <el-button @click="resetColumns">恢复默认</el-button>
+          <el-button type="primary" @click="showColumnDialog = false">确认</el-button>
+        </template>
+      </el-dialog>
 
-    <el-dialog v-model="editDialogVisible" title="编辑员工" width="60%" @closed="resetEditForm">
-      <el-form ref="editFormRef" :model="editFormData" :rules="editRules" label-width="110px">
-        <el-form-item label="姓名" prop="staffName" required>
-          <el-input v-model="editFormData.staffName" placeholder="请输入姓名" />
-        </el-form-item>
-        <el-form-item label="电话" prop="staffPhone" required>
-          <el-input v-model="editFormData.staffPhone" placeholder="请输入电话" />
-        </el-form-item>
-        <el-form-item label="登录账号" prop="staffAccount" required>
-          <el-input v-model="editFormData.staffAccount" placeholder="请输入登录账号" />
-        </el-form-item>
-        <el-form-item label="所属机构" prop="organization">
-          <el-tree ref="treeRef" :data="data" show-checkbox node-key="id" @check-change="handleCheck" />
-        </el-form-item>
-        <el-form-item label="所属职位" prop="positionId" required>
-          <el-select v-model="editFormData.positionId" placeholder="请选择职位">
-            <el-option v-for="item in positionOptions" :key="item.value" :label="item.label" :value="item.value" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="人员类型" prop="staffTypeId" required>
-          <el-select v-model="editFormData.staffTypeId" placeholder="人员类型">
-            <el-option label="内部" value="3a1aa9dd-dfb0-c706-496a-965d53a73a02" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="性别" prop="staffGender" required>
-          <el-select v-model="editFormData.staffGender" placeholder="请选择性别">
-            <el-option label="男" value="男" />
-            <el-option label="女" value="女" />
-            <el-option label="未知" value="未知" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="学历" prop="education">
-          <el-select v-model="editFormData.education" placeholder="请选择学历">
-            <el-option label="未知" value="未知" />
-            <el-option label="大专" value="大专" />
-            <el-option label="本科" value="本科" />
-            <el-option label="硕士" value="硕士" />
-            <el-option label="博士" value="博士" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="生日" prop="birthday">
-          <el-date-picker v-model="editFormData.birthday" type="date" placeholder="请选择生日" style="width: 100%" />
-        </el-form-item>
-        <el-form-item label="毕业学校" prop="graduationSchool">
-          <el-input v-model="editFormData.graduationSchool" placeholder="请输入毕业学校" />
-        </el-form-item>
-        <el-form-item label="入职日期" prop="entryDate">
-          <el-date-picker v-model="editFormData.entryDate" type="date" placeholder="请选择入职日期" style="width: 100%" />
-        </el-form-item>
-        <el-form-item label="简介" prop="introduction">
-          <el-input v-model="editFormData.introduction" type="textarea" :rows="2" placeholder="请输入简介" />
-        </el-form-item>
-        <el-form-item label="状态" prop="status">
-          <el-switch v-model="editFormData.status" :active-value="1" :inactive-value="0" active-text="在职"
-            inactive-text="离职" />
-        </el-form-item>
-        <el-form-item label="照片" prop="photoUrl">
-          <el-upload class="avatar-uploader" action="https://localhost:44375/api/upload/image" :show-file-list="false"
-            :on-success="handleAvatarSuccess" :before-upload="beforeAvatarUpload">
-            <img v-if="imageUrl" :src="imageUrl" class="avatar" />
-            <el-icon v-else class="avatar-uploader-icon">
-              <Plus />
-            </el-icon>
-          </el-upload>
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <el-button @click="editDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="submitEditForm">保存</el-button>
-      </template>
-    </el-dialog>
+      <!-- 状态对话框 -->
+      <el-dialog v-model="statusDialogVisible" :title="statusDialogTitle">
+        <el-form :model="statusForm">
+          <el-form-item label="状态">
+            <el-select v-model="statusForm.status" placeholder="请选择状态">
+              <el-option label="在职" :value="1" />
+              <el-option label="离职" :value="0" />
+            </el-select>
+          </el-form-item>
+        </el-form>
+        <template #footer>
+          <el-button @click="statusDialogVisible = false">取消</el-button>
+          <el-button type="primary" @click="submitStatus">提交</el-button>
+        </template>
+      </el-dialog>
 
-    <el-dialog v-model="showColumnDialog" title="自定义显示列" width="400px">
-      <el-checkbox-group v-model="checkedProps">
-        <el-checkbox v-for="col in allColumns" :key="col.prop" :label="col.prop">
-          {{ col.label }}
-        </el-checkbox>
-      </el-checkbox-group>
-      <template #footer>
-        <el-button @click="resetColumns">恢复默认</el-button>
-        <el-button type="primary" @click="showColumnDialog = false">确认</el-button>
-      </template>
-    </el-dialog>
+      <el-dialog v-model="passwordDialogVisible" title="重置密码" width="400px">
+        <el-form ref="passwordFormRef" :model="passwordForm" :rules="passwordRules" label-width="100px">
+          <el-form-item label="输入新密码:" prop="newPassword">
+            <el-input v-model="passwordForm.newPassword" type="password" placeholder="请输入新密码" />
+          </el-form-item>
+        </el-form>
+        <template #footer>
+          <el-button @click="passwordDialogVisible = false">取消</el-button>
+          <el-button type="primary" @click="submitPassword">提交</el-button>
+        </template>
+      </el-dialog>
 
-    <!-- 状态对话框 -->
-    <el-dialog v-model="statusDialogVisible" :title="statusDialogTitle">
-      <el-form :model="statusForm">
-        <el-form-item label="状态">
-          <el-select v-model="statusForm.status" placeholder="请选择状态">
-            <el-option label="在职" :value="1" />
-            <el-option label="离职" :value="0" />
-          </el-select>
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <el-button @click="statusDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="submitStatus">提交</el-button>
-      </template>
-    </el-dialog>
+      <!-- 转机构对话框 -->
+      <el-dialog v-model="transferDialogVisible" title="转机构" width="500px">
+        <div class="transfer-dialog-content">
+          <p>请选择要转入的机构：</p>
+          <el-tree ref="transferTreeRef" :data="data" show-checkbox node-key="id" default-expand-all highlight-current
+            :props="{ label: 'label' }" />
+        </div>
+        <template #footer>
+          <span class="dialog-footer">
+            <el-button @click="transferDialogVisible = false">取消</el-button>
+            <el-button type="primary" @click="submitTransfer">确认</el-button>
+          </span>
+        </template>
+      </el-dialog>
 
-    <el-dialog v-model="passwordDialogVisible" title="重置密码" width="400px">
-      <el-form ref="passwordFormRef" :model="passwordForm" :rules="passwordRules" label-width="100px">
-        <el-form-item label="输入新密码:" prop="newPassword">
-          <el-input v-model="passwordForm.newPassword" type="password" placeholder="请输入新密码" />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <el-button @click="passwordDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="submitPassword">提交</el-button>
-      </template>
-    </el-dialog>
-
-    <!-- 转机构对话框 -->
-    <el-dialog v-model="transferDialogVisible" title="转机构" width="500px">
-      <div class="transfer-dialog-content">
-        <p>请选择要转入的机构：</p>
-        <el-tree ref="transferTreeRef" :data="data" show-checkbox node-key="id" default-expand-all highlight-current
-          :props="{ label: 'label' }" />
-      </div>
-      <template #footer>
-        <span class="dialog-footer">
-          <el-button @click="transferDialogVisible = false">取消</el-button>
-          <el-button type="primary" @click="submitTransfer">确认</el-button>
-        </span>
-      </template>
-    </el-dialog>
-
+    </div>
   </div>
 </template>
 
@@ -460,6 +466,7 @@ const fetchStaffList = async () => {
       Status: queryParams.Status,
       PageIndex: queryParams.PageIndex,
       PageSize: queryParams.PageSize,
+      OrganizationId: selectedOrgId.value || undefined, // 传递机构ID
     };
     const response = await StaffAPI.getList(params);
     console.log("接口返回", response);
@@ -853,10 +860,41 @@ const resetEditForm = () => {
   editFormRef.value?.resetFields();
 };
 
+const orgTreeData = ref([]);
+const selectedOrgId = ref<string | null>(null);
+
+function handleOrgNodeClick(node: any) {
+  selectedOrgId.value = node.id;
+  fetchStaffList(); // 查询员工
+}
+
+onMounted(async () => {
+  orgTreeData.value = await getOrganizationTree("00000000-0000-0000-0000-000000000000");
+});
 
 </script>
 
 <style scoped>
+.staff-page {
+  display: flex;
+  height: 100%;
+}
+
+.left-tree {
+  width: 240px;
+  min-width: 200px;
+  background: #fff;
+  border-right: 1px solid #f0f0f0;
+  padding: 16px 0 16px 16px;
+  box-sizing: border-box;
+}
+
+.right-content {
+  flex: 1;
+  padding: 16px;
+  overflow: auto;
+}
+
 .staff-management {
   padding: 20px;
 }
