@@ -101,10 +101,10 @@
           </el-select>
         </el-form-item>
         <el-form-item label="Logo路径" prop="logoPath">
-          <el-upload class="avatar-uploader" action="https://localhost:44375/api/upload/image" :show-file-list="false"
-            :on-success="handleAvatarSuccess" :before-upload="beforeAvatarUpload">
-            <img v-if="form.logoPath" :src="form.logoPath" class="avatar" />
-            <el-icon v-else class="avatar-uploader-icon">
+          <el-upload class="avatar-uploader custom-avatar-uploader" action="https://localhost:44375/api/upload/image"
+            :show-file-list="false" :on-success="handleAvatarSuccess" :before-upload="beforeAvatarUpload">
+            <img v-if="form.logoPath" :src="form.logoPath" class="avatar custom-avatar-img" />
+            <el-icon v-else class="avatar-uploader-icon custom-avatar-icon">
               <Plus />
             </el-icon>
           </el-upload>
@@ -376,13 +376,13 @@ const handleAdd = () => {
 const handleUpdate = async (row: any) => {
   try {
     reset()
-    const response = await getTopicDetail(row.id)
-    Object.assign(form.value, response.data) // 保持响应式
-    form.value = response.data
+    // const response = await getTopicDetail(row.id)
+    //Object.assign(form.value, response.data) // 保持响应式
+    //form.value = response.data
     // const response = await getTopicDetail(row.id)
     // form.value = response.data
-    // 设置logo预览
-    logoImageUrl.value = form.value.logoPath
+    // // 设置logo预览
+    // logoImageUrl.value = form.value.logoPath
     open.value = true
     title.value = '修改专题'
     TopicDetail(row.id)
@@ -673,5 +673,44 @@ const showColumns = computed(() =>
   margin-top: 8px;
   font-size: 12px;
   color: #606266;
+}
+
+.custom-avatar-uploader {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  cursor: pointer;
+}
+
+.custom-avatar-img {
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+  border: 2px solid #e4e7ed;
+  object-fit: cover;
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+.custom-avatar-img:hover {
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
+  border-color: #409eff;
+}
+
+.custom-avatar-icon {
+  font-size: 32px;
+  color: #c0c4cc;
+  border: 2px dashed #e4e7ed;
+  border-radius: 8px;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.2s;
+}
+
+.custom-avatar-icon:hover {
+  border-color: #409eff;
+  color: #409eff;
 }
 </style>
