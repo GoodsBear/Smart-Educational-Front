@@ -239,10 +239,8 @@
           </el-form-item>
         </el-col>
         <el-col :span="12">
-          <el-form-item label="课程封面图" prop="coverImage">
-            <el-upload action="upload_url" :show-file-list="false" :on-success="handleCoverImageSuccess">
-              <el-button type="primary">上传</el-button>
-            </el-upload>
+          <el-form-item label="课程封面图">
+            <SingleImageUpload v-model="courseForm.coverImage" :accept="'image/*'" :max-file-size="10" />
           </el-form-item>
         </el-col>
       </el-row>
@@ -254,10 +252,8 @@
           </el-form-item>
         </el-col>
         <el-col :span="12">
-          <el-form-item label="班级群二维码" prop="classQrCode">
-            <el-upload action="upload_url" :show-file-list="false" :on-success="handleClassQrCodeSuccess">
-              <el-button type="primary">上传</el-button>
-            </el-upload>
+          <el-form-item label="班级群二维码">
+            <SingleImageUpload v-model="courseForm.classQrCode" :accept="'image/*'" :max-file-size="10" />
           </el-form-item>
         </el-col>
       </el-row>
@@ -274,10 +270,8 @@
         </el-col>
       </el-row>
 
-      <el-form-item label="详情介绍图集" prop="detailImageList">
-        <el-upload action="upload_url" list-type="picture-card" :file-list="courseForm.detailImageList">
-          <el-button type="primary">上传</el-button>
-        </el-upload>
+      <el-form-item label="详情介绍图集">
+        <MultiImageUpload v-model="courseForm.detailImageList" :limit="10" />
       </el-form-item>
       <el-form-item label="师资说明" prop="teacherRemark">
         <el-input v-model="courseForm.teacherRemark" type="textarea"></el-input>
@@ -301,7 +295,7 @@
 
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
-import { updateCourseStatus, getCourseList, addCourse } from '@/api/Lession/CourseManager/Course'
+import { updateCourseStatus, getCourseList, addCourse, updateCourse } from '@/api/Lession/CourseManager/Course'
 import moment from 'moment'
 import type { FormInstance, FormRules } from 'element-plus'
 import { getSubjectDropdown } from '@/api/Lession/SubjectManager/Subject'
@@ -363,8 +357,8 @@ const drawer = ref(false)
 const title = ref("")
 // 表单数据
 interface CourseForm {
-  id: string
-  courseName: string
+  id: string,
+  courseName: string,
   campusId: string,
   subjectId: string,
   topicId: string,
@@ -386,7 +380,7 @@ interface CourseForm {
   classQrCode: string,
   stockNum: number,
   stopSaleDate: Date,
-  detailImageList: string[],
+  detailImageList: string,
   teacherRemark: string,
   serviceRemark: string
 }
@@ -401,22 +395,22 @@ const courseForm = reactive<CourseForm>({
   gradeId: '',
   sellUnit: '次',
   courseTypeId: 1,
-  totalPrice: null,
-  lessonNum: null,
-  validMonthNum: null,
-  isReserve: false,
-  lessonCut: null,
-  isAfterPay: false,
-  lessonCutMode: null,
-  lessonDuration: null,
+  totalPrice: 0,
+  lessonNum: 0,
+  validMonthNum: 0,
+  isReserve: true,
+  lessonCut: 0,
+  isAfterPay: true,
+  lessonCutMode: 0,
+  lessonDuration: 0,
   status: true,
   isOnlineSale: false,
   coverImage: '',
   isOpenRecommend: false,
   classQrCode: '',
-  stockNum: null,
-  stopSaleDate: null,
-  detailImageList: [],
+  stockNum: 0,
+  stopSaleDate: new Date(),
+  detailImageList: '',
   teacherRemark: '',
   serviceRemark: ''
 })
@@ -448,28 +442,49 @@ const handleAdd = async () => {
   drawer.value = true
   title.value = "新增课程"
 }
-const submitForm = async (formEl: FormInstance | undefined) => {
-  if (!formEl) return
-  await formEl.validate(async (valid, fields) => {
-    if (valid) {
-      const response = await addCourse(courseForm)
-      if (response.code === 200) {
-        ElMessage.success(response.message)
-        drawer.value = false
-        handleQuery()
-      } else {
-        ElMessage.error(response.message)
-      }
-    } else {
-      console.log('error submit!', fields)
-    }
-  })
-}
 
+//重置表单
 const resetForm = (formEl: any) => {
   if (!formEl) return
   formEl.resetFields()
 }
+// 新增/编辑状态
+const isEdit = ref(false);
+// 编辑方法
+const handleEdit = (row: any) => {
+  title.value = "编辑课程";
+  drawer.value = true;
+  isEdit.value = true;
+  // 深拷贝，避免直接修改表格数据
+  Object.assign(courseForm, JSON.parse(JSON.stringify(row)));
+}
+
+// 提交方法
+const submitForm = async (formEl: FormInstance | undefined) => {
+  if (!formEl) return;
+  await formEl.validate(async (valid, fields) => {
+    if (valid) {
+      let response;
+      if (isEdit.value) {
+        debugger
+        // 编辑
+        response = await updateCourse(courseForm);
+      } else {
+        // 新增
+        response = await addCourse(courseForm);
+      }
+      if (response.code === 200) {
+        ElMessage.success(response.message);
+        drawer.value = false;
+        handleQuery();
+      } else {
+        ElMessage.error(response.message);
+      }
+    } else {
+      console.log('error submit!', fields);
+    }
+  });
+};
 
 //#endregion
 
@@ -544,16 +559,6 @@ const handleAction = async (action: any) => {
 };
 
 
-
-// 编辑方法
-const handleEdit = (row: any) => {
-  // TODO: 实现编辑逻辑
-  drawer.value = true
-  Object.assign(courseForm, row)
-}
-
-
-
 // 处理每页显示数量变化
 const handleSizeChange = (val: number) => {
   queryParams.PageSize = val
@@ -611,7 +616,10 @@ const LoadTopic = async () => {
   const response = await getSpecialSubjectDropdown();
   TopicList.value = response
 }
+//#region 图片上传相关
 
+
+//#endregion
 
 //#endregion
 
@@ -643,5 +651,10 @@ onMounted(() => {
 .pagination-container {
   margin-top: 20px;
   text-align: right;
+}
+
+.avatar-uploader .avatar {
+  width: 100px;
+  height: 100px;
 }
 </style>

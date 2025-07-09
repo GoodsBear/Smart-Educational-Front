@@ -80,3 +80,15 @@ export function getCourseDropdown() {
     method: "get",
   });
 }
+
+/**
+ * @description 修改课程信息
+ * @param {object} data 课程信息
+ */
+export function updateCourse(data: any) {
+  return request({
+    url: "/UpdateCourse",
+    method: "put",
+    data,
+  });
+}
