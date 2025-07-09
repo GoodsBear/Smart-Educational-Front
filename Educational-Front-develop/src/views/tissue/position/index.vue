@@ -20,9 +20,9 @@
                 <div class="table-title">职位列表</div>
                 <div class="operation-area">
                     <el-button type="primary" @click="showAddDialog">新增</el-button>
-                    <el-button @click="handleDelete">删除</el-button>
-                    <el-button @click="fetchPositionList">刷新</el-button>
-                    <el-button @click="showColumnDialog = true">自定义显示列</el-button>
+                    <el-button @click="handleDelete" type="danger">删除</el-button>
+                    <el-button @click="fetchPositionList" type="success">刷新</el-button>
+                    <el-button @click="showColumnDialog = true" type="primary">自定义显示列</el-button>
                 </div>
             </div>
             <!-- 职位列表表格 -->

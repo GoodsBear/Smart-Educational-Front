@@ -13,25 +13,22 @@
           </el-select>
         </el-form-item>
         <el-form-item label="讲师" prop="teacher">
-
-          <el-input v-model="queryParams.teacher" placeholder="请输入讲师名称" clearable style="width: 240px;" />
-
-          <!-- <el-select v-model="queryParams.teacher" placeholder="请输入讲师名称" style="width: 240px">
-          
+          <!-- <el-input v-model="queryParams.teacher" placeholder="请输入讲师名称" clearable style="width: 240px;"
+            @click="ShowTopicB == true" /> -->
+          <el-select v-model="queryParams.teacher" placeholder="请输入讲师名称" style="width: 240px">
+            <el-option v-for="item in staffList" :key="item.id" :label="item.staffName" :value="item.staffName" />
           </el-select>
-            <el-option v-for="item in staffList" :key="item.id" :label="item.staffName" :value="item.staffName" /> -->
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="handleQuery">查询</el-button>
           <el-button @click="resetQuery">重置</el-button>
         </el-form-item>
-
       </el-form>
       <!-- {{ Name }} 
-      <TopicB v-model:Name="Name"></TopicB>-->
-      <div>
+      <TopicB v-model:Name="Name"></TopicB>
+      <div :class="ShowTopicB">
         <TopicB v-model:Name="Name"></TopicB>
-      </div>
+      </div>-->
     </el-card>
 
     <el-card shadow="never">
@@ -43,40 +40,37 @@
           <el-col :span="1.5">
             <el-button type="danger" :disabled="multiple" @click="handleBatchDelete">批量删除</el-button>
           </el-col>
+          <el-col :span="1.5">
+            <el-button @click="getList()">刷新</el-button>
+          </el-col>
+          <el-col :span="1.5">
+            <el-button @click="showColumnDialog = true" type="primary">自定义显示列</el-button>
+          </el-col>
         </el-row>
       </template>
 
       <el-table v-loading="loading" :data="topicList" @selection-change="handleSelectionChange">
-
         <el-table-column type="selection" width="55" align="center" />
-        <el-table-column label="Logo" align="center" prop="logoPath">
-          <template #default="scope">
-            <img :src="scope.row.logoPath" class="avatar" :style="'width:40px;height:40px'" />
+        <el-table-column v-for="col in showColumns" :key="col.prop" :prop="col.prop" :label="col.label"
+          :width="col.width" :align="col.align">
+          <template v-if="col.prop === 'logoPath'" #default="scope">
+            <img :src="scope.row.logoPath" class="avatar" style="width: 80px; height: 80px;" />
           </template>
-        </el-table-column><el-table-column label="专题名称" align="center" prop="name" />
-        <el-table-column label="分类名称" align="center" prop="categoryName" />
-        <el-table-column label="讲师" align="center" prop="teacher" />
-        <el-table-column label="简介" align="center" prop="brief" />
-        <el-table-column label="详情" align="center" prop="details" />
-        <el-table-column label="成就展示" align="center" prop="achievementDisplay" />
-        <el-table-column label="创建时间" align="center" prop="creationTime" width="180">
-          <template #default="scope">
-            {{ formatDateTime(scope.row.creationTime) }}
+          <template v-else-if="col.prop === 'brief' || col.prop === 'details' || col.prop === 'achievementDisplay'"
+            #default="scope">
+            <div v-html="scope.row[col.prop]"></div>
+          </template>
+          <template v-else-if="col.prop === 'creationTime' || col.prop === 'lastModificationTime'" #default="scope">
+            {{ moment(scope.row[col.prop]).format("YYYY-MM-DD HH:mm:ss") }}
+          </template>
+          <template v-else #default="scope">
+            {{ scope.row[col.prop] }}
           </template>
         </el-table-column>
-        <!-- <el-table-column label="修改时间" align="center" prop="lastModificationTime" width="180">
-          <template #default="scope">
-            {{ formatDateTime(scope.row.lastModificationTime) }}、
-          </template>
-        </el-table-column> -->
         <el-table-column label="操作" align="center" width="150">
           <template #default="scope">
-            <el-button type="primary" link @click="handleUpdate(scope.row)">
-              编辑
-            </el-button>
-            <el-button type="primary" link @click="handleDelete(scope.row)">
-              删除
-            </el-button>
+            <el-button type="primary" link @click="handleUpdate(scope.row)">编辑</el-button>
+            <el-button type="primary" link @click="handleDelete(scope.row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -84,7 +78,10 @@
       <pagination v-if="total > 0" v-model:page="queryParams.pageIndex" v-model:limit="queryParams.pageSize"
         :total="total" @pagination="getList" />
     </el-card>
-
+    <!-- 下拉组件 -->
+    <!-- <el-dialog v-model="ShowTopicB" :title="title" width="600px" destroy-on-close :close-on-click-modal="false">
+      <TopicB v-model:Name="Name"></TopicB>
+    </el-dialog> -->
     <!-- 添加或修改专题对话框 -->
     <el-dialog v-model="open" :title="title" width="600px" destroy-on-close :close-on-click-modal="false">
       <el-form ref="topicForm" :model="form" :rules="rules" label-width="100px" status-icon>
@@ -103,13 +100,11 @@
             <el-option v-for="item in staffList" :key="item.id" :label="item.staffName" :value="item.staffName" />
           </el-select>
         </el-form-item>
-        <!-- <el-input v-model="form.logoPath" placeholder="请输入Logo路径" />
-        </el-form-item> -->
         <el-form-item label="Logo路径" prop="logoPath">
-          <el-upload class="avatar-uploader" action="https://localhost:44375/api/upload/image" :show-file-list="false"
-            :on-success="handleAvatarSuccess" :before-upload="beforeAvatarUpload">
-            <img v-if="form.logoPath" :src="form.logoPath" class="avatar" />
-            <el-icon v-else class="avatar-uploader-icon">
+          <el-upload class="avatar-uploader custom-avatar-uploader" action="https://localhost:44375/api/upload/image"
+            :show-file-list="false" :on-success="handleAvatarSuccess" :before-upload="beforeAvatarUpload">
+            <img v-if="form.logoPath" :src="form.logoPath" class="avatar custom-avatar-img" />
+            <el-icon v-else class="avatar-uploader-icon custom-avatar-icon">
               <Plus />
             </el-icon>
           </el-upload>
@@ -118,7 +113,6 @@
           <!-- <el-input  type="textarea" :rows="3" placeholder="请输入简介" /> -->
           <div style="border: 1px solid #ccc">
             <Editor v-model="form.brief" :api-key="apiKey" :init="TinyMCE_option" />
-            <!-- <Editor v-model="form.brief" :api-key="apiKey" :init="TinyMCE_option" initial-value="Welcome to TinyMCE!" /> -->
           </div>
         </el-form-item>
         <el-form-item label="详情" prop="details">
@@ -144,12 +138,25 @@
         </div>
       </template>
     </el-dialog>
+    <!-- 自定义显示列弹窗 -->
+    <el-dialog v-model="showColumnDialog" title="自定义显示列" width="400px">
+      <el-checkbox-group v-model="checkedProps">
+        <el-checkbox v-for="col in allColumns" :key="col.prop" :label="col.prop">
+          {{ col.label }}
+        </el-checkbox>
+      </el-checkbox-group>
+      <template #footer>
+        <el-button @click="resetColumns">恢复默认</el-button>
+        <el-button type="primary" @click="showColumnDialog = false">确认</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import moment from 'moment'
 import {
   createTopic,
   getTopicList,
@@ -159,8 +166,9 @@ import {
   getCategoryList,
   getstaffList
 } from '@/api/Lession/TopicManager/TopicManager'
-import { Plus } from '@element-plus/icons-vue'
 import type { UploadProps } from 'element-plus'
+import { Picture, Plus } from '@element-plus/icons-vue'
+import { UploadImage } from '@/api/uoload/uoload.api'
 
 // import WangEditor from '@/components/WangEditor/index.vue'
 // 列表数据
@@ -171,8 +179,16 @@ const title = ref('')
 const open = ref(false)
 const multiple = ref(true)
 const selectedIdList = ref<string[]>([])
-const categoryOptions = ref([])
-const staffList = ref([])
+const categoryOptions = ref([{
+  id: "",
+  categoryName: ""
+}])
+const staffList = ref([
+  {
+    id: "",
+    staffName: ""
+  }
+])
 const topicForm = ref()
 const Name = ref<string>("");
 watch(Name, (newVal, oldVal) => {
@@ -180,7 +196,10 @@ watch(Name, (newVal, oldVal) => {
   queryParams.value.teacher = newVal;
   // 执行自定义逻辑（如调用 API、更新其他状态等）
 });
+const logoImageUrl = ref('')
+
 // 查询参数
+// 查询参数queryParams
 const queryParams = ref({
   name: '',
   categoryId: '',
@@ -188,6 +207,8 @@ const queryParams = ref({
   pageIndex: 1,
   pageSize: 10
 })
+//控制下拉讲师的
+const ShowTopicB = ref(false);
 
 // Logo上传相关方法
 const handleLogoSuccess = (res: any) => {
@@ -232,7 +253,7 @@ const customUpload = async (options: any) => {
 
 // 表单参数
 const form = ref({
-  id: '',
+  id: "",
   name: '',
   categoryId: '',
   teacher: '',
@@ -275,7 +296,7 @@ const loadstaff = async () => {
 const TopicDetail = async (id: any) => {
   try {
     const response = await getTopicDetail(id)
-    staffList.value = response || []
+    form.value = response || []
   } catch (error) {
     console.error('获取教职员工下拉列表失败:', error)
   }
@@ -358,6 +379,10 @@ const handleUpdate = async (row: any) => {
     // const response = await getTopicDetail(row.id)
     //Object.assign(form.value, response.data) // 保持响应式
     //form.value = response.data
+    // const response = await getTopicDetail(row.id)
+    // form.value = response.data
+    // // 设置logo预览
+    // logoImageUrl.value = form.value.logoPath
     open.value = true
     title.value = '修改专题'
     TopicDetail(row.id)
@@ -367,7 +392,6 @@ const handleUpdate = async (row: any) => {
     ElMessage.error(error.response?.data?.error?.message || '获取详情失败')
   }
 }
-
 // 提交按钮
 const submitForm = async () => {
   const formEl = topicForm.value
@@ -519,7 +543,7 @@ const beforeAvatarUpload: UploadProps["beforeUpload"] = (rawFile) => {
 
 import Editor from '@tinymce/tinymce-vue'
 import { reactive } from 'vue';
-import TopicB from './topicB.vue'
+// import TopicB from './topicB.vue'
 
 const apiKey = 'c84dxh4zz5sav5fvpfj8ats9tqewf49axrzcpc6ftqzhep17' // 替换为你的 API 密钥
 
@@ -539,15 +563,43 @@ const TinyMCE_option = reactive({
   // 语言
   language: 'zh_CN',
   // 自定义功能键
-  setup: (editor) => {
-    const toDateHtml = (date) => `<time datetime="${date.toString()}">${date.toDateString()}</time>`;
+  setup: (editor: any) => {
+    const toDateHtml = (date: any) => `<time datetime="${date.toString()}">${date.toDateString()}</time>`;
     editor.ui.registry.addButton('selectiveDateButton', {
       icon: 'insert-time',
       tooltip: '插入当前时间',
-      onAction: (_) => editor.insertContent(toDateHtml(new Date()))
+      onAction: () => editor.insertContent(toDateHtml(new Date()))
+    });
+    // 内容存入v-model前的处理
+    editor.on('SaveContent', (e: any) => {
+      // 示例：移除所有script标签，防止XSS攻击
+      e.content = e.content.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+      // 示例：将所有段落的class添加统一前缀
+      e.content = e.content.replace(/<p([^>]*)>/g, '<p class="custom-paragraph $1">');
     });
   }
 })
+
+// 自定义显示列相关
+const showColumnDialog = ref(false)
+const allColumns = ref([
+  { label: 'Logo', prop: 'logoPath', width: 250, align: 'center' },
+  { label: '专题名称', prop: 'name', align: 'center' },
+  { label: '分类名称', prop: 'categoryName', align: 'center' },
+  { label: '讲师', prop: 'teacher', align: 'center' },
+  { label: '简介', prop: 'brief', align: 'center' },
+  { label: '详情', prop: 'details', align: 'center' },
+  { label: '成就展示', prop: 'achievementDisplay', align: 'center' },
+  { label: '创建时间', prop: 'creationTime', width: 180, align: 'center' },
+  { label: '修改时间', prop: 'lastModificationTime', width: 180, align: 'center' }
+])
+const checkedProps = ref(allColumns.value.map(col => col.prop))
+const resetColumns = () => {
+  checkedProps.value = allColumns.value.map(col => col.prop)
+}
+const showColumns = computed(() =>
+  allColumns.value.filter(col => checkedProps.value.includes(col.prop))
+)
 
 </script>
 
@@ -559,26 +611,104 @@ const TinyMCE_option = reactive({
 .mb8 {
   margin-bottom: 8px;
 }
-</style>
-<!-- <style>
-.avatar-uploader .el-upload {
-  border: 1px dashed var(--el-border-color);
+
+.image-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background-color: #f5f7fa;
+  color: #909399;
+  font-size: 12px;
+}
+
+.image-error .el-icon {
+  font-size: 24px;
+  margin-bottom: 8px;
+}
+
+/* Logo上传样式 */
+.logo-uploader {
+  width: 150px;
+  height: 150px;
+  border: 1px dashed #d9d9d9;
   border-radius: 6px;
   cursor: pointer;
   position: relative;
   overflow: hidden;
-  transition: var(--el-transition-duration-fast);
+  transition: border-color 0.3s;
 }
 
-.avatar-uploader .el-upload:hover {
-  border-color: var(--el-color-primary);
+.logo-uploader:hover {
+  border-color: #409eff;
 }
 
-.el-icon.avatar-uploader-icon {
-  font-size: 40px;
+.logo-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.logo-uploader-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
   color: #8c939d;
-  width: 246px;
-  height: 246px;
-  text-align: center;
 }
-</style> -->
+
+.logo-uploader-placeholder .el-icon {
+  font-size: 28px;
+  margin-bottom: 8px;
+}
+
+.logo-path {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #606266;
+}
+
+.custom-avatar-uploader {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  cursor: pointer;
+}
+
+.custom-avatar-img {
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+  border: 2px solid #e4e7ed;
+  object-fit: cover;
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+.custom-avatar-img:hover {
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
+  border-color: #409eff;
+}
+
+.custom-avatar-icon {
+  font-size: 32px;
+  color: #c0c4cc;
+  border: 2px dashed #e4e7ed;
+  border-radius: 8px;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.2s;
+}
+
+.custom-avatar-icon:hover {
+  border-color: #409eff;
+  color: #409eff;
+}
+</style>

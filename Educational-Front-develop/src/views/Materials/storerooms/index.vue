@@ -45,19 +45,14 @@
         <div class="table-title">物料变动日志</div>
         <div class="operation-area">
           <el-button type="success" @click="fetchMaterialLogList">刷新</el-button>
+          <el-button @click="showColumnDialog = true" type="primary">自定义显示列</el-button>
         </div>
       </div>
       <!-- 物料变动日志表格 -->
       <el-table :data="materialLogList" style="width: 100%">
         <el-table-column type="index" label="序号" width="60" />
-        <el-table-column label="物料名" prop="materialName" min-width="120" />
-        <el-table-column label="变动数量" prop="changeSum" min-width="100" />
-        <el-table-column label="申请员工：" prop="staffName" min-width="100" />
-        <el-table-column label="涉及学生" prop="studentName" min-width="100" />
-        <el-table-column label="变动类型" prop="changeTypeName" min-width="100" />
-        <el-table-column label="原因" prop="reason" min-width="150" />
-        <el-table-column label="变动时间" prop="changeDate" min-width="180">
-          <template #default="{ row }">
+        <el-table-column v-for="col in showColumns" :key="col.prop" :prop="col.prop" :label="col.label">
+          <template v-if="col.prop === 'changeDate'" #default="{ row }">
             {{ moment(row.changeDate).format("YYYY-MM-DD HH:mm:ss") }}
           </template>
         </el-table-column>
@@ -68,11 +63,23 @@
           v-model:limit="pageParams.PageSize" @pagination="handlePagination" />
       </div>
     </el-card>
+    <!-- 自定义显示列弹窗 -->
+    <el-dialog v-model="showColumnDialog" title="自定义显示列" width="400px">
+      <el-checkbox-group v-model="checkedProps">
+        <el-checkbox v-for="col in allColumns" :key="col.prop" :label="col.prop">
+          {{ col.label }}
+        </el-checkbox>
+      </el-checkbox-group>
+      <template #footer>
+        <el-button @click="resetColumns">恢复默认</el-button>
+        <el-button type="primary" @click="showColumnDialog = false">确认</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive, onMounted } from "vue";
+import { ref, reactive, onMounted, computed } from "vue";
 import Pagination from '@/components/Pagination/index.vue';
 import moment from "moment";
 import { getMaterialRetordList, materialRetordIn, materialRetordOut } from '@/api/Materials/storerooms.api';
@@ -171,6 +178,25 @@ const staffSelect = () => {
     staffname.value = res;
   })
 }
+
+// 自定义显示列相关
+const showColumnDialog = ref(false);
+const allColumns = ref([
+  { label: "物料名", prop: "materialName" },
+  { label: "变动数量", prop: "changeSum" },
+  { label: "申请员工", prop: "staffName" },
+  { label: "涉及学生", prop: "studentName" },
+  { label: "变动类型", prop: "changeTypeName" },
+  { label: "原因", prop: "reason" },
+  { label: "变动时间", prop: "changeDate" }
+]);
+const checkedProps = ref(allColumns.value.map(col => col.prop));
+const resetColumns = () => {
+  checkedProps.value = allColumns.value.map(col => col.prop);
+};
+const showColumns = computed(() =>
+  allColumns.value.filter(col => checkedProps.value.includes(col.prop))
+);
 
 onMounted(() => {
   fetchMaterialLogList();

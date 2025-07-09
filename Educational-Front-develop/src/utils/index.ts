@@ -56,3 +56,13 @@ export function formatGrowthRate(growthRate: number) {
     .replace(/\.?0+$/, "");
   return formattedRate + "%";
 }
+
+/**
+ * Remove HTML tags from a string
+ * @param {string} htmlString
+ * @returns {string}
+ */
+export function stripHtmlTags(htmlString: string): string {
+  const doc = new DOMParser().parseFromString(htmlString, 'text/html');
+  return doc.body.textContent || "";
+}
