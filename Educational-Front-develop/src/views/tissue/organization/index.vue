@@ -12,8 +12,8 @@
         <template #default="scope">
           <el-button type="primary" size="small" @click="openAddDialog(scope.row)">增加子机构</el-button>
           <el-button type="primary" size="small" @click="openEditDialog(scope.row)">编辑</el-button>
-          <el-button type="primary" size="small" @click="openStatusDialog(scope.row)">设置状态</el-button>
           <el-button type="danger" size="small" @click="handleDelete(scope.row)">删除</el-button>
+          <el-button type="primary" size="small" @click="handleView(scope.row)">查看</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -100,18 +100,42 @@
       </template>
     </el-dialog>
 
-    <el-dialog v-model="statusDialogVisible" title="设置机构状态" width="300px">
-      <el-form>
+    <el-dialog v-model="infoDialogVisible" title="组织机构基本信息" width="500px">
+      <el-form :model="infoForm" label-width="100px">
+        <el-form-item label="机构名称">
+          <el-input v-model="infoForm.name" disabled />
+        </el-form-item>
+        <el-form-item label="简称">
+          <el-input v-model="infoForm.shortName" disabled />
+        </el-form-item>
+        <el-form-item label="级别">
+          <el-input v-model="infoForm.levelName" disabled />
+        </el-form-item>
+        <el-form-item label="联系人">
+          <el-input v-model="infoForm.contactPerson" disabled />
+        </el-form-item>
+        <el-form-item label="电话">
+          <el-input v-model="infoForm.phone" disabled />
+        </el-form-item>
+        <el-form-item label="传真">
+          <el-input v-model="infoForm.fax" disabled />
+        </el-form-item>
+        <el-form-item label="邮箱">
+          <el-input v-model="infoForm.email" disabled />
+        </el-form-item>
+        <el-form-item label="排序">
+          <el-input v-model="infoForm.sortOrder" disabled />
+        </el-form-item>
         <el-form-item label="状态">
-          <el-radio-group v-model="statusForm.state">
-            <el-radio :label="0">启用</el-radio>
-            <el-radio :label="1">禁用</el-radio>
-          </el-radio-group>
+          <el-switch v-model="infoForm.isActive" :active-value="1" :inactive-value="0" disabled active-text="禁用"
+            inactive-text="启用" />
+        </el-form-item>
+        <el-form-item label="说明">
+          <el-input v-model="infoForm.description" type="textarea" disabled />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="statusDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="submitStatusForm">确定</el-button>
+        <el-button @click="infoDialogVisible = false">关闭</el-button>
       </template>
     </el-dialog>
   </div>
@@ -303,26 +327,43 @@ function submitEditForm() {
   })
 }
 
-const statusDialogVisible = ref(false)
-const statusForm = reactive({
-  id: '',
-  state: 0
+const infoDialogVisible = ref(false)
+const infoForm = reactive({
+  name: '',
+  shortName: '',
+  levelName: '',
+  contactPerson: '',
+  phone: '',
+  fax: '',
+  email: '',
+  sortOrder: 0,
+  isActive: 1,
+  description: ''
 })
 
-// 打开状态对话框并回显当前状态
-function openStatusDialog(row: Organization) {
-  statusForm.id = row.id
-  //statusForm.state = row.isActive // 假设isActive字段就是当前状态
-  statusDialogVisible.value = true
+// 查看按钮事件
+async function handleView(row: any) {
+  try {
+    const res = await OrganizationAPI.getOrganizationById(row.id)
+    console.log(res);
+
+    // 字段映射
+    infoForm.name = res.name || ''
+    infoForm.shortName = res.shortName || ''
+    infoForm.levelName = res.levelName || ''
+    infoForm.contactPerson = res.contactPerson || ''
+    infoForm.phone = res.phone || ''
+    infoForm.fax = res.fax || ''
+    infoForm.email = res.email || ''
+    infoForm.sortOrder = res.sortOrder ?? 0
+    infoForm.isActive = res.isActive ?? 1
+    infoForm.description = res.description || ''
+    infoDialogVisible.value = true
+  } catch (e) {
+    ElMessage.error('获取信息失败')
+  }
 }
 
-// 提交状态修改
-async function submitStatusForm() {
-  await OrganizationAPI.updateOrganizationStatus(statusForm.id, statusForm.state)
-  ElMessage.success('状态修改成功')
-  statusDialogVisible.value = false
-  OrganizationTree()
-}
 
 // 初始根节点数据
 onMounted(() => {

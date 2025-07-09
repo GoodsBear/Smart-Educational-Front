@@ -104,15 +104,6 @@ const OrganizationAPI = {
       params: data,
     });
   },
-
-  // 修改机构状态（用 params 传值）
-  updateOrganizationStatus(Id: string, state: number) {
-    return request({
-      url: `${ORGANIZATION_BASE_URL}/organzation-state/${Id}`,
-      method: "put",
-      params: { state },
-    });
-  },
 };
 
 export default OrganizationAPI;
