@@ -205,10 +205,10 @@ export const usePermissionStore = defineStore("permission", () => {
             meta: { title: "系统", icon: "ep:setting" },
             children: [
               {
-                path: "user",
-                name: "User",
-                component: () => import("@/views/system/user/index.vue"),
-                meta: { title: "用户管理", icon: "ep:user" },
+                path: "staff",
+                name: "Staff",
+                component: () => import("@/views/system/staff/index.vue"),
+                meta: { title: "员工管理", icon: "ep:collection" },
               },
               {
                 path: "role",
