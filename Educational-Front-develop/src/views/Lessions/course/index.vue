@@ -1,10 +1,10 @@
 <!-- 课程管理主页面 -->
 <template>
   <div class="app-container">
+    <!-- 筛选项 -->
     <div class="filter-container">
       <el-card class="box-card">
         <div class="filter-item">
-
           <el-form :inline="true" :model="queryParams" class="demo-form-inline">
             <el-form-item label="课程名称">
               <el-input v-model="queryParams.CourseName" placeholder="请输入课程名称" style="width: 150px" class="filter-item"
@@ -42,8 +42,8 @@
         </div>
       </el-card>
     </div>
-
     <el-card class="box-card">
+      <!-- 操作按钮 -->
       <el-row>
         <el-col style="margin-bottom: 20px;">
           <el-button type="success" class="filter-item" @click="handleAdd">
@@ -56,37 +56,66 @@
           <el-button type="danger" @click="handleAction('delete')">删除</el-button>
         </el-col>
       </el-row>
-
+      <!-- 数据展示 -->
       <el-table ref="tableRef" v-loading="loading" :data="courseList" style="width: 100%" border>
-        <el-table-column type="selection" width="55" align="center" />
-        <el-table-column label="课程名称" prop="courseName" />
-        <el-table-column label="状态" prop="status">
+        <el-table-column fixed="left" type="selection" width="55" align="center" />
+        <el-table-column label="课程" prop="courseName" />
+        <el-table-column label="校区" prop="campusName" />
+        <el-table-column label="科目" prop="subjectName" />
+        <el-table-column label="专题" prop="topicName" />
+        <el-table-column label="课型" prop="courseTypeName" />
+        <el-table-column label="单价" >
+          <template v-slot="scope">
+            {{ (scope.row.totalPrice/scope.row.lessonNum).toFixed(2) }}
+          </template>
+        </el-table-column>
+        <el-table-column label="总售价" prop="totalPrice" />
+        <el-table-column label="课时数" prop="lessonNum" />
+        <el-table-column label="单位" prop="sellUnit" />
+        <el-table-column label="班型" prop="courseTypeName" />
+        <el-table-column label="关联数" prop="" />
+        <el-table-column label="群二维码" prop="classQrCode">
           <template #default="scope">
+            <template v-if="scope.row.classQrCode">
+              <el-tooltip placement="top" effect="dark">
+                <template #content>
+                  <img :src="scope.row.classQrCode" style="width:120px;height:120px;" />
+                </template>
+                <span style="color: #409EFF; cursor: pointer;">有</span>
+              </el-tooltip>
+            </template>
+            <template v-else>
+              <span>无</span>
+            </template>
+          </template>
+        </el-table-column>
+        <el-table-column label="可预约" prop="totalPrice" />
+        <el-table-column label="上架状态" prop="status">
+          <template #default="scope">
+            <el-tag v-if="scope.row.isOnlineSale" type="success">已上架</el-tag>
+            <el-tag v-else type="danger">未上架</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="库存" prop="stockNum"/>
+        <el-table-column label="销售量" prop="" />
+        <el-table-column label="销售额" prop="" />
+        <el-table-column label="销售截止日期" prop="stopSaleDate" width="120">
+          <template v-slot="scope">
+            {{ moment().format("yyyy-MM-DD") }}
+          </template>
+        </el-table-column>
+        <el-table-column label="课程状态" prop="creationTime">
+          <template v-slot="scope">
             <el-tag v-if="scope.row.status" type="success">启用</el-tag>
             <el-tag v-else type="danger">禁用</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="是否上架" prop="isOnlineSale">
-          <template #default="scope">
-            <el-tag v-if="scope.row.isOnlineSale" type="success">已上架</el-tag>
-            <el-tag v-else type="danger">已下架</el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column label="校区" prop="campusName" />
-        <el-table-column label="科目" prop="subjectName" />
-        <el-table-column label="专题" prop="topicName" />
-        <el-table-column label="课程类型" prop="courseTypeName" />
-        <el-table-column label="价格" prop="price" />
-        <el-table-column label="创建时间" prop="creationTime" width="180">
-          <template #default="scope">
-            <span style="color: chocolate;">{{ moment(scope.row.creationTime).format('YYYY-MM-DD HH:mm:SS') }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="操作" width="180" align="center">
+        <el-table-column fixed="right" label="操作" width="180" align="center">
           <template #default="scope">
             <el-button type="primary" link @click="handleEdit(scope.row)">
               编辑
             </el-button>
+            <el-button type="primary" link @click="reletedopen(scope.row)">关联课程</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -131,7 +160,7 @@
       <el-row>
         <el-col :span="12">
           <el-form-item label="适用年级" prop="gradeId">
-            <el-select v-model="courseForm.gradeId" placeholder="请选择年级">
+            <el-select v-model="courseForm.gratorId" placeholder="请选择年级">
               <el-option v-for="item in GradeList" :key="item.id" :label="item.gradeName" :value="item.id" />
             </el-select>
           </el-form-item>
@@ -290,6 +319,8 @@
     </el-form>
   </el-drawer>
 
+  <!-- 关联课程弹窗 -->
+  <ReletedCourse v-model:visible="reletedCourseDialogVisible" :course-id="currentCourseId" />
 
 </template>
 
@@ -302,13 +333,14 @@ import { getSubjectDropdown } from '@/api/Lession/SubjectManager/Subject'
 import { getSpecialSubjectDropdown } from '@/api/Lession/TopicManager/TopicManager'
 import { getOrganizationDropdown } from '@/api/Organization/organization.api'
 import { getGradeDropdown } from '@/api/Lession/ClassAndGrade/Grade'
-
+import ReletedCourse from './reletedcourse/ReletedCourse.vue'
 
 
 defineOptions({
   name: 'CourseManagement'
 })
 
+//#region 数据展示
 // 加载状态
 const loading = ref(false)
 // 课程列表数据
@@ -348,7 +380,7 @@ const handleResetQuery = () => {
   handleQuery()
 }
 
-
+//#endregion
 
 //#region 添加相关操作
 // 抽屉开关
@@ -362,7 +394,7 @@ interface CourseForm {
   campusId: string,
   subjectId: string,
   topicId: string,
-  gradeId: string,
+  gratorId: string,
   sellUnit: string,
   courseTypeId: number,
   totalPrice: number,
@@ -380,7 +412,7 @@ interface CourseForm {
   classQrCode: string,
   stockNum: number,
   stopSaleDate: Date,
-  detailImageList: string,
+  detailImageList: [],
   teacherRemark: string,
   serviceRemark: string
 }
@@ -420,7 +452,7 @@ const rules = reactive<FormRules>({
   campusId: [{ required: true, message: '请选择学校', trigger: 'change' }],
   subjectId: [{ required: true, message: '请选择科目', trigger: 'change' }],
   topicId: [{ required: true, message: '请输入关联专题', trigger: 'blur' }],
-  gradeId: [{ required: true, message: '请选择年级', trigger: 'change' }],
+  gratorId: [{ required: true, message: '请选择年级', trigger: 'change' }],
   sellUnit: [{ required: true, message: '请选择出售单位', trigger: 'change' }],
   totalPrice: [{ required: true, message: '请输入总价', trigger: 'blur' }],
   lessonNum: [{ required: true, message: '请输入课时数', trigger: 'blur' }],
@@ -517,7 +549,7 @@ const handleAction = async (action: any) => {
     //下架
     case 'unpublish':
       actions.value = "下架"
-      status.value = true;
+      status.value = false;
       actionResult.value = 1;
       break;
     //删除
@@ -573,6 +605,7 @@ const handleCurrentChange = (val: number) => {
 //#endregion
 //#region 下拉框数据
 
+//#region 下拉框数据
 //学校下拉数据
 const SchoolList = ref([{
   id: '',
@@ -616,9 +649,14 @@ const LoadTopic = async () => {
   const response = await getSpecialSubjectDropdown();
   TopicList.value = response
 }
-//#region 图片上传相关
-
-
+//#endregion
+//#region 关联课程相关
+const reletedCourseDialogVisible = ref(false)
+const currentCourseId = ref("")
+const reletedopen = (row: any) => {
+  currentCourseId.value = row.id
+  reletedCourseDialogVisible.value = true
+}
 //#endregion
 
 //#endregion

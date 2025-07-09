@@ -5,30 +5,32 @@ import request from "@/utils/request";
  * @param {object} data 课程信息
  */
 export function addCourse(data: {
-  courseName: string;
-  campusId: string;
-  subjectId: string;
-  topicId: string;
-  courseTypeId: string;
-  price: number;
-  totalPrice: number;
-  lessonNum: number;
-  validMonthNum: number;
-  isReserve: boolean;
-  lessonCar: number;
-  isInterCut: boolean;
-  classSchedule: string;
-  lessonDescribe: string;
-  status: boolean;
-  isLineSale: boolean;
-  coverImage: string;
-  isRecommend: boolean;
-  classQRCode: string;
-  stockNum: number;
-  stopSaleDate: string;
-  detailImageList: string;
-  teacherRemark: string;
-  serviceRemark: string;
+  id: string,
+  courseName: string,
+  campusId: string,
+  subjectId: string,
+  topicId: string,
+  gratorId: string,
+  sellUnit: string,
+  courseTypeId: number,
+  totalPrice: number,
+  lessonNum: number,
+  validMonthNum: number,
+  isReserve: boolean,
+  lessonCut: number,
+  isAfterPay: boolean,
+  lessonCutMode: number,
+  lessonDuration: number,
+  status: boolean,
+  isOnlineSale: boolean,
+  coverImage: string,
+  isOpenRecommend: boolean,
+  classQrCode: string,
+  stockNum: number,
+  stopSaleDate: Date,
+  detailImageList: string,
+  teacherRemark: string,
+  serviceRemark: string
 }) {
   return request({
     url: "/api/app/course-services/course",
