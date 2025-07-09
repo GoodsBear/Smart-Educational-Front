@@ -40,57 +40,37 @@
           <el-col :span="1.5">
             <el-button type="danger" :disabled="multiple" @click="handleBatchDelete">批量删除</el-button>
           </el-col>
+          <el-col :span="1.5">
+            <el-button @click="getList()">刷新</el-button>
+          </el-col>
+          <el-col :span="1.5">
+            <el-button @click="showColumnDialog = true" type="primary">自定义显示列</el-button>
+          </el-col>
         </el-row>
       </template>
 
       <el-table v-loading="loading" :data="topicList" @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="55" align="center" />
-        <el-table-column label="Logo" align="center" width="250" prop="logoPath">
-          <template #default="scope">
-            <img :src="scope.row.logoPath" class="avatar" default: />
+        <el-table-column v-for="col in showColumns" :key="col.prop" :prop="col.prop" :label="col.label"
+          :width="col.width" :align="col.align">
+          <template v-if="col.prop === 'logoPath'" #default="scope">
+            <img :src="scope.row.logoPath" class="avatar" style="width: 80px; height: 80px;" />
           </template>
-        </el-table-column><el-table-column label="专题名称" align="center" prop="name" />
-        <el-table-column label="分类名称" align="center" prop="categoryName" />
-        <el-table-column label="讲师" align="center" prop="teacher" />
-        <el-table-column label="简介" align="center" prop="brief">
-          <template #default="scope">
-            <div v-html="scope.row.brief"></div>
+          <template v-else-if="col.prop === 'brief' || col.prop === 'details' || col.prop === 'achievementDisplay'"
+            #default="scope">
+            <div v-html="scope.row[col.prop]"></div>
           </template>
-        </el-table-column>
-        <el-table-column label="详情" align="center" prop="details">
-          <template #default="scope">
-            <div v-html="scope.row.details"></div>
+          <template v-else-if="col.prop === 'creationTime' || col.prop === 'lastModificationTime'" #default="scope">
+            {{ moment(scope.row[col.prop]).format("YYYY-MM-DD HH:mm:ss") }}
           </template>
-        </el-table-column>
-        <el-table-column label="成就展示" align="center" prop="achievementDisplay">
-          <template #default="scope">
-            <div v-html="scope.row.achievementDisplay"></div>
+          <template v-else #default="scope">
+            {{ scope.row[col.prop] }}
           </template>
         </el-table-column>
-        <el-table-column label="创建时间" align="center" prop="creationTime" width="180">
-          <template #default="scope">
-            {{ moment(scope.row.creationTime).format("YYYY-MM-DD HH:mm:ss") }}
-          </template>
-        </el-table-column>
-
-        <el-table-column label="修改时间" align="center" prop="lastModificationTime" width="180">
-          <template #default="scope">
-            {{ moment(scope.row.lastModificationTime).format("YYYY-MM-DD HH:mm:ss") }}
-          </template>
-        </el-table-column>
-        <!-- <el-table-column label="修改时间" align="center" prop="lastModificationTime" width="180">
-          <template #default="scope">
-            {{ formatDateTime(scope.row.lastModificationTime) }}、
-          </template>
-        </el-table-column> -->
         <el-table-column label="操作" align="center" width="150">
           <template #default="scope">
-            <el-button type="primary" link @click="handleUpdate(scope.row)">
-              编辑
-            </el-button>
-            <el-button type="primary" link @click="handleDelete(scope.row)">
-              删除
-            </el-button>
+            <el-button type="primary" link @click="handleUpdate(scope.row)">编辑</el-button>
+            <el-button type="primary" link @click="handleDelete(scope.row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -158,11 +138,23 @@
         </div>
       </template>
     </el-dialog>
+    <!-- 自定义显示列弹窗 -->
+    <el-dialog v-model="showColumnDialog" title="自定义显示列" width="400px">
+      <el-checkbox-group v-model="checkedProps">
+        <el-checkbox v-for="col in allColumns" :key="col.prop" :label="col.prop">
+          {{ col.label }}
+        </el-checkbox>
+      </el-checkbox-group>
+      <template #footer>
+        <el-button @click="resetColumns">恢复默认</el-button>
+        <el-button type="primary" @click="showColumnDialog = false">确认</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import moment from 'moment'
 import {
@@ -261,7 +253,7 @@ const customUpload = async (options: any) => {
 
 // 表单参数
 const form = ref({
-  id: '',
+  id: "",
   name: '',
   categoryId: '',
   teacher: '',
@@ -384,11 +376,11 @@ const handleAdd = () => {
 const handleUpdate = async (row: any) => {
   try {
     reset()
-    // const response = await getTopicDetail(row.id)
-    //Object.assign(form.value, response.data) // 保持响应式
-    //form.value = response.data
     const response = await getTopicDetail(row.id)
+    Object.assign(form.value, response.data) // 保持响应式
     form.value = response.data
+    // const response = await getTopicDetail(row.id)
+    // form.value = response.data
     // 设置logo预览
     logoImageUrl.value = form.value.logoPath
     open.value = true
@@ -590,6 +582,27 @@ const TinyMCE_option = reactive({
   }
 })
 
+// 自定义显示列相关
+const showColumnDialog = ref(false)
+const allColumns = ref([
+  { label: 'Logo', prop: 'logoPath', width: 250, align: 'center' },
+  { label: '专题名称', prop: 'name', align: 'center' },
+  { label: '分类名称', prop: 'categoryName', align: 'center' },
+  { label: '讲师', prop: 'teacher', align: 'center' },
+  { label: '简介', prop: 'brief', align: 'center' },
+  { label: '详情', prop: 'details', align: 'center' },
+  { label: '成就展示', prop: 'achievementDisplay', align: 'center' },
+  { label: '创建时间', prop: 'creationTime', width: 180, align: 'center' },
+  { label: '修改时间', prop: 'lastModificationTime', width: 180, align: 'center' }
+])
+const checkedProps = ref(allColumns.value.map(col => col.prop))
+const resetColumns = () => {
+  checkedProps.value = allColumns.value.map(col => col.prop)
+}
+const showColumns = computed(() =>
+  allColumns.value.filter(col => checkedProps.value.includes(col.prop))
+)
+
 </script>
 
 <style scoped>
@@ -600,66 +613,65 @@ const TinyMCE_option = reactive({
 .mb8 {
   margin-bottom: 8px;
 }
-</style>
 
 .image-error {
-display: flex;
-flex-direction: column;
-align-items: center;
-justify-content: center;
-width: 100%;
-height: 100%;
-background-color: #f5f7fa;
-color: #909399;
-font-size: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background-color: #f5f7fa;
+  color: #909399;
+  font-size: 12px;
 }
 
 .image-error .el-icon {
-font-size: 24px;
-margin-bottom: 8px;
+  font-size: 24px;
+  margin-bottom: 8px;
 }
 
 /* Logo上传样式 */
 .logo-uploader {
-width: 150px;
-height: 150px;
-border: 1px dashed #d9d9d9;
-border-radius: 6px;
-cursor: pointer;
-position: relative;
-overflow: hidden;
-transition: border-color 0.3s;
+  width: 150px;
+  height: 150px;
+  border: 1px dashed #d9d9d9;
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.3s;
 }
 
 .logo-uploader:hover {
-border-color: #409eff;
+  border-color: #409eff;
 }
 
 .logo-image {
-width: 100%;
-height: 100%;
-object-fit: cover;
-display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .logo-uploader-placeholder {
-display: flex;
-flex-direction: column;
-align-items: center;
-justify-content: center;
-width: 100%;
-height: 100%;
-color: #8c939d;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: #8c939d;
 }
 
 .logo-uploader-placeholder .el-icon {
-font-size: 28px;
-margin-bottom: 8px;
+  font-size: 28px;
+  margin-bottom: 8px;
 }
 
 .logo-path {
-margin-top: 8px;
-font-size: 12px;
-color: #606266;
+  margin-top: 8px;
+  font-size: 12px;
+  color: #606266;
 }
 </style>
