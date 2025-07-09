@@ -236,7 +236,7 @@ const queryParams = ref({
   pageSize: 10
 })
 //控制下拉讲师的
-const ShowTopicB = ref(false);
+//const ShowTopicB = ref(false);
 
 
 // // Logo上传相关方法
@@ -307,26 +307,6 @@ const loadCategories = async () => {
   try {
     const response = await getCategoryList()
     categoryOptions.value = response || []
-  } catch (error) {
-    console.error('获取分类列表失败:', error)
-  }
-}
-
-// 获取教职员工下拉列表
-const loadstaff = async () => {
-  try {
-    const response = await getstaffList()
-    staffList.value = response || []
-  } catch (error) {
-    console.error('获取教职员工下拉列表失败:', error)
-  }
-}
-//getTopicDetail详情反填
-const TopicDetail = async (id: any) => {
-  try {
-    const response = await getCategoryList()
-    categoryOptions.value = response || []
-    // categoryOptions.value = response.data.data || []
   } catch (error) {
     console.error('获取分类列表失败:', error)
   }
