@@ -1,42 +1,43 @@
 <!-- 科目管理主页面 -->
 <template>
-  <div class="app-container">
-    <div class="filter-container">
-      <!-- 查询 -->
-      <el-card class="box-card">
-        <div class="filter-item">
-          <el-input v-model="queryParams.SubjectName" placeholder="请输入科目名称" style="width: 200px" class="filter-item"
-            @keyup.enter="handleQuery" />
-          <el-button type="primary" class="filter-item" @click="handleQuery, queryParams.PageIndex = 1">
-            搜索
-          </el-button>
-          <el-button type="success" class="filter-item" @click="handleAdd">
-            新增
-          </el-button>
-          <el-button type="danger" :disabled="multiple" @click="handleBatchDelete">
-            批量删除
-          </el-button>
+  <div class="subject-management">
+    <!-- 搜索栏 -->
+    <el-card style="max-width: 10000px">
+      <div class="search-bar">
+        <el-form :inline="true" :model="queryParams">
+          <el-form-item label="搜索名称：">
+            <el-input v-model="queryParams.SubjectName" placeholder="请输入" clearable />
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" @click="handleQuery">查询</el-button>
+          </el-form-item>
+        </el-form>
+      </div>
+    </el-card>
+
+    <el-card style="max-width: 10000px; margin-top: 10px">
+      <!-- 表格标题和操作按钮区 -->
+      <div class="table-header-bar">
+        <div class="table-title">科目列表</div>
+        <div class="operation-area">
+          <el-button type="primary" @click="handleAdd">新增</el-button>
+          <el-button :disabled="multiple" @click="handleBatchDelete" type="danger">删除</el-button>
+          <el-button @click="handleQuery" type="success">刷新</el-button>
+          <el-button @click="showColumnDialog = true" type="primary">自定义显示列</el-button>
         </div>
-      </el-card>
-    </div>
-    <!-- 显示 -->
-    <el-card class="box-card">
-      <el-table v-loading="loading" :data="subjectList" style="width: 100%" border
+      </div>
+      <!-- 科目列表表格 -->
+      <el-table ref="tableRef" v-loading="loading" :data="subjectList" style="width: 100%; margin-top: 10px"
         @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="55" align="center" />
-        <el-table-column label="科目名称" prop="subjectName" />
-        <el-table-column label="权重" prop="sortWeight" />
-        <el-table-column label="科目描述" prop="subjectDescription" />
-        <el-table-column label="创建时间" prop="creationTime" width="180">
-          <template #default="scope">
+        <el-table-column v-for="col in showColumns" :key="col.prop" :prop="col.prop" :label="col.label">
+          <template v-if="col.prop === 'creationTime'" #default="scope">
             {{ formatDateTime(scope.row.creationTime) }}
           </template>
         </el-table-column>
         <el-table-column label="操作" width="180" align="center">
           <template #default="scope">
-            <el-button type="primary" link @click="handleEdit(scope.row)">
-              编辑
-            </el-button>
+            <el-button type="primary" link @click="handleEdit(scope.row)">编辑</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -47,9 +48,11 @@
           @size-change="handleSizeChange" @current-change="handleCurrentChange" />
       </div>
     </el-card>
-    <!-- 添加或修改专题对话框 -->
-    <el-dialog v-model="open" :title="title" width="600px" destroy-on-close :close-on-click-modal="false">
-      <el-form ref="topicForm" :model="form" :rules="rules" label-width="100px" status-icon>
+
+    <!-- 添加或修改科目对话框 -->
+    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="600px" destroy-on-close :close-on-click-modal="false"
+      @closed="resetForm">
+      <el-form ref="formRef" :model="form" :rules="rules" label-width="100px" status-icon>
         <el-form-item label="科目名称" prop="subjectName">
           <el-input v-model="form.subjectName" placeholder="请输入科目名称" />
         </el-form-item>
@@ -63,124 +66,163 @@
       <template #footer>
         <div class="dialog-footer">
           <el-button type="primary" @click="submitForm">提交</el-button>
-          <el-button @click="open = false, reset()">取 消</el-button>
+          <el-button @click="dialogVisible = false">取 消</el-button>
         </div>
+      </template>
+    </el-dialog>
+
+    <!-- 自定义显示列对话框 -->
+    <el-dialog v-model="showColumnDialog" title="自定义显示列" width="400px">
+      <el-checkbox-group v-model="checkedProps">
+        <el-checkbox v-for="col in allColumns" :key="col.prop" :label="col.prop">
+          {{ col.label }}
+        </el-checkbox>
+      </el-checkbox-group>
+      <template #footer>
+        <el-button @click="resetColumns">恢复默认</el-button>
+        <el-button type="primary" @click="showColumnDialog = false">确认</el-button>
       </template>
     </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, reactive, onMounted, computed } from 'vue'
+import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
 import {
   getSubjectList, getSubjectById, updateSubject, addSubject, deleteSubjects,
 } from '@/api/Lession/SubjectManager/Subject'
+
 defineOptions({
   name: 'SubjectManagement'
 })
-//add+update
-const topicForm = ref()
-//对话框标题
-const title = ref("");
-const open = ref(false);
-// 加载状态
+
+// 响应式数据
 const loading = ref(false)
-// 科目列表数据
 const subjectList = ref([])
-// 总记录数
 const total = ref(0)
-// 查询参数
-const queryParams = ref({
+const queryParams = reactive({
   SubjectName: "",
   PageIndex: 1,
   PageSize: 10
 })
-//批量删除ids
 const selectedIdList = ref<string[]>([])
 const multiple = ref(true)
-// 表单参数
-const form = ref({
+const dialogVisible = ref(false)
+const dialogTitle = ref("")
+const formRef = ref<FormInstance>()
+const isAdd = ref(true)
+const form = reactive({
   id: "",
   subjectName: '',
   sortWeight: 0,
   subjectDescription: ''
 })
-//生命钩子
+
+// 自定义列相关
+const allColumns = ref([
+  { prop: 'subjectName', label: '科目名称' },
+  { prop: 'sortWeight', label: '权重' },
+  { prop: 'subjectDescription', label: '科目描述' },
+  { prop: 'creationTime', label: '创建时间' }
+])
+const checkedProps = ref(allColumns.value.map(col => col.prop))
+const showColumnDialog = ref(false)
+
+const showColumns = computed(() => {
+  return allColumns.value.filter(col => checkedProps.value.includes(col.prop))
+})
+
+// 生命周期钩子
 onMounted(() => {
-  console.log('组件已挂载')
   handleQuery()
 })
-// 查询方法 
+
+// 查询方法
 const handleQuery = () => {
   loading.value = true
   getSubjectList({
-    SubjectName: queryParams.value.SubjectName,
-    PageIndex: queryParams.value.PageIndex,
-    PageSize: queryParams.value.PageSize
+    SubjectName: queryParams.SubjectName,
+    PageIndex: queryParams.PageIndex,
+    PageSize: queryParams.PageSize
   }).then(response => {
-    console.log('获取专题列表失败:', response)
-    debugger;
     subjectList.value = response.data || []
     total.value = response.totleCount
     loading.value = false
   }).catch(error => {
-    console.error('获取专题列表失败:', error)
+    console.error('获取科目列表失败:', error)
     loading.value = false
   })
 }
 
 // 新增方法
 const handleAdd = () => {
-  reset();
-  title.value = "新增科目信息";
-  open.value = true;
-  // TODO: 实现新增逻辑
+  resetForm()
+  dialogTitle.value = "新增科目信息"
+  isAdd.value = true
+  dialogVisible.value = true
 }
+
 // 编辑方法
 const handleEdit = (row: any) => {
-  try {
-    reset()
-    title.value = "修改科目信息";
-    open.value = true;
-    getSubjectById(row.id)
-    form.value = row;
-  } catch (error: any) {
-    console.error('获取详情失败:', error.response?.data)
-    ElMessage.error(error.response?.data?.error?.message || '获取详情失败')
-  }
+  resetForm()
+  dialogTitle.value = "修改科目信息"
+  isAdd.value = false
+  Object.assign(form, row)
+  dialogVisible.value = true
+}
 
-  // TODO: 实现编辑逻辑
+// 批量删除方法
+const handleBatchDelete = () => {
+  if (selectedIdList.value.length === 0) {
+    ElMessage.warning("请选择要删除的科目")
+    return
+  }
+  ElMessageBox.confirm(
+    `确定删除选中的 ${selectedIdList.value.length} 条科目信息吗?`,
+    "提示",
+    {
+      confirmButtonText: "确定",
+      cancelButtonText: "取消",
+      type: "warning",
+    }
+  ).then(async () => {
+    await deleteSubjects(selectedIdList.value)
+    ElMessage.success("删除成功")
+    handleQuery()
+  }).catch(() => {
+    ElMessage.info("删除已取消")
+  })
 }
-// 删除方法
-const handleDelete = (row: any) => {
-  // TODO: 实现删除逻辑
+
+// 处理选择项变化
+const handleSelectionChange = (selection: any[]) => {
+  selectedIdList.value = selection.map(item => item.id)
+  multiple.value = !selection.length
 }
+
 // 处理每页显示数量变化
 const handleSizeChange = (val: number) => {
-  queryParams.value.PageSize = val
+  queryParams.PageSize = val
   handleQuery()
 }
 
 // 处理页码变化
 const handleCurrentChange = (val: number) => {
-  queryParams.value.PageIndex = val
+  queryParams.PageIndex = val
   handleQuery()
 }
+
 // 表单重置
-const reset = () => {
-  console.log('重置表单')
-  form.value = {
-    subjectName: '',
-    sortWeight: 0,
-    subjectDescription: ''
-  }
+const resetForm = () => {
+  formRef.value?.resetFields()
+  Object.assign(form, { id: "", subjectName: '', sortWeight: 0, subjectDescription: '' })
 }
+
 // 时间格式化
 const formatDateTime = (dateTimeStr: string) => {
   if (!dateTimeStr) return '-'
-
   const date = new Date(dateTimeStr)
-
   const year = date.getFullYear()
   const month = String(date.getMonth() + 1).padStart(2, '0')
   const day = String(date.getDate()).padStart(2, '0')
@@ -189,94 +231,76 @@ const formatDateTime = (dateTimeStr: string) => {
   const seconds = String(date.getSeconds()).padStart(2, '0')
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
 }
-// 表单校验
-const rules = {
+
+// 表单校验规则
+const rules: FormRules = {
   subjectName: [{ required: true, message: '科目名称不能为空', trigger: 'blur' }],
   sortWeight: [{ required: true, message: '排序权重不能为空', trigger: 'blur' }],
   subjectDescription: [{ required: true, message: '科目说明不能为空', trigger: 'blur' }]
 }
+
 // 提交按钮
 const submitForm = async () => {
-  const formEl = topicForm.value
-  if (!formEl) return
-  try {
-    await formEl.validate()
-    if (form.value.id) {
-      // 修改
+  if (!formRef.value) return
+  await formRef.value.validate(async (valid) => {
+    if (valid) {
       try {
-        await updateSubject(form.value.id, {
-          subjectName: form.value.subjectName,
-          sortWeight: form.value.sortWeight,
-          subjectDescription: form.value.subjectDescription
-        })
-        ElMessage.success('修改成功')
-        open.value = false
-        reset()
+        if (isAdd.value) {
+          await addSubject(form)
+          ElMessage.success("新增成功")
+        } else {
+          await updateSubject(form.id, form)
+          ElMessage.success("修改成功")
+        }
+        dialogVisible.value = false
         handleQuery()
-      } catch (error: any) {
-        console.error('修改失败:', error.response?.data)
-        ElMessage.error(error.response?.data?.error?.message || '修改失败')
-      }
-    } else {
-      // 新增
-      try {
-        await addSubject({
-          subjectName: form.value.subjectName,
-          sortWeight: form.value.sortWeight,
-          subjectDescription: form.value.subjectDescription
-        })
-        ElMessage.success('新增成功')
-        open.value = false
-        handleQuery()
-      } catch (error: any) {
-        console.error('新增失败:', error.response?.data)
-        ElMessage.error(error.response?.data?.error?.message || '新增失败')
+      } catch (error) {
+        console.error('提交失败:', error)
+        ElMessage.error('提交失败')
       }
     }
-  } catch (error) {
-    console.error('表单验证失败:', error)
-    ElMessage.warning('请填写必填项')
-    return false
-  }
-}
-
-// 多选框选中数据
-const handleSelectionChange = (selection: any[]) => {
-  selectedIdList.value = selection.map(item => item.id)
-  multiple.value = !selection.length
-}
-// 批量删除操作
-const handleBatchDelete = () => {
-  if (selectedIdList.value.length === 0) {
-    ElMessage.warning('请选择要删除的数据')
-    return
-  }
-  ElMessageBox.confirm('确认批量删除所选专题吗？', '警告', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
-    type: 'warning'
-  }).then(() => {
-    deleteSubjects(selectedIdList.value).then(() => {
-      ElMessage.success('批量删除成功')
-      handleQuery()
-    })
   })
 }
-//
+
+// 恢复默认列
+const resetColumns = () => {
+  checkedProps.value = allColumns.value.map(c => c.prop)
+}
 </script>
 
 <style scoped>
-.filter-container {
-  margin-bottom: 20px;
+.subject-management {
+  padding: 20px;
 }
 
-.filter-item {
-  display: inline-block;
-  margin-right: 10px;
+.search-bar {
+  margin-bottom: 15px;
+}
+
+.table-header-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.table-title {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.operation-area {
+  display: flex;
+  gap: 10px;
 }
 
 .pagination-container {
-  margin-top: 20px;
+  margin-top: 15px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.dialog-footer {
   text-align: right;
 }
 </style>

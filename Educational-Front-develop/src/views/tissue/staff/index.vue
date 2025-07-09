@@ -32,27 +32,21 @@
       <el-button @click="showColumnDialog = true">自定义显示列</el-button>
     </div>
     <div style="margin-top:10px ;">
-          <!-- 员工列表 -->
-    <el-table
-      ref="tableRef"
-      v-loading="loading"
-      :data="staffList"
-      style="width: 100%"
-      @selection-change="ToAll"
-    >
-      <el-table-column type="selection" width="50" />
-      <template v-for="col in allColumns" :key="col.prop">
-        <el-table-column v-if="checkedProps.includes(col.prop)" :prop="col.prop" :label="col.label">
-          <template v-if="col.prop === 'staffName'" #default="{ row }">
-            <el-link @click="goToDetail(row)">{{ row.staffName }}</el-link>
-          </template>
-          <template v-else-if="col.prop === 'entryDate'" #default="{ row }">
-            {{ row.entryDate ? moment(row.entryDate).format("YYYY-MM-DD") : "" }}
-          </template>
-          <template v-else-if="col.prop === 'status'" #default="{ row }">
-            <el-tag :type="row.status === 1 ? 'success' : 'info'">
-              {{ row.status === 1 ? "在职" : "离职" }}
-            </el-tag>
+      <!-- 员工列表 -->
+      <el-table ref="tableRef" v-loading="loading" :data="staffList" style="width: 100%" @selection-change="ToAll">
+        <el-table-column type="selection" width="50" />
+        <template v-for="col in allColumns" :key="col.prop">
+          <el-table-column v-if="checkedProps.includes(col.prop)" :prop="col.prop" :label="col.label">
+            <template v-if="col.prop === 'staffName'" #default="{ row }">
+              <el-link @click="goToDetail(row)">{{ row.staffName }}</el-link>
+            </template>
+            <template v-else-if="col.prop === 'entryDate'" #default="{ row }">
+              {{ row.entryDate ? moment(row.entryDate).format("YYYY-MM-DD") : "" }}
+            </template>
+            <template v-else-if="col.prop === 'status'" #default="{ row }">
+              <el-tag :type="row.status === 1 ? 'success' : 'info'">
+                {{ row.status === 1 ? "在职" : "离职" }}
+              </el-tag>
             </template>
           </el-table-column>
         </template>
@@ -131,13 +125,7 @@
           <el-input v-model="formData.staffPassword" placeholder="请输入登录密码" />
         </el-form-item>
         <el-form-item label="所属机构" prop="organization">
-          <el-tree
-            ref="treeRef"
-            :data="data"
-            show-checkbox
-            node-key="id"
-            @check-change="handleCheck"
-          />
+          <el-tree ref="treeRef" :data="data" show-checkbox node-key="id" @check-change="handleCheck" />
           <el-button @click="getSelected">获取选中节点</el-button>
         </el-form-item>
         <el-form-item label="所属职位" prop="positionId" required>
@@ -176,51 +164,28 @@
           </el-select>
         </el-form-item>
         <el-form-item label="生日" prop="birthday">
-          <el-date-picker
-            v-model="formData.birthday"
-            type="date"
-            placeholder="请选择生日"
-            style="width: 100%"
-          />
+          <el-date-picker v-model="formData.birthday" type="date" placeholder="请选择生日" style="width: 100%" />
         </el-form-item>
         <el-form-item label="毕业学校" prop="graduationSchool">
           <el-input v-model="formData.graduationSchool" placeholder="请输入毕业学校" />
         </el-form-item>
         <el-form-item label="入职日期" prop="entryDate">
-          <el-date-picker
-            v-model="formData.entryDate"
-            type="date"
-            placeholder="请选择入职日期"
-            style="width: 100%"
-          />
+          <el-date-picker v-model="formData.entryDate" type="date" placeholder="请选择入职日期" style="width: 100%" />
         </el-form-item>
         <el-form-item label="简介" prop="introduction">
-          <el-input
-            v-model="formData.introduction"
-            type="textarea"
-            :rows="2"
-            placeholder="请输入简介"
-          />
+          <el-input v-model="formData.introduction" type="textarea" :rows="2" placeholder="请输入简介" />
         </el-form-item>
         <el-form-item label="状态" prop="status">
-          <el-switch
-            v-model="formData.status"
-            :active-value="1"
-            :inactive-value="0"
-            active-text="在职"
-            inactive-text="离职"
-          />
+          <el-switch v-model="formData.status" :active-value="1" :inactive-value="0" active-text="在职"
+            inactive-text="离职" />
         </el-form-item>
         <el-form-item label="照片" prop="photoUrl">
-          <el-upload
-            class="avatar-uploader"
-            action="https://localhost:44375/api/upload/image"
-            :show-file-list="false"
-            :on-success="handleAvatarSuccess"
-            :before-upload="beforeAvatarUpload"
-          >
+          <el-upload class="avatar-uploader" action="https://localhost:44375/api/upload/image" :show-file-list="false"
+            :on-success="handleAvatarSuccess" :before-upload="beforeAvatarUpload">
             <img v-if="imageUrl" :src="imageUrl" class="avatar" />
-            <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
+            <el-icon v-else class="avatar-uploader-icon">
+              <Plus />
+            </el-icon>
           </el-upload>
         </el-form-item>
       </el-form>

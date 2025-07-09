@@ -59,26 +59,16 @@
 
       <el-table ref="tableRef" v-loading="loading" :data="courseList" style="width: 100%" border>
         <el-table-column type="selection" width="55" align="center" />
-        <el-table-column label="课程名称" prop="courseName" />
-        <el-table-column label="状态" prop="status">
-          <template #default="scope">
+        <el-table-column v-for="col in showColumns" :key="col.prop" :prop="col.prop" :label="col.label">
+          <template v-if="col.prop === 'status'" #default="scope">
             <el-tag v-if="scope.row.status" type="success">启用</el-tag>
             <el-tag v-else type="danger">禁用</el-tag>
           </template>
-        </el-table-column>
-        <el-table-column label="是否上架" prop="isOnlineSale">
-          <template #default="scope">
+          <template v-else-if="col.prop === 'isOnlineSale'" #default="scope">
             <el-tag v-if="scope.row.isOnlineSale" type="success">已上架</el-tag>
             <el-tag v-else type="danger">已下架</el-tag>
           </template>
-        </el-table-column>
-        <el-table-column label="校区" prop="campusName" />
-        <el-table-column label="科目" prop="subjectName" />
-        <el-table-column label="专题" prop="topicName" />
-        <el-table-column label="课程类型" prop="courseTypeName" />
-        <el-table-column label="价格" prop="price" />
-        <el-table-column label="创建时间" prop="creationTime" width="180">
-          <template #default="scope">
+          <template v-else-if="col.prop === 'creationTime'" #default="scope">
             <span style="color: chocolate;">{{ moment(scope.row.creationTime).format('YYYY-MM-DD HH:mm:SS') }}</span>
           </template>
         </el-table-column>
@@ -206,7 +196,7 @@
           <el-form-item label="后付费模式" prop="isAfterPay">
             <el-switch v-model="courseForm.isAfterPay"></el-switch>
             <span style="margin-left: 10px;">开启</span>
-            <div style="font-size: 12px; color: #999;">开启后，学生报名后先上课再缴费，结算缴费单在“后付费结算”模块中生成。</div>
+            <div style="font-size: 12px; color: #999;">开启后，学生报名后先上课再缴费，结算缴费单在"后付费结算"模块中生成。</div>
           </el-form-item>
         </el-col>
       </el-row>
@@ -298,11 +288,23 @@
     </el-form>
   </el-drawer>
 
+  <!-- 自定义显示列弹窗 -->
+  <el-dialog v-model="showColumnDialog" title="自定义显示列" width="400px">
+    <el-checkbox-group v-model="checkedProps">
+      <el-checkbox v-for="col in allColumns" :key="col.prop" :label="col.prop">
+        {{ col.label }}
+      </el-checkbox>
+    </el-checkbox-group>
+    <template #footer>
+      <el-button @click="resetColumns">恢复默认</el-button>
+      <el-button type="primary" @click="showColumnDialog = false">确认</el-button>
+    </template>
+  </el-dialog>
 
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { updateCourseStatus, getCourseList, addCourse } from '@/api/Lession/CourseManager/Course'
 import moment from 'moment'
 import type { FormInstance, FormRules } from 'element-plus'

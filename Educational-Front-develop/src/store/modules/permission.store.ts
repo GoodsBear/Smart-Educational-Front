@@ -80,9 +80,36 @@ export const usePermissionStore = defineStore("permission", () => {
             ],
           },
           {
+            path: "/Senate",
+            component: Layout,
+            redirect: "/Senate/OnlineStudents",
+            meta: { title: "教务管理", icon: "ep:user-filled" },
+            children: [
+              {
+                path: "clbum",
+                name: "clbum",
+                component: () => import("@/views/Senate/clbum/index.vue"),
+                meta: { title: "班级管理", icon: "ep:star-filled" },
+              },
+              {
+                path: "classroom",
+                name: "classroom",
+                component: () => import("@/views/Senate/classroom/index.vue"),
+                meta: { title: "教室管理", icon: "ep:user" },
+              },
+             
+              {
+                path: "grade",
+                name: "grade",
+                component: () => import("@/views/Senate/grade/index.vue"),
+                meta: { title: "年级管理", icon: "ep:medal" },
+              },
+            ],
+          },
+          {
             path: "/material",
             component: Layout,
-            redirect: "/material/user",
+            redirect: "/material/material",
             meta: { title: "物料管理", icon: "ep:setting" },
             children: [
               {
@@ -102,7 +129,7 @@ export const usePermissionStore = defineStore("permission", () => {
           {
             path: "/tissue",
             component: Layout,
-            redirect: "/tissue/user",
+            redirect: "/tissue/staff",
             meta: { title: "组织管理", icon: "ep:setting" },
             children: [
               {
@@ -131,43 +158,6 @@ export const usePermissionStore = defineStore("permission", () => {
               },
             ],
           },
-          {
-            path: "/system",
-            component: Layout,
-            redirect: "/system/user",
-            meta: { title: "系统管理", icon: "ep:setting" },
-            children: [
-              {
-                path: "user",
-                name: "User",
-                component: () => import("@/views/system/user/index.vue"),
-                meta: { title: "用户管理", icon: "ep:user" },
-              },
-              {
-                path: "role",
-                name: "Role",
-                component: () => import("@/views/system/role/index.vue"),
-                meta: { title: "角色管理", icon: "ep:key" },
-              },
-              {
-                path: "dict",
-                name: "Dict",
-                component: () => import("@/views/system/dict/index.vue"),
-                meta: { title: "字典管理", icon: "ep:collection" },
-              },
-              {
-                path: "announcement",
-                component: () => import("@/views/system/announcement/index.vue"),
-                name: "Announcement",
-                meta: {
-                  title: "内部公告",
-                  icon: "notification",
-                  permission: ["system:announcement:list"],
-                },
-              },
-            ],
-          },
-
           {
             path: "/educational",
             component: Layout,
@@ -208,6 +198,44 @@ export const usePermissionStore = defineStore("permission", () => {
               },
             ],
           },
+          {
+            path: "/system",
+            component: Layout,
+            redirect: "/system/user",
+            meta: { title: "系统管理", icon: "ep:setting" },
+            children: [
+              {
+                path: "user",
+                name: "User",
+                component: () => import("@/views/system/user/index.vue"),
+                meta: { title: "用户管理", icon: "ep:user" },
+              },
+              {
+                path: "role",
+                name: "Role",
+                component: () => import("@/views/system/role/index.vue"),
+                meta: { title: "角色管理", icon: "ep:key" },
+              },
+              {
+                path: "dict",
+                name: "Dict",
+                component: () => import("@/views/system/dict/index.vue"),
+                meta: { title: "字典管理", icon: "ep:collection" },
+              },
+              {
+                path: "announcement",
+                component: () => import("@/views/system/announcement/index.vue"),
+                name: "Announcement",
+                meta: {
+                  title: "内部公告",
+                  icon: "notification",
+                  permission: ["system:announcement:list"],
+                },
+              },
+            ],
+          },
+
+          
         ];
         // 清理可能存在的重复路由
         try {
