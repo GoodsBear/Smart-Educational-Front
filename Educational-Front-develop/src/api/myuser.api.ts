@@ -14,22 +14,19 @@ const MyUserAPI = {
     // 正常API调用
     console.log("执行实际登录API调用", data);
 
-    // 构建适合后端API的请求参数
-    const params = {
-      StaffAccount: data.StaffAccount,
-      StaffPassword: data.StaffPassword,
-      CaptchaKey: data.CaptchaKey,
-      CaptchaCode: data.CaptchaCode,
-      rememberMe: data.rememberMe,
-    };
+    // // 构建适合后端API的请求参数
+    // const data = {
+    //   StaffAccount: data.StaffAccount,
+    //   StaffPassword: data.StaffPassword,
+    //   CaptchaKey: data.CaptchaKey,
+    //   CaptchaCode: data.CaptchaCode,
+    //   rememberMe: data.rememberMe,
+    // };
 
     return request<LoginResult>({
       url: "api/app/staff-services/login",
       method: "post",
-      params, // 使用适配后的参数作为query参数
-      headers: {
-        "Content-Type": "application/json",
-      },
+      data      
     });
   },
 

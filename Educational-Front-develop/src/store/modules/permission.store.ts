@@ -117,12 +117,12 @@ export const usePermissionStore = defineStore("permission", () => {
               //component: () => import("@/views/tissue/money/index.vue"),
               //meta: { title: "薪资设置", icon: "ep:collection" },
               //},
-              {
-                path: "organization",
-                name: "Organization",
-                component: () => import("@/views/tissue/organization/index.vue"),
-                meta: { title: "组织管理", icon: "ep:collection" },
-              },
+              // {
+              //   path: "organization",
+              //   name: "Organization",
+              //   component: () => import("@/views/tissue/organization/index.vue"),
+              //   meta: { title: "组织管理", icon: "ep:collection" },
+              // },
               {
                 path: "position",
                 name: "Position",
@@ -149,12 +149,12 @@ export const usePermissionStore = defineStore("permission", () => {
                 component: () => import("@/views/system/role/index.vue"),
                 meta: { title: "角色管理", icon: "ep:key" },
               },
-              {
-                path: "dict",
-                name: "Dict",
-                component: () => import("@/views/system/dict/index.vue"),
-                meta: { title: "字典管理", icon: "ep:collection" },
-              },
+              // {
+              //   path: "dict",
+              //   name: "Dict",
+              //   component: () => import("@/views/system/dict/index.vue"),
+              //   meta: { title: "字典管理", icon: "ep:collection" },
+              // },
               {
                 path: "announcement",
                 component: () => import("@/views/system/announcement/index.vue"),
@@ -188,24 +188,24 @@ export const usePermissionStore = defineStore("permission", () => {
                   icon: "course",
                 },
               },
-              {
-                path: "subject",
-                component: () => import("@/views/Lessions/subject/index.vue"),
-                name: "SubjectManagement",
-                meta: {
-                  title: "科目管理",
-                  icon: "subject",
-                },
-              },
-              {
-                path: "topic",
-                component: () => import("@/views/Lessions/topic/index.vue"),
-                name: "TopicManagement",
-                meta: {
-                  title: "专题管理",
-                  icon: "topic",
-                },
-              },
+              // {
+              //   path: "subject",
+              //   component: () => import("@/views/Lessions/subject/index.vue"),
+              //   name: "SubjectManagement",
+              //   meta: {
+              //     title: "科目管理",
+              //     icon: "subject",
+              //   },
+              // },
+              // {
+              //   path: "topic",
+              //   component: () => import("@/views/Lessions/topic/index.vue"),
+              //   name: "TopicManagement",
+              //   meta: {
+              //     title: "专题管理",
+              //     icon: "topic",
+              //   },
+              // },
             ],
           },
         ];
