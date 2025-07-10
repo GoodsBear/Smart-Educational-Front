@@ -11,7 +11,7 @@ import MyUserAPI from "@/api/myuser.api";
 export const useUserStore = defineStore("user", () => {
   // token
   const token = ref(Auth.getAccessToken() || "");
-  
+
   // 用户信息
   const userInfo = ref({
     userId: "1",
@@ -35,7 +35,7 @@ export const useUserStore = defineStore("user", () => {
       // 设置token
       const accessToken = result.accessToken || "mock-token";
       token.value = accessToken;
-      
+
       // 设置登录状态
       Auth.setTokens(
         accessToken,

@@ -7,26 +7,18 @@ import request from "@/utils/request";
 const MyUserAPI = {
   /**
    * 用户登录接口
-   *
    * @param data 登录表单数据
    */
-  login(data: LoginFormData) {
-    // 正常API调用
-    console.log("执行实际登录API调用", data);
-
-    // 构建适合后端API的请求参数
-    const params = {
-      StaffAccount: data.StaffAccount,
-      StaffPassword: data.StaffPassword,
-      CaptchaKey: data.CaptchaKey,
-      CaptchaCode: data.CaptchaCode,
-      rememberMe: data.rememberMe,
-    };
-
-    return request<LoginResult>({
+  login(data: {
+    staffAccount: string;
+    staffPassword: string;
+    captchaKey: string;
+    captchaCode: string;
+  }) {
+    return request({
       url: "api/app/staff-services/login",
       method: "post",
-      params, // 使用适配后的参数作为query参数
+      data, // 这里用 data，不是 params
       headers: {
         "Content-Type": "application/json",
       },

@@ -59,6 +59,14 @@ export const constantRoutes: RouteRecordRaw[] = [
     meta: { hidden: true },
   },
 
+  // 个人中心
+  {
+    path: "/profile",
+    name: "Profile",
+    component: () => import("@/views/profile/index.vue"),
+    meta: { title: "个人中心", icon: "user", hidden: true },
+  },
+
   // 注意：移除对404的通配符重定向，让所有路由都能尝试访问
   // {
   //   path: "/:pathMatch(.*)*",
@@ -129,8 +137,8 @@ export function setupRouter(app: App<Element>) {
 
 // 添加一个通配符路由，确保所有路由都能被捕获
 router.addRoute({
-  path: '/:pathMatch(.*)*',
-  redirect: '/dashboard'
+  path: "/:pathMatch(.*)*",
+  redirect: "/dashboard",
 });
 
 export default router;

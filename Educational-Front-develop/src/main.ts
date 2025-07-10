@@ -4,11 +4,11 @@ import setupPlugins from "@/plugins";
 import { ApiDetector } from "@/utils/apiDetector";
 import { usePermissionStore } from "@/store";
 import { ElMessage } from "element-plus";
-import { createPinia } from 'pinia'
-import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
+import { createPinia } from "pinia";
+import piniaPluginPersistedstate from "pinia-plugin-persistedstate";
 
-const pinia = createPinia()
-pinia.use(piniaPluginPersistedstate)
+const pinia = createPinia();
+pinia.use(piniaPluginPersistedstate);
 
 // 暗黑主题样式
 import "element-plus/theme-chalk/dark/css-vars.css";
@@ -68,7 +68,7 @@ async function initializeApp() {
     // 1. 先初始化路由
     await permissionStore.generateRoutes();
     console.log("✅ 静态路由初始化完成");
-    
+
     // 2. 然后挂载应用
     app.mount("#app");
     console.log("✅ 应用挂载完成");

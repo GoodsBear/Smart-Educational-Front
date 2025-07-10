@@ -54,6 +54,7 @@
           <el-button type="primary" @click="handleAction('publish')">上架</el-button>
           <el-button type="warning" @click="handleAction('unpublish')">下架</el-button>
           <el-button type="danger" @click="handleAction('delete')">删除</el-button>
+          <el-button type="primary" @click="showColumnDialog = true">自定义显示列</el-button>
         </el-col>
       </el-row>
       <!-- 数据展示 -->
@@ -236,7 +237,7 @@
           <el-form-item label="后付费模式" prop="isAfterPay">
             <el-switch v-model="courseForm.isAfterPay"></el-switch>
             <span style="margin-left: 10px;">开启</span>
-            <div style="font-size: 12px; color: #999;">开启后，学生报名后先上课再缴费，结算缴费单在“后付费结算”模块中生成。</div>
+            <div style="font-size: 12px; color: #999;">开启后，学生报名后先上课再缴费，结算缴费单在"后付费结算"模块中生成。</div>
           </el-form-item>
         </el-col>
       </el-row>
@@ -697,6 +698,28 @@ onMounted(() => {
   //年级选项
   LoadGrade()
 })
+
+// 自定义显示列相关
+const showColumnDialog = ref(false)
+const allColumns = ref([
+  { label: '课程名称', prop: 'courseName' },
+  { label: '适用学校', prop: 'campusName' },
+  { label: '科目', prop: 'subjectName' },
+  { label: '状态', prop: 'status' },
+  { label: '适用年级', prop: 'gradeName' },
+  { label: '总价', prop: 'totalPrice' },
+  { label: '课时数', prop: 'lessonNum' },
+  { label: '有效月数', prop: 'validMonthNum' },
+  { label: '上架状态', prop: 'isOnlineSale' },
+  { label: '创建时间', prop: 'creationTime' }
+])
+const checkedProps = ref(allColumns.value.map(col => col.prop))
+const resetColumns = () => {
+  checkedProps.value = allColumns.value.map(col => col.prop)
+}
+const showColumns = computed(() =>
+  allColumns.value.filter(col => checkedProps.value.includes(col.prop))
+)
 </script>
 
 <style scoped>

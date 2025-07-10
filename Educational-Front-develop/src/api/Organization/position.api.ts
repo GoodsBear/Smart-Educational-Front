@@ -64,6 +64,16 @@ const PositionAPI = {
       params: data,
     });
   },
+
+  /**
+   * 获取职位下拉信息列表
+   */
+  getPositionSelectList() {
+    return request({
+      url: `${POSITION_BASE_URL}/position`,
+      method: "get",
+    });
+  },
 };
 
 export default PositionAPI;

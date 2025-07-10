@@ -20,7 +20,7 @@ export const usePermissionStore = defineStore("permission", () => {
    * 生成静态路由数据并注册到全局路由
    */
   function generateRoutes() {
-    return new Promise<RouteRecordRaw[]>((resolve, reject) => {
+    return new Promise<RouteRecordRaw[]>((resolve) => {
       try {
         console.log("🔧 生成静态菜单...");
 
@@ -51,7 +51,7 @@ export const usePermissionStore = defineStore("permission", () => {
             path: "/Students",
             component: Layout,
             redirect: "/Students/OnlineStudents",
-            meta: { title: "学员管理", icon: "ep:user-filled" },
+            meta: { title: "学员", icon: "ep:user-filled" },
             children: [
               {
                 path: "OnlineStudents",
@@ -80,101 +80,39 @@ export const usePermissionStore = defineStore("permission", () => {
             ],
           },
           {
-            path: "/material",
+            path: "/Senate",
             component: Layout,
-            redirect: "/material/user",
-            meta: { title: "物料管理", icon: "ep:setting" },
+            redirect: "/Senate/OnlineStudents",
+            meta: { title: "教务", icon: "ep:user-filled" },
             children: [
               {
-                path: "material",
-                name: "Material",
-                component: () => import("@/views/Materials/material/index.vue"),
-                meta: { title: "物料列表", icon: "ep:collection" },
+                path: "clbum",
+                name: "clbum",
+                component: () => import("@/views/Senate/clbum/index.vue"),
+                meta: { title: "班级管理", icon: "ep:star-filled" },
               },
               {
-                path: "storerooms",
-                name: "Storerooms",
-                component: () => import("@/views/Materials/storerooms/index.vue"),
-                meta: { title: "出入库记录", icon: "ep:collection" },
+                path: "classroom",
+                name: "classroom",
+                component: () => import("@/views/Senate/classroom/index.vue"),
+                meta: { title: "教室管理", icon: "ep:user" },
               },
-            ],
-          },
-          {
-            path: "/tissue",
-            component: Layout,
-            redirect: "/tissue/user",
-            meta: { title: "组织管理", icon: "ep:setting" },
-            children: [
-              {
-                path: "staff",
-                name: "Staff",
-                component: () => import("@/views/system/staff/index.vue"),
-                meta: { title: "员工管理", icon: "ep:collection" },
-              },
-              //{
-              // path: "money",
-              //name: "money",
-              //component: () => import("@/views/tissue/money/index.vue"),
-              //meta: { title: "薪资设置", icon: "ep:collection" },
-              //},
-              {
-                path: "organization",
-                name: "Organization",
-                component: () => import("@/views/tissue/organization/index.vue"),
-                meta: { title: "组织管理", icon: "ep:collection" },
-              },
-              {
-                path: "position",
-                name: "Position",
-                component: () => import("@/views/tissue/position/index.vue"),
-                meta: { title: "职位管理", icon: "ep:collection" },
-              },
-            ],
-          },
-          {
-            path: "/system",
-            component: Layout,
-            redirect: "/system/user",
-            meta: { title: "系统管理", icon: "ep:setting" },
-            children: [
-              {
-                path: "user",
-                name: "User",
-                component: () => import("@/views/system/user/index.vue"),
-                meta: { title: "用户管理", icon: "ep:user" },
-              },
-              {
-                path: "role",
-                name: "Role",
-                component: () => import("@/views/system/role/index.vue"),
-                meta: { title: "角色管理", icon: "ep:key" },
-              },
-              {
-                path: "dict",
-                name: "Dict",
-                component: () => import("@/views/system/dict/index.vue"),
-                meta: { title: "字典管理", icon: "ep:collection" },
-              },
-              {
-                path: "announcement",
-                component: () => import("@/views/system/announcement/index.vue"),
-                name: "Announcement",
-                meta: {
-                  title: "内部公告",
-                  icon: "notification",
-                  permission: ["system:announcement:list"],
-                },
-              },
-            ],
-          },
 
+              {
+                path: "grade",
+                name: "grade",
+                component: () => import("@/views/Senate/grade/index.vue"),
+                meta: { title: "年级管理", icon: "ep:medal" },
+              },
+            ],
+          },
           {
             path: "/educational",
             component: Layout,
             redirect: "/educational/course",
             name: "Educational",
             meta: {
-              title: "课程管理",
+              title: "课程",
               icon: "education",
               order: 1,
             },
@@ -208,6 +146,94 @@ export const usePermissionStore = defineStore("permission", () => {
               },
             ],
           },
+          {
+            path: "/material",
+            component: Layout,
+            redirect: "/material/user",
+            meta: { title: "物料", icon: "ep:setting" },
+            children: [
+              {
+                path: "material",
+                name: "Material",
+                component: () => import("@/views/Materials/material/index.vue"),
+                meta: { title: "物料列表", icon: "ep:collection" },
+              },
+              {
+                path: "storerooms",
+                name: "Storerooms",
+                component: () => import("@/views/Materials/storerooms/index.vue"),
+                meta: { title: "出入库记录", icon: "ep:collection" },
+              },
+            ],
+          },
+          {
+            path: "/tissue",
+            component: Layout,
+            redirect: "/tissue/user",
+            meta: { title: "组织", icon: "ep:setting" },
+            children: [
+              {
+                path: "staff",
+                name: "Staff",
+                component: () => import("@/views/system/staff/index.vue"),
+                meta: { title: "员工管理", icon: "ep:collection" },
+              },
+              {
+                path: "salary",
+                name: "salary",
+                component: () => import("@/views/tissue/salary/index.vue"),
+                meta: { title: "薪资设置", icon: "ep:collection" },
+              },
+              {
+                path: "organization",
+                name: "Organization",
+                component: () => import("@/views/tissue/organization/index.vue"),
+                meta: { title: "组织管理", icon: "ep:collection" },
+              },
+              {
+                path: "position",
+                name: "Position",
+                component: () => import("@/views/tissue/position/index.vue"),
+                meta: { title: "职位管理", icon: "ep:collection" },
+              },
+            ],
+          },
+          {
+            path: "/system",
+            component: Layout,
+            redirect: "/system/user",
+            meta: { title: "系统", icon: "ep:setting" },
+            children: [
+              // {
+              //   path: "staff",
+              //   name: "Staff",
+              //   component: () => import("@/views/system/staff/index.vue"),
+              //   meta: { title: "员工管理", icon: "ep:collection" },
+              // },
+              {
+                path: "role",
+                name: "Role",
+                component: () => import("@/views/system/role/index.vue"),
+                meta: { title: "角色管理", icon: "ep:key" },
+              },
+              // {
+              //   path: "dict",
+              //   name: "Dict",
+              //   component: () => import("@/views/system/dict/index.vue"),
+              //   meta: { title: "字典管理", icon: "ep:collection" },
+              // },
+              {
+                path: "announcement",
+                component: () => import("@/views/system/announcement/index.vue"),
+                name: "Announcement",
+                meta: {
+                  title: "内部公告",
+                  icon: "notification",
+                  permission: ["system:announcement:list"],
+                },
+              },
+            ],
+          },
         ];
         // 清理可能存在的重复路由
         try {
@@ -216,7 +242,7 @@ export const usePermissionStore = defineStore("permission", () => {
             if (route.name) {
               try {
                 router.removeRoute(route.name);
-              } catch (e) {
+              } catch {
                 // 忽略移除不存在路由的错误
               }
             }
