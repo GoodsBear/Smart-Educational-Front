@@ -129,8 +129,8 @@ export function setupRouter(app: App<Element>) {
 
 // 添加一个通配符路由，确保所有路由都能被捕获
 router.addRoute({
-  path: '/:pathMatch(.*)*',
-  redirect: '/dashboard'
+  path: "/:pathMatch(.*)*",
+  redirect: "/dashboard",
 });
 
 export default router;

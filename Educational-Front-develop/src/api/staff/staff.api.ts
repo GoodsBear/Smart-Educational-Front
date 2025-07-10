@@ -75,7 +75,7 @@ const StaffAPI = {
    * @params status 状态
    * @returns 更新结果
    * */
-  updateStaffStatus(Ids: string, status: string) {
+  updateStaffStatus(Ids: string, status: number) {
     return request({
       url: `${STAFF_BASE_URL}/staff-status?status=${status}`,
       method: "put",
