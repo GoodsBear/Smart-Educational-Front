@@ -49,7 +49,11 @@
     </div>
 
     <!-- 系统设置 -->
-    <div v-if="defaultSettings.showSettings" class="navbar-actions__item" @click="handleSettingsClick">
+    <div
+      v-if="defaultSettings.showSettings"
+      class="navbar-actions__item"
+      @click="handleSettingsClick"
+    >
       <div class="i-svg:setting" />
     </div>
   </div>
@@ -162,7 +166,7 @@ function handleSettingsClick() {
     transition: all 0.3s;
 
     // 确保子元素居中
-    >* {
+    > * {
       display: flex;
       align-items: center;
       justify-content: center;

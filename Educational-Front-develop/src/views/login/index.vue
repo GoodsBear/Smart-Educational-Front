@@ -12,8 +12,13 @@
       <div class="login-right">
         <div class="login-container">
           <h2 class="login-welcome">欢迎使用</h2>
-          <el-form ref="loginFormRef" :model="loginFormData" :rules="loginRules" size="large"
-            :validate-on-rule-change="false">
+          <el-form
+            ref="loginFormRef"
+            :model="loginFormData"
+            :rules="loginRules"
+            size="large"
+            :validate-on-rule-change="false"
+          >
             <!-- 用户名 -->
             <el-form-item prop="StaffAccount">
               <el-input v-model="loginFormData.StaffAccount" :placeholder="t('login.username')">
@@ -28,8 +33,14 @@
             <!-- 密码 -->
             <el-tooltip :visible="isCapsLock" :content="t('login.capsLock')" placement="right">
               <el-form-item prop="StaffPassword">
-                <el-input v-model.trim="loginFormData.StaffPassword" :placeholder="t('login.password')" type="password"
-                  show-password @keyup="checkCapsLock" @keyup.enter="handleLoginSubmit">
+                <el-input
+                  v-model.trim="loginFormData.StaffPassword"
+                  :placeholder="t('login.password')"
+                  type="password"
+                  show-password
+                  @keyup="checkCapsLock"
+                  @keyup.enter="handleLoginSubmit"
+                >
                   <template #prefix>
                     <el-icon>
                       <Lock />
@@ -40,16 +51,27 @@
             </el-tooltip>
 
             <el-form-item>
-              <el-input v-model="loginFormData.CaptchaCode" placeholder="请输入验证码" style="width: 120px" />
+              <el-input
+                v-model="loginFormData.CaptchaCode"
+                placeholder="请输入验证码"
+                style="width: 120px"
+              />
               <template v-if="!captchaImgUrl">
-                <el-button :disabled="!loginFormData.StaffAccount || captchaLoading" style="margin-left: 8px"
-                  @click="getCaptchaImg">
+                <el-button
+                  :disabled="!loginFormData.StaffAccount || captchaLoading"
+                  style="margin-left: 8px"
+                  @click="getCaptchaImg"
+                >
                   获取验证码
                 </el-button>
               </template>
               <template v-else>
-                <img :src="captchaImgUrl" style="height: 32px; margin-left: 8px; cursor: pointer" title="点击刷新验证码"
-                  @click="getCaptchaImg" />
+                <img
+                  :src="captchaImgUrl"
+                  style="height: 32px; margin-left: 8px; cursor: pointer"
+                  title="点击刷新验证码"
+                  @click="getCaptchaImg"
+                />
               </template>
             </el-form-item>
 
@@ -86,7 +108,12 @@
 
             <!-- 登录按钮 -->
             <el-form-item>
-              <el-button :loading="loading" type="primary" class="w-full" @click="handleLoginSubmit">
+              <el-button
+                :loading="loading"
+                type="primary"
+                class="w-full"
+                @click="handleLoginSubmit"
+              >
                 {{ t("login.login") }}
               </el-button>
             </el-form-item>
@@ -112,7 +139,7 @@ import { ref, watch, reactive } from "vue";
 import MyUserAPI from "@/api/myuser.api";
 import logo from "@/assets/icons/b_ecd07cbf1b39cf913b555c732b89b120.jpg";
 import illustration from "@/assets/icons/65A3D8E6A127C519E4752FFFCBD6E5D9.gif";
-import { useStore } from "@/store/pinia/user.pinia"
+import { useStore } from "@/store/pinia/user.pinia";
 const userinfo = useStore();
 const { t } = useI18n();
 
@@ -137,8 +164,8 @@ const isCapsLock = ref(false);
 // const connectionStatus = ref("");
 
 // 1. 读取本地存储
-const savedAccount = localStorage.getItem('rememberAccount') || '';
-const savedPassword = localStorage.getItem('rememberPassword') || '';
+const savedAccount = localStorage.getItem("rememberAccount") || "";
+const savedPassword = localStorage.getItem("rememberPassword") || "";
 
 // 2. 初始化表单
 const loginFormData = reactive({
@@ -199,11 +226,11 @@ async function handleLoginSubmit() {
 
     // 新增：记住账号密码
     if (loginFormData.rememberMe) {
-      localStorage.setItem('rememberAccount', loginFormData.StaffAccount);
-      localStorage.setItem('rememberPassword', loginFormData.StaffPassword);
+      localStorage.setItem("rememberAccount", loginFormData.StaffAccount);
+      localStorage.setItem("rememberPassword", loginFormData.StaffPassword);
     } else {
-      localStorage.removeItem('rememberAccount');
-      localStorage.removeItem('rememberPassword');
+      localStorage.removeItem("rememberAccount");
+      localStorage.removeItem("rememberPassword");
     }
 
     // 3. 登录成功

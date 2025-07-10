@@ -59,6 +59,14 @@ export const constantRoutes: RouteRecordRaw[] = [
     meta: { hidden: true },
   },
 
+  // 个人中心
+  {
+    path: "/profile",
+    name: "Profile",
+    component: () => import("@/views/profile/index.vue"),
+    meta: { title: "个人中心", icon: "user", hidden: true },
+  },
+
   // 注意：移除对404的通配符重定向，让所有路由都能尝试访问
   // {
   //   path: "/:pathMatch(.*)*",
