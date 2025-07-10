@@ -32,8 +32,8 @@
     <div class="navbar-actions__item">
       <el-dropdown trigger="click">
         <div class="user-profile">
-          <img class="user-profile__avatar" :src="userStore.userInfo.avatar" />
-          <span class="user-profile__name">{{ userStore.userInfo.username }}</span>
+          <img class="user-profile__avatar" :src="staffInfo.PhotoUrl" />
+          <span class="user-profile__name">{{ staffInfo.StaffAccount }}</span>
         </div>
         <template #dropdown>
           <el-dropdown-menu>
@@ -143,6 +143,25 @@ function logout() {
 function handleSettingsClick() {
   settingStore.settingsVisible = true;
 }
+
+const staffInfo = ref({
+  PhotoUrl: "",
+  StaffAccount: "",
+  // 你还可以加其他字段
+});
+
+onMounted(() => {
+  // await loadUserProfile();
+  const infoStr = localStorage.getItem("staffInfo");
+  if (infoStr) {
+    try {
+      const info = JSON.parse(infoStr);
+      staffInfo.value = info;
+    } catch {
+      staffInfo.value = { PhotoUrl: "", StaffAccount: "" };
+    }
+  }
+});
 </script>
 
 <style lang="scss" scoped>

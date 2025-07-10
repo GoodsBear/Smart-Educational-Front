@@ -7,11 +7,11 @@
       <div class="flex flex-wrap">
         <!-- 左侧问候语区域 -->
         <div class="flex-1 flex items-start">
-          <img class="w80px h80px rounded-full"
-            src="https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png" />
+          <img class="w80px h80px rounded-full" :src="staffInfo.PhotoUrl" />
           <div class="ml-5">
             <p class="text-lg font-bold">欢迎使用智慧教务系统！</p>
-            zhzh <p class="text-sm text-gray">今日天气晴朗，气温在15℃至25℃之间，东南风。</p>
+            {{ staffInfo.StaffName }}
+            <p class="text-sm text-gray">今日天气晴朗，气温在15℃至25℃之间，东南风。</p>
           </div>
         </div>
 
@@ -74,9 +74,7 @@
 
           <div class="flex-x-between mt-2 flex-1">
             <div class="flex-y-center">
-              <span class="text-lg transition-all duration-300 hover:scale-110">
-                128
-              </span>
+              <span class="text-lg transition-all duration-300 hover:scale-110">128</span>
               <span class="ml-2 text-xs text-[#67c23a]">
                 <el-icon>
                   <Connection />
@@ -154,90 +152,36 @@
         </el-card>
       </el-col>
     </el-row>
-
-    <!-- 用户列表卡片 -->
-    <!-- <el-card shadow="never" class="mt-5">
-      <template #header>
-        <div class="flex justify-between items-center">
-          <span>用户列表</span>
-          <el-button type="primary" size="small">添加用户</el-button>
-        </div>
-      </template>
-
-      <el-table :data="userList" border style="width: 100%">
-        <el-table-column prop="id" label="ID" width="80" />
-        <el-table-column prop="name" label="姓名" width="120" />
-        <el-table-column prop="phone" label="电话" width="150" />
-        <el-table-column prop="email" label="邮箱" />
-        <el-table-column prop="status" label="状态" width="100">
-          <template #default="scope">
-            <el-tag :type="scope.row.status ? 'success' : 'danger'">
-              {{ scope.row.status ? '启用' : '禁用' }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column label="操作" width="180">
-          <template #default="scope">
-            <el-button size="small" @click="handleEdit(scope.row)">编辑</el-button>
-            <el-button size="small" type="danger" @click="handleDelete(scope.row)">删除</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
-    </el-card> -->
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import { ElMessage } from 'element-plus';
-import { Connection } from '@element-plus/icons-vue';
+import { Connection } from "@element-plus/icons-vue";
+import { Document, Top } from "@element-plus/icons-vue";
+import { ref, onMounted } from "vue";
 
 defineOptions({
   name: "Dashboard",
   inheritAttrs: false,
 });
 
-// 静态用户列表数据
-const userList = ref([
-  {
-    id: 1,
-    name: '张三',
-    phone: '13800138000',
-    email: 'zhangsan@example.com',
-    status: true
-  },
-  {
-    id: 2,
-    name: '李四',
-    phone: '13800138001',
-    email: 'lisi@example.com',
-    status: true
-  },
-  {
-    id: 3,
-    name: '王五',
-    phone: '13800138002',
-    email: 'wangwu@example.com',
-    status: false
-  },
-  {
-    id: 4,
-    name: '赵六',
-    phone: '13800138003',
-    email: 'zhaoliu@example.com',
-    status: true
+const staffInfo = ref({
+  PhotoUrl: "",
+  StaffName: "",
+  // 你还可以加其他字段
+});
+
+onMounted(() => {
+  const infoStr = localStorage.getItem("staffInfo");
+  if (infoStr) {
+    try {
+      const info = JSON.parse(infoStr);
+      staffInfo.value = info;
+    } catch {
+      staffInfo.value = { PhotoUrl: "", StaffName: "" };
+    }
   }
-]);
-
-// 处理编辑
-const handleEdit = (row: any) => {
-  ElMessage.success(`编辑用户: ${row.name}`);
-};
-
-// 处理删除
-const handleDelete = (row: any) => {
-  ElMessage.warning(`删除用户: ${row.name}`);
-};
+});
 </script>
 
 <style lang="scss" scoped>

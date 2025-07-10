@@ -140,6 +140,7 @@ import MyUserAPI from "@/api/myuser.api";
 import logo from "@/assets/icons/b_ecd07cbf1b39cf913b555c732b89b120.jpg";
 import illustration from "@/assets/icons/65A3D8E6A127C519E4752FFFCBD6E5D9.gif";
 import { useStore } from "@/store/pinia/user.pinia";
+import { jwtDecode } from "jwt-decode"; // 注意是 jwtDecode（具名导出）
 const userinfo = useStore();
 const { t } = useI18n();
 
@@ -222,7 +223,7 @@ async function handleLoginSubmit() {
     // 2. 调用登录API
     const userStore = useUserStore();
     console.log("提交数据", loginFormData);
-    await userStore.login(loginFormData);
+    const res = await userStore.login(loginFormData);
 
     // 新增：记住账号密码
     if (loginFormData.rememberMe) {
@@ -233,10 +234,25 @@ async function handleLoginSubmit() {
       localStorage.removeItem("rememberPassword");
     }
 
+    // 3. 获取token
+    const token = res.token;
+
+    // 4. 解析token
+    const staffInfo = jwtDecode(token);
+
+    // 5. 存储token和员工信息到Pinia或localStorage
+
+    userStore.token = token;
+    userStore.userInfo = staffInfo;
+
+    // 也可以存到localStorage
+    localStorage.setItem("token", token);
+    localStorage.setItem("staffInfo", JSON.stringify(staffInfo));
+
     // 3. 登录成功
     ElMessage.success(t("login.loginSuccess"));
-    userinfo.userinfo.token = userStore.token;
-    userinfo.userinfo.staffid = userStore.userInfo.userId;
+    // userinfo.userinfo.token = userStore.token;
+    // userinfo.userinfo.staffid = userStore.userInfo.userId;
     // 4. 获取重定向地址或默认跳转到仪表盘
     //const redirect = route.query.redirect?.toString() || '/dashboard';
     await router.replace({ path: "/dashboard" });
