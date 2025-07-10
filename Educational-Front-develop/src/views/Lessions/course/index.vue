@@ -59,14 +59,14 @@
       <!-- 数据展示 -->
       <el-table ref="tableRef" v-loading="loading" :data="courseList" style="width: 100%" border>
         <el-table-column fixed="left" type="selection" width="55" align="center" />
-        <el-table-column label="课程" prop="courseName" />
+        <el-table-column fixed="left" label="课程" prop="courseName" />
         <el-table-column label="校区" prop="campusName" />
         <el-table-column label="科目" prop="subjectName" />
         <el-table-column label="专题" prop="topicName" />
         <el-table-column label="课型" prop="courseTypeName" />
-        <el-table-column label="单价" >
+        <el-table-column label="单价">
           <template v-slot="scope">
-            {{ (scope.row.totalPrice/scope.row.lessonNum).toFixed(2) }}
+            {{ (scope.row.totalPrice / scope.row.lessonNum).toFixed(2) }}
           </template>
         </el-table-column>
         <el-table-column label="总售价" prop="totalPrice" />
@@ -96,7 +96,7 @@
             <el-tag v-else type="danger">未上架</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="库存" prop="stockNum"/>
+        <el-table-column label="库存" prop="stockNum" />
         <el-table-column label="销售量" prop="" />
         <el-table-column label="销售额" prop="" />
         <el-table-column label="销售截止日期" prop="stopSaleDate" width="120">
@@ -130,7 +130,8 @@
 
   <!-- 新增课程抽屉 -->
 
-  <el-drawer v-model="drawer" close-on-press-escape size="850" :title="title" :with-header="true">
+  <el-drawer v-model="drawer" close-on-press-escape size="850" :title="title" :with-header="true"
+    @close="resetForm(ruleFormRef)">
     <el-form ref="ruleFormRef" :model="courseForm" :rules="rules" label-width="auto">
       <!-- 基本信息 -->
       <el-form-item label="课程名称" prop="courseName">
@@ -208,9 +209,9 @@
           <!-- 课堂类型与预约模式 -->
           <el-form-item label="课堂类型" prop="courseTypeId">
             <el-radio-group v-model="courseForm.courseTypeId">
-              <el-radio :label="1">大班课</el-radio>
-              <el-radio :label="2">小班课</el-radio>
-              <el-radio :label="3">一对一</el-radio>
+              <el-radio :label="0">大班课</el-radio>
+              <el-radio :label="1">小班课</el-radio>
+              <el-radio :label="2">一对一</el-radio>
             </el-radio-group>
             <div style="font-size: 12px; color: #999;">一对一类型可自动生成班级</div>
           </el-form-item>
@@ -299,9 +300,9 @@
         </el-col>
       </el-row>
 
-      <el-form-item label="详情介绍图集">
+      <!-- <el-form-item label="详情介绍图集">
         <MultiImageUpload v-model="courseForm.detailImageList" :limit="10" />
-      </el-form-item>
+      </el-form-item> -->
       <el-form-item label="师资说明" prop="teacherRemark">
         <el-input v-model="courseForm.teacherRemark" type="textarea"></el-input>
       </el-form-item>
@@ -331,9 +332,10 @@ import moment from 'moment'
 import type { FormInstance, FormRules } from 'element-plus'
 import { getSubjectDropdown } from '@/api/Lession/SubjectManager/Subject'
 import { getSpecialSubjectDropdown } from '@/api/Lession/TopicManager/TopicManager'
-import { getOrganizationDropdown } from '@/api/Organization/organization.api'
 import { getGradeDropdown } from '@/api/Lession/ClassAndGrade/Grade'
 import ReletedCourse from './reletedcourse/ReletedCourse.vue'
+import MultiImageUpload from '@/components/Upload/MultiImageUpload.vue'
+import { getOrganizationDropdown } from '@/api/organization/organization.api'
 
 
 defineOptions({
@@ -389,7 +391,7 @@ const drawer = ref(false)
 const title = ref("")
 // 表单数据
 interface CourseForm {
-  id: string,
+  id:string,
   courseName: string,
   campusId: string,
   subjectId: string,
@@ -412,14 +414,14 @@ interface CourseForm {
   classQrCode: string,
   stockNum: number,
   stopSaleDate: Date,
-  detailImageList: [],
+  detailImageList: string,
   teacherRemark: string,
   serviceRemark: string
 }
 
 const ruleFormRef = ref()
 const courseForm = reactive<CourseForm>({
-  id: '',
+  id:'',
   courseName: '',
   campusId: '',
   subjectId: '',
@@ -442,7 +444,7 @@ const courseForm = reactive<CourseForm>({
   classQrCode: '',
   stockNum: 0,
   stopSaleDate: new Date(),
-  detailImageList: [],
+  detailImageList: '',
   teacherRemark: '',
   serviceRemark: ''
 })
@@ -468,25 +470,51 @@ const rules = reactive<FormRules>({
   coverImage: [{ required: true, message: '请上传课程封面图', trigger: 'change' }],
   classQrCode: [{ required: true, message: '请上传班级群二维码', trigger: 'change' }]
 });
+
+//重置表单
+const resetForm = (formEl: any) => {
+  if (!formEl) return
+  formEl.resetFields()
+  // 还原所有字段到初始状态
+  Object.assign(courseForm, {
+    id: '',
+    courseName: '',
+    campusId: '',
+    subjectId: '',
+    topicId: '',
+    gratorId: '',
+    sellUnit: '次',
+    courseTypeId: 1,
+    totalPrice: 0,
+    lessonNum: 0,
+    validMonthNum: 0,
+    isReserve: true,
+    lessonCut: 0,
+    isAfterPay: true,
+    lessonCutMode: 0,
+    lessonDuration: 0,
+    status: true,
+    isOnlineSale: false,
+    coverImage: '',
+    isOpenRecommend: false,
+    classQrCode: '',
+    stockNum: 0,
+    stopSaleDate: new Date(),
+    detailImageList: '',
+    teacherRemark: '',
+    serviceRemark: ''
+  })
+}
 // 新增方法
 const handleAdd = async () => {
   // TODO: 实现新增逻辑
   drawer.value = true
   title.value = "新增课程"
 }
-
-//重置表单
-const resetForm = (formEl: any) => {
-  if (!formEl) return
-  formEl.resetFields()
-}
-// 新增/编辑状态
-const isEdit = ref(false);
 // 编辑方法
 const handleEdit = (row: any) => {
   title.value = "编辑课程";
   drawer.value = true;
-  isEdit.value = true;
   // 深拷贝，避免直接修改表格数据
   Object.assign(courseForm, JSON.parse(JSON.stringify(row)));
 }
@@ -497,21 +525,15 @@ const submitForm = async (formEl: FormInstance | undefined) => {
   await formEl.validate(async (valid, fields) => {
     if (valid) {
       let response;
-      if (isEdit.value) {
-        debugger
+      if (title.value == "新增课程") {
         // 编辑
-        response = await updateCourse(courseForm);
+        response = await addCourse(courseForm);
       } else {
         // 新增
-        response = await addCourse(courseForm);
+        response = await updateCourse(courseForm);
       }
-      if (response.code === 200) {
-        ElMessage.success(response.message);
         drawer.value = false;
         handleQuery();
-      } else {
-        ElMessage.error(response.message);
-      }
     } else {
       console.log('error submit!', fields);
     }
@@ -580,7 +602,7 @@ const handleAction = async (action: any) => {
   )
   // 调用后台API
 
-  const response = await updateCourseStatus({
+  await updateCourseStatus({
     status: status.value,
     type: actionResult.value,
   }, ids);
@@ -652,10 +674,11 @@ const LoadTopic = async () => {
 //#endregion
 //#region 关联课程相关
 const reletedCourseDialogVisible = ref(false)
-const currentCourseId = ref("")
-const reletedopen = (row: any) => {
-  currentCourseId.value = row.id
-  reletedCourseDialogVisible.value = true
+const currentCourseId = ref('')
+
+function reletedopen(row: any) {
+  currentCourseId.value = row.id;
+  reletedCourseDialogVisible.value = true;
 }
 //#endregion
 

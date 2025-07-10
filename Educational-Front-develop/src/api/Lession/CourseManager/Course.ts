@@ -118,3 +118,20 @@ export function getReletedCourse(params: { id: string; pageIndex?: number; pageS
     params,
   });
 }
+
+/**
+ * @description 移除课程关联
+ * @param {object} params
+ *   - id: 主课程的id（path参数）
+ *   - guid: 要移除的关联课程id（query参数）
+ * @returns Promise<any>
+ */
+export function removeReletedCourse(params: { id: string; guid: string }) {
+  return request({
+    url: `/api/app/course-services/${params.id}/releted-course`,
+    method: "delete",
+    params: { guid: params.guid },
+  });
+}
+
+
