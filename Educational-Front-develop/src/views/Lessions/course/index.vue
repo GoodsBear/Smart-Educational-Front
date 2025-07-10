@@ -424,7 +424,7 @@ const courseForm = reactive<CourseForm>({
   campusId: '',
   subjectId: '',
   topicId: '',
-  gradeId: '',
+  gratorId: '',
   sellUnit: '次',
   courseTypeId: 1,
   totalPrice: 0,
@@ -442,7 +442,7 @@ const courseForm = reactive<CourseForm>({
   classQrCode: '',
   stockNum: 0,
   stopSaleDate: new Date(),
-  detailImageList: '',
+  detailImageList: [],
   teacherRemark: '',
   serviceRemark: ''
 })

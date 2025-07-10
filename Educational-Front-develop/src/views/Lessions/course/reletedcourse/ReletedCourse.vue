@@ -20,13 +20,15 @@
       <el-pagination background layout="prev, pager, next" :total="total" :page-size="pageSize"
         :current-page="currentPage" @current-change="handlePageChange" />
     </div>
-    <span slot="footer" class="dialog-footer">
-      <el-button @click="handleClose">关闭</el-button>
-    </span>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button @click="handleClose">关闭</el-button>
+      </span>
+    </template>
 
     <!-- 新增关联弹窗 -->
-    <el-dialog :model-value="showAddDialog" title="添加关联" width="500px" @close="handleAddDialogClose" append-to-body>
-      <el-form :model="addForm" :rules="addRules" ref="addFormRef" label-width="100px">
+    <el-dialog :model-value="showAddDialog" title="添加关联" width="500px" append-to-body @close="handleAddDialogClose">
+      <el-form ref="addFormRef" :model="addForm" :rules="addRules" label-width="100px">
         <el-form-item label="选择课程" prop="courseNames">
           <el-input v-model="addForm.courseNames" placeholder="请选择课程" readonly @click="openCourseSelectDialog" />
         </el-form-item>
@@ -38,8 +40,8 @@
     </el-dialog>
 
     <!-- 课程选择弹窗（独立） -->
-    <el-dialog :model-value="showCourseSelectDialog" title="选择课程" width="900px" @close="showCourseSelectDialog = false"
-      append-to-body>
+    <el-dialog :model-value="showCourseSelectDialog" title="选择课程" width="900px" append-to-body
+      @close="showCourseSelectDialog = false">
       <el-row :gutter="20">
         <!-- 左侧课程表格 -->
         <el-col :span="15">
@@ -49,9 +51,9 @@
           <el-table :data="courseList" style="width: 100%; margin-top: 10px;" height="350">
             <el-table-column prop="courseName" label="课程名称" />
             <el-table-column prop="lessonNum" label="课时" width="80" />
-            <el-table-column  label="单价" width="100" >
-              <template v-slot="scope">
-                {{ scope.row.totalPrice/scope.row.lessonNum }}
+            <el-table-column label="单价" width="100">
+              <template #default="scope">
+                {{ scope.row.totalPrice / scope.row.lessonNum }}
               </template>
             </el-table-column>
             <el-table-column prop="totalPrice" label="总价" width="100" />
@@ -62,8 +64,8 @@
             <el-table-column prop="lessonDuration" label="时长" width="80" />
             <el-table-column label="操作" width="80" fixed="right">
               <template #default="scope">
-                <el-button type="primary" size="small" @click="selectCourse(scope.row)"
-                  :disabled="isSelected(scope.row)">选择</el-button>
+                <el-button type="primary" size="small" :disabled="isSelected(scope.row)"
+                  @click="selectCourse(scope.row)">选择</el-button>
               </template>
             </el-table-column>
           </el-table>
@@ -93,7 +95,7 @@
 </template>
 
 <script>
-import { getCourseList } from '@/api/Lession/CourseManager/Course';
+import { getCourseList, addReletedCourse, getReletedCourse } from '@/api/Lession/CourseManager/Course';
 export default {
   name: "ReletedCourse",
   props: {
@@ -143,7 +145,18 @@ export default {
   },
   methods: {
     fetchData() {
-      // TODO: 拉取当前courseId的关联课程数据
+      // 拉取当前courseId的关联课程数据
+      if (!this.courseId) return;
+      getReletedCourse({ id: this.courseId, pageIndex: this.currentPage, pageSize: this.pageSize }).then(res => {
+        if (res && res.isSuc) {
+          this.tableData = res.data.data.data || [];
+          console.log(this.tableData)
+          this.total = res.data ? res.data.length : 0;
+        } else {
+          this.tableData = [];
+          this.total = 0;
+        }
+      });
     },
     // 课程选择相关方法
     fetchCourseList() {
@@ -186,10 +199,25 @@ export default {
       this.selectedCourses = [];
     },
     handleAddSubmit() {
-      this.$refs.addFormRef.validate(valid => {
+      this.$refs.addFormRef.validate(async valid => {
         if (valid) {
-          this.$message.success('添加成功');
-          this.showAddDialog = false;
+          // 调用后端接口
+          const courseId = this.courseId;
+          const guids = this.selectedCourses.map(item => item.id);
+          try {
+            const res = await addReletedCourse({ courseId, guids });
+            if (res && res.isSuc) {
+              this.$message.success(res.msg || '添加成功');
+              this.showAddDialog = false;
+              this.addForm = { courseNames: '' };
+              this.selectedCourses = [];
+              this.fetchData && this.fetchData(); // 刷新主表
+            } else {
+              this.$message.error(res.msg || '添加失败');
+            }
+          } catch (e) {
+            this.$message.error('请求失败' + e.message);
+          }
         }
       });
     },

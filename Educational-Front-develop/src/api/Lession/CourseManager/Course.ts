@@ -94,3 +94,27 @@ export function updateCourse(data: any) {
     data,
   });
 }
+
+/**
+ * @description 批量添加课程关联
+ * @param {object} data { courseId: string, guids: string[] }
+ */
+export function addReletedCourse(data: { courseId: string, guids: string[] }) {
+  return request({
+    url: "/api/app/course-services/releted-course",
+    method: "post",
+    data,
+  });
+}
+
+/**
+ * @description 获取课程关联
+ * @param {object} params 查询参数 { id: string, pageIndex?: number, pageSize?: number }
+ */
+export function getReletedCourse(params: { id: string; pageIndex?: number; pageSize?: number }) {
+  return request({
+    url: "/api/app/course-services/releted-course",
+    method: "get",
+    params,
+  });
+}
