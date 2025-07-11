@@ -80,3 +80,13 @@ export function getCourseDropdown() {
     method: "get",
   });
 }
+/**
+ * @description 获取课程列表全部下拉框
+ */
+export function getCourseSelect() {
+  return request({
+    url: "/api/app/course-services/f-tCouser",
+    method: "get",
+  });
+}
+

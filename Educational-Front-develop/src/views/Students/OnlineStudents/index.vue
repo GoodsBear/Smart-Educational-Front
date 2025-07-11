@@ -70,7 +70,7 @@
         <el-table-column label="操作" width="200" align="center" fixed="right">
           <template #default="{ row }">
             <el-button type="primary" link @click="handleView(row)">查看</el-button>
-            <el-button type="success" link @click="">报名</el-button>
+            <el-button type="success" link @click="openEnrollDialog(row)">报名</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -188,6 +188,75 @@
         </span>
       </template>
     </el-dialog>
+
+    <!-- 报名弹框 -->
+    <el-dialog v-model="enrollDialogVisible" title="录入报名签单信息" width="40%" :close-on-click-modal="false"
+      @close="resetEnrollForm">
+      <el-form :model="enrollForm" label-width="100px" label-position="right">
+        <el-form-item label="学生姓名">
+          <el-input v-model="enrollForm.studentName" disabled></el-input>
+        </el-form-item>
+        <el-form-item label="选择课程" required>
+          <el-select v-model="enrollForm.courseId" placeholder="请选择" style="width:100%" @change="onCourseChange">
+            <el-option v-for="item in courseList" :key="item.id" :label="item.name" :value="item.id" />
+          </el-select>
+        </el-form-item>
+        <template v-if="enrollForm.courseId">
+          <el-form-item label="报名类型" required>
+            <el-select v-model="enrollForm.enrollType" placeholder="请选择" style="width:100%">
+              <el-option label="新报名" value="新报名" />
+              <el-option label="续报" value="续报" />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="开始日期" required>
+            <el-date-picker v-model="enrollForm.startDate" type="date" style="width:100%" value-format="YYYY-MM-DD" />
+          </el-form-item>
+          <el-form-item label="有效期至" required>
+            <el-date-picker v-model="enrollForm.endDate" type="date" style="width:100%" value-format="YYYY-MM-DD" />
+          </el-form-item>
+          <el-form-item label="购买课时数" required>
+            <el-input v-model="enrollForm.lessonCount" disabled></el-input>
+          </el-form-item>
+          <el-form-item label="课程金额">
+            <el-input v-model="enrollForm.courseAmount" disabled suffix="元"></el-input>
+          </el-form-item>
+          <el-form-item label="实收金额" required>
+            <el-input v-model="enrollForm.actualAmount" suffix="元" @input="onActualAmountInput"></el-input>
+          </el-form-item>
+          <el-form-item label="优惠金额">
+            <el-input v-model="enrollForm.discountAmount" disabled suffix="元"></el-input>
+          </el-form-item>
+          <el-form-item label="收款经手人">
+            <el-select v-model="enrollForm.collector" placeholder="请选择" style="width:100%">
+              <el-option v-for="item in staffList" :key="item.guid || item.id" :label="item.staffName || item.name"
+                :value="item.guid || item.id" />
+            </el-select>
+            <div style="font-size:12px;color:#999;margin-top:4px;">不填表示经手人是自己</div>
+          </el-form-item>
+          <el-form-item label="备注">
+            <el-input v-model="enrollForm.remark" type="textarea" rows="3"></el-input>
+          </el-form-item>
+        </template>
+        <el-form-item>
+          <div style="width:100%;">
+            <div>课程总额 ￥{{ enrollForm.courseAmount || 0 }}</div>
+            <div>优惠金额 ￥{{ enrollForm.discountAmount || 0 }}</div>
+            <div>实收金额 ￥{{ enrollForm.actualAmount || 0 }}</div>
+          </div>
+        </el-form-item>
+        <el-form-item>
+          <div style="background:#f5f7fa;padding:8px 12px;border-radius:4px;font-size:13px;color:#888;width:100%;">
+            经财务中心审核通过的报名课时数才会生效。
+          </div>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="enrollDialogVisible = false">取消</el-button>
+          <el-button type="primary" @click="submitEnrollForm">提交</el-button>
+        </span>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -196,7 +265,7 @@ import { ref, onMounted, reactive, watch } from 'vue'
 import { ElMessage, ElMessageBox, FormInstance } from 'element-plus'
 import studentApi from '@/api/StudentsManager/Student/Student'
 import { formatDate } from '@/utils/date'
-import { getCourseList } from '@/api/Lession/CourseManager/Course'
+import { getCourseList, getCourseSelect } from '@/api/Lession/CourseManager/Course'
 import router from '@/router'
 //#region 
 // 查询参数
@@ -652,16 +721,7 @@ const submitConsultant = async () => {
   }
 }
 
-
-
-
-
-
-
-
-
-
-
+//#endregion
 // 页面加载时获取列表
 onMounted(() => {
   getStudentList()
@@ -669,6 +729,87 @@ onMounted(() => {
   getGradeList()
   getStaffList()
 })
+
+// 报名弹框相关数据
+const enrollDialogVisible = ref(false)
+const enrollForm = reactive({
+  studentName: '',
+  courseId: '',
+  enrollType: '',
+  startDate: '',
+  endDate: '',
+  lessonCount: '',
+  courseAmount: '',
+  actualAmount: '',
+  discountAmount: '',
+  collector: '',
+  remark: ''
+})
+const courseList = ref<any[]>([])
+
+// 打开报名弹框
+const openEnrollDialog = async (row: any) => {
+  enrollDialogVisible.value = true
+  enrollForm.studentName = row.name
+  enrollForm.courseId = ''
+  enrollForm.enrollType = ''
+  enrollForm.startDate = ''
+  enrollForm.endDate = ''
+  enrollForm.lessonCount = ''
+  enrollForm.courseAmount = ''
+  enrollForm.actualAmount = ''
+  enrollForm.discountAmount = ''
+  enrollForm.collector = ''
+  enrollForm.remark = ''
+  // 获取课程列表
+  const res = await getCourseSelect()
+  courseList.value = Array.isArray(res) ? res : (res.data || [])
+}
+
+// 课程选择变化时自动反填
+const onCourseChange = (courseId: string) => {
+  const course = courseList.value.find((c: any) => c.id === courseId || c.CourseId === courseId)
+  if (course) {
+    enrollForm.lessonCount = String(course.lessonNum || course.课时 || course.lessonCount || '')
+    enrollForm.courseAmount = String(course.totalPrice || course.总价 || course.amount || course.金额 || '')
+    enrollForm.discountAmount = String(course.discount || course.优惠金额 || 0)
+    enrollForm.actualAmount = enrollForm.courseAmount
+  } else {
+    enrollForm.lessonCount = ''
+    enrollForm.courseAmount = ''
+    enrollForm.discountAmount = ''
+    enrollForm.actualAmount = ''
+  }
+}
+
+// 实收金额输入时
+const onActualAmountInput = (val: any) => {
+  // 可做校验或格式化
+}
+
+// 重置报名表单
+const resetEnrollForm = () => {
+  enrollForm.studentName = ''
+  enrollForm.courseId = ''
+  enrollForm.enrollType = ''
+  enrollForm.startDate = ''
+  enrollForm.endDate = ''
+  enrollForm.lessonCount = ''
+  enrollForm.courseAmount = ''
+  enrollForm.actualAmount = ''
+  enrollForm.discountAmount = ''
+  enrollForm.collector = ''
+  enrollForm.remark = ''
+}
+
+// 提交报名表单
+const submitEnrollForm = async () => {
+  // 这里可调用报名API
+  ElMessage.success('报名信息提交成功')
+  enrollDialogVisible.value = false
+  resetEnrollForm()
+}
+
 </script>
 
 <style scoped>
