@@ -9,7 +9,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { ElMessage, type TreeInstance } from 'element-plus'
-import { getOrganizationTree } from "../../../api/Organization/organrization";//@/api/organization/organization.api
+import { getOrganizationTree } from "../../../api/Organization/organization.api";//@/api/organization/organization.api
 // 局部引入（组件内）
 import { ElTree } from 'element-plus';
 import { useRouter } from 'vue-router'
