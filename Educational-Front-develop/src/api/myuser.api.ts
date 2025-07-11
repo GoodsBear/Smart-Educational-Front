@@ -7,12 +7,9 @@ import request from "@/utils/request";
 const MyUserAPI = {
   /**
    * 用户登录接口
-   *
    * @param data 登录表单数据
    */
   login(data: LoginFormData) {
-    // 正常API调用
-    console.log("执行实际登录API调用", data);
 
     // // 构建适合后端API的请求参数
     // const data = {
@@ -26,7 +23,7 @@ const MyUserAPI = {
     return request<LoginResult>({
       url: "api/app/staff-services/login",
       method: "post",
-      data      
+      data,
     });
   },
 

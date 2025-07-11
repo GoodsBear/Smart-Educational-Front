@@ -81,10 +81,18 @@ service.interceptors.response.use(
     if (response.config.responseType === "blob") {
       return response;
     }
+    if (response.config.responseType === "text") {
+      return response.data;
+    }
 
     const { isSuc, data, msg, code } = response.data;
 
-    console.log(`⬅️ 接收响应: ${response.config.method} ${response.config.url}`, { isSuc, code, msg, data });
+    console.log(`⬅️ 接收响应: ${response.config.method} ${response.config.url}`, {
+      isSuc,
+      code,
+      msg,
+      data,
+    });
 
     // 请求成功：检查 isSuc 和 code
     if (isSuc === true && code.toString() === ResultEnum.SUCCESS) {

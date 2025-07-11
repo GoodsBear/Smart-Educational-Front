@@ -20,7 +20,7 @@ export const usePermissionStore = defineStore("permission", () => {
    * 生成静态路由数据并注册到全局路由
    */
   function generateRoutes() {
-    return new Promise<RouteRecordRaw[]>((resolve, reject) => {
+    return new Promise<RouteRecordRaw[]>((resolve) => {
       try {
         console.log("🔧 生成静态菜单...");
 
@@ -51,7 +51,7 @@ export const usePermissionStore = defineStore("permission", () => {
             path: "/Students",
             component: Layout,
             redirect: "/Students/OnlineStudents",
-            meta: { title: "学员管理", icon: "ep:user-filled" },
+            meta: { title: "学员", icon: "ep:user-filled" },
             children: [
               {
                 path: "OnlineStudents",
@@ -80,10 +80,76 @@ export const usePermissionStore = defineStore("permission", () => {
             ],
           },
           {
+            path: "/Senate",
+            component: Layout,
+            redirect: "/Senate/OnlineStudents",
+            meta: { title: "教务", icon: "ep:user-filled" },
+            children: [
+              {
+                path: "clbum",
+                name: "clbum",
+                component: () => import("@/views/Senate/clbum/index.vue"),
+                meta: { title: "班级管理", icon: "ep:star-filled" },
+              },
+              {
+                path: "classroom",
+                name: "classroom",
+                component: () => import("@/views/Senate/classroom/index.vue"),
+                meta: { title: "教室管理", icon: "ep:user" },
+              },
+              {
+                path: "grade",
+                name: "grade",
+                component: () => import("@/views/Senate/grade/index.vue"),
+                meta: { title: "年级管理", icon: "ep:medal" },
+              },
+            ],
+          },
+          {
+            path: "/educational",
+            component: Layout,
+            redirect: "/educational/course",
+            name: "Educational",
+            meta: {
+              title: "课程",
+              icon: "education",
+              order: 1,
+            },
+            children: [
+              {
+                path: "course",
+                component: () => import("@/views/Lessions/course/index.vue"),
+                name: "CourseManagement",
+                meta: {
+                  title: "课程管理",
+                  icon: "course",
+                },
+              },
+              {
+                path: "subject",
+                component: () => import("@/views/Lessions/subject/index.vue"),
+                name: "SubjectManagement",
+                meta: {
+                  title: "科目管理",
+                  icon: "subject",
+                },
+              },
+              {
+                path: "topic",
+                component: () => import("@/views/Lessions/topic/index.vue"),
+                name: "TopicManagement",
+                meta: {
+                  title: "专题管理",
+                  icon: "topic",
+                },
+              },
+            ],
+          },
+          {
             path: "/material",
             component: Layout,
             redirect: "/material/user",
-            meta: { title: "物料管理", icon: "ep:setting" },
+            meta: { title: "物料", icon: "ep:setting" },
             children: [
               {
                 path: "material",
@@ -103,7 +169,7 @@ export const usePermissionStore = defineStore("permission", () => {
             path: "/tissue",
             component: Layout,
             redirect: "/tissue/user",
-            meta: { title: "组织管理", icon: "ep:setting" },
+            meta: { title: "组织", icon: "ep:setting" },
             children: [
               {
                 path: "staff",
@@ -111,18 +177,18 @@ export const usePermissionStore = defineStore("permission", () => {
                 component: () => import("@/views/system/staff/index.vue"),
                 meta: { title: "员工管理", icon: "ep:collection" },
               },
-              //{
-              // path: "money",
-              //name: "money",
-              //component: () => import("@/views/tissue/money/index.vue"),
-              //meta: { title: "薪资设置", icon: "ep:collection" },
-              //},
-              // {
-              //   path: "organization",
-              //   name: "Organization",
-              //   component: () => import("@/views/tissue/organization/index.vue"),
-              //   meta: { title: "组织管理", icon: "ep:collection" },
-              // },
+              {
+                path: "salary",
+                name: "salary",
+                component: () => import("@/views/tissue/salary/index.vue"),
+                meta: { title: "薪资设置", icon: "ep:collection" },
+              },
+              {
+                path: "organization",
+                name: "Organization",
+                component: () => import("@/views/tissue/organization/index.vue"),
+                meta: { title: "组织管理", icon: "ep:collection" },
+              },
               {
                 path: "position",
                 name: "Position",
@@ -135,14 +201,8 @@ export const usePermissionStore = defineStore("permission", () => {
             path: "/system",
             component: Layout,
             redirect: "/system/user",
-            meta: { title: "系统管理", icon: "ep:setting" },
+            meta: { title: "系统", icon: "ep:setting" },
             children: [
-              {
-                path: "user",
-                name: "User",
-                component: () => import("@/views/system/user/index.vue"),
-                meta: { title: "用户管理", icon: "ep:user" },
-              },
               {
                 path: "role",
                 name: "Role",
@@ -167,48 +227,7 @@ export const usePermissionStore = defineStore("permission", () => {
               },
             ],
           },
-
-          {
-            path: "/educational",
-            component: Layout,
-            redirect: "/educational/course",
-            name: "Educational",
-            meta: {
-              title: "课程管理",
-              icon: "education",
-              order: 1,
-            },
-            children: [
-              {
-                path: "course",
-                component: () => import("@/views/Lessions/course/index.vue"),
-                name: "CourseManagement",
-                meta: {
-                  title: "课程管理",
-                  icon: "course",
-                },
-              },
-              // {
-              //   path: "subject",
-              //   component: () => import("@/views/Lessions/subject/index.vue"),
-              //   name: "SubjectManagement",
-              //   meta: {
-              //     title: "科目管理",
-              //     icon: "subject",
-              //   },
-              // },
-              // {
-              //   path: "topic",
-              //   component: () => import("@/views/Lessions/topic/index.vue"),
-              //   name: "TopicManagement",
-              //   meta: {
-              //     title: "专题管理",
-              //     icon: "topic",
-              //   },
-              // },
-            ],
-          },
-        ];
+         ];
         // 清理可能存在的重复路由
         try {
           // 尝试移除可能已存在的路由
@@ -216,7 +235,7 @@ export const usePermissionStore = defineStore("permission", () => {
             if (route.name) {
               try {
                 router.removeRoute(route.name);
-              } catch (e) {
+              } catch {
                 // 忽略移除不存在路由的错误
               }
             }

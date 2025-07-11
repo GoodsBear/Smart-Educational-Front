@@ -5,30 +5,32 @@ import request from "@/utils/request";
  * @param {object} data 课程信息
  */
 export function addCourse(data: {
-  courseName: string;
-  campusId: string;
-  subjectId: string;
-  topicId: string;
-  courseTypeId: string;
-  price: number;
-  totalPrice: number;
-  lessonNum: number;
-  validMonthNum: number;
-  isReserve: boolean;
-  lessonCar: number;
-  isInterCut: boolean;
-  classSchedule: string;
-  lessonDescribe: string;
-  status: boolean;
-  isLineSale: boolean;
-  coverImage: string;
-  isRecommend: boolean;
-  classQRCode: string;
-  stockNum: number;
-  stopSaleDate: string;
-  detailImageList: string;
-  teacherRemark: string;
-  serviceRemark: string;
+  id: string,
+  courseName: string,
+  campusId: string,
+  subjectId: string,
+  topicId: string,
+  gratorId: string,
+  sellUnit: string,
+  courseTypeId: number,
+  totalPrice: number,
+  lessonNum: number,
+  validMonthNum: number,
+  isReserve: boolean,
+  lessonCut: number,
+  isAfterPay: boolean,
+  lessonCutMode: number,
+  lessonDuration: number,
+  status: boolean,
+  isOnlineSale: boolean,
+  coverImage: string,
+  isOpenRecommend: boolean,
+  classQrCode: string,
+  stockNum: number,
+  stopSaleDate: Date,
+  detailImageList: string,
+  teacherRemark: string,
+  serviceRemark: string
 }) {
   return request({
     url: "/api/app/course-services/course",
@@ -80,3 +82,56 @@ export function getCourseDropdown() {
     method: "get",
   });
 }
+
+/**
+ * @description 修改课程信息
+ * @param {object} data 课程信息
+ */
+export function updateCourse(data: any) {
+  return request({
+    url: "/UpdateCourse",
+    method: "put",
+    data,
+  });
+}
+
+/**
+ * @description 批量添加课程关联
+ * @param {object} data { courseId: string, guids: string[] }
+ */
+export function addReletedCourse(data: { courseId: string, guids: string[] }) {
+  return request({
+    url: "/api/app/course-services/releted-course",
+    method: "post",
+    data,
+  });
+}
+
+/**
+ * @description 获取课程关联
+ * @param {object} params 查询参数 { id: string, pageIndex?: number, pageSize?: number }
+ */
+export function getReletedCourse(params: { id: string; pageIndex?: number; pageSize?: number }) {
+  return request({
+    url: "/api/app/course-services/releted-course",
+    method: "get",
+    params,
+  });
+}
+
+/**
+ * @description 移除课程关联
+ * @param {object} params
+ *   - id: 主课程的id（path参数）
+ *   - guid: 要移除的关联课程id（query参数）
+ * @returns Promise<any>
+ */
+export function removeReletedCourse(params: { id: string; guid: string }) {
+  return request({
+    url: `/api/app/course-services/${params.id}/releted-course`,
+    method: "delete",
+    params: { guid: params.guid },
+  });
+}
+
+

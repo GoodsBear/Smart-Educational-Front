@@ -80,6 +80,7 @@ export function getTopicDetail(id: string) {
 export function updateTopic(
   id: string,
   data: {
+    id:string,
     name: string;
     categoryId: string;
     logoPath: string;

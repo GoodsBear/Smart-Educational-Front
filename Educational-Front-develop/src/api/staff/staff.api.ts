@@ -75,7 +75,7 @@ const StaffAPI = {
    * @params status 状态
    * @returns 更新结果
    * */
-  updateStaffStatus(Ids: string, status: string) {
+  updateStaffStatus(Ids: string, status: number) {
     return request({
       url: `${STAFF_BASE_URL}/staff-status?status=${status}`,
       method: "put",
@@ -105,12 +105,12 @@ const StaffAPI = {
    */
   staffOrganization(Ids: string[], organizationIds: string[]) {
     return request({
-      url: '/api/app/staff-services/staff-oranization',
-      method: 'post',
+      url: "/api/app/staff-services/staff-oranization",
+      method: "post",
       params: { Ids },
-      data: organizationIds
+      data: organizationIds,
     });
-  }
+  },
 };
 
 export default StaffAPI;
@@ -121,6 +121,7 @@ export interface StaffQuery {
   StaffName?: string;
   /** 员工状态 (0或1) */
   Status?: number;
+  OrganizationId?: string;
   /** 当前页码 */
   PageIndex: number;
   /** 每页数量 */

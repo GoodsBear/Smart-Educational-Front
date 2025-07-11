@@ -6,7 +6,7 @@
         <el-card class="user-card">
           <div class="user-info">
             <div class="avatar-wrapper">
-              <el-avatar :src="userProfile.avatar" :size="100" />
+              <el-avatar :src="staffInfo.PhotoUrl" :size="100" />
               <el-button
                 type="info"
                 class="avatar-edit-btn"
@@ -18,7 +18,7 @@
               <input ref="fileInput" type="file" style="display: none" @change="handleFileChange" />
             </div>
             <div class="user-name">
-              <span class="nickname">{{ userProfile.nickname }}</span>
+              <span class="nickname">{{ staffInfo.StaffName }}</span>
               <el-icon class="edit-icon" @click="handleOpenDialog(DialogType.ACCOUNT)">
                 <Edit />
               </el-icon>
@@ -388,7 +388,7 @@ const handleSubmit = async () => {
     UserAPI.updateProfile(userProfileForm).then(() => {
       ElMessage.success("账号资料修改成功");
       dialog.visible = false;
-      loadUserProfile();
+      // loadUserProfile();
     });
   } else if (dialog.type === DialogType.PASSWORD) {
     if (passwordChangeForm.newPassword !== passwordChangeForm.confirmPassword) {
@@ -403,13 +403,13 @@ const handleSubmit = async () => {
     UserAPI.bindOrChangeMobile(mobileUpdateForm).then(() => {
       ElMessage.success("手机号绑定成功");
       dialog.visible = false;
-      loadUserProfile();
+      // loadUserProfile();
     });
   } else if (dialog.type === DialogType.EMAIL) {
     UserAPI.bindOrChangeEmail(emailUpdateForm).then(() => {
       ElMessage.success("邮箱绑定成功");
       dialog.visible = false;
-      loadUserProfile();
+      // loadUserProfile();
     });
   }
 };
@@ -457,19 +457,34 @@ const handleFileChange = async (event: Event) => {
 };
 
 /** 加载用户信息 */
-const loadUserProfile = async () => {
-  const data = await UserAPI.getProfile();
-  userProfile.value = data;
-};
+// const loadUserProfile = async () => {
+//   const data = await UserAPI.getProfile();
+//   userProfile.value = data;
+// };
 
-onMounted(async () => {
+const staffInfo = ref({
+  PhotoUrl: "",
+  StaffName: "",
+  // 你还可以加其他字段
+});
+
+onMounted(() => {
   if (mobileTimer.value) {
     clearInterval(mobileTimer.value);
   }
   if (emailTimer.value) {
     clearInterval(emailTimer.value);
   }
-  await loadUserProfile();
+  // await loadUserProfile();
+  const infoStr = localStorage.getItem("staffInfo");
+  if (infoStr) {
+    try {
+      const info = JSON.parse(infoStr);
+      staffInfo.value = info;
+    } catch {
+      staffInfo.value = { PhotoUrl: "", StaffName: "" };
+    }
+  }
 });
 </script>
 
