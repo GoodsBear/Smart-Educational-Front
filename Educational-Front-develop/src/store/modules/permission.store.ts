@@ -167,6 +167,26 @@ export const usePermissionStore = defineStore("permission", () => {
             ],
           },
           {
+            path: "/interact",
+            component: Layout,
+            redirect: "/interact/user",
+            meta: { title: "互动", icon: "ep:setting" },
+            children: [
+              {
+                path: "evaluation",
+                name: "Evaluation",
+                component: () => import("@/views/Interact/evaluation/index.vue"),
+                meta: { title: "学评教", icon: "ep:collection" },
+              },
+              {
+                path: "evaluation",
+                name: "Evaluation",
+                component: () => import("@/views/Interact/evaluation/index.vue"),
+                meta: { title: "学评教", icon: "ep:collection" },
+              },
+            ],
+          },
+          {
             path: "/tissue",
             component: Layout,
             redirect: "/tissue/user",
