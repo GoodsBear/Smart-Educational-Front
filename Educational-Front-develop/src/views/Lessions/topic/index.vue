@@ -138,21 +138,6 @@
             </el-icon>
           </el-upload>
         </el-form-item>
-
-        <!--     <el-form-item label="Logo" prop="logoPath">
-                <el-upload class="logo-uploader" action="" :show-file-list="false" :on-success="handleLogoSuccess"
-                  :before-upload="beforeLogoUpload" :http-request="customUpload">
-                  <img v-if="logoImageUrl" :src="logoImageUrl" class="logo-image" />
-                  <div v-else class="logo-uploader-placeholder">
-                    <el-icon>
-                      <Plus />
-                    </el-icon>
-                    <span>点击上传</span>
-                  </div>
-                </el-upload>
-                <div v-if="form.logoPath" class="logo-path">当前路径: {{ form.logoPath }}</div>
-                 
-              </el-form-item>-->
         <el-form-item v-model="form.brief" label="简介" prop="brief">
           <div style="border: 1px solid #ccc">
             <Editor v-model="form.brief" :api-key="apiKey" :init="TinyMCE_option" />

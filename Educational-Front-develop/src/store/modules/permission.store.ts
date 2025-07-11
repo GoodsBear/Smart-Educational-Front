@@ -79,7 +79,111 @@ export const usePermissionStore = defineStore("permission", () => {
               },
             ],
           },
+          {
+            path: "/Senate",
+            component: Layout,
+            redirect: "/Senate/OnlineStudents",
+            meta: { title: "教务", icon: "ep:user-filled" },
+            children: [
+              {
+                path: "classSchedule",
+                name: "classSchedule",
+                component: () => import("@/views/Senate/classSchedule/index.vue"),
+                meta: { title: "排课管理", icon: "ep:star-filled" },
+              },
+              {
+                path: "classSchedule2",
+                name: "classSchedule2",
+                component: () => import("@/views/Senate/classSchedule/index2.vue"),
+                meta: { title: "排课管理", icon: "ep:star-filled" },
+              },
+              {
+                path: "clbum",
+                name: "clbum",
+                component: () => import("@/views/Senate/clbum/index.vue"),
+                meta: { title: "班级管理", icon: "ep:star-filled" },
+              },
+              {
+                path: "detail",
+                name: "Clbumdetail",
+                component: () => import("@/views/Senate/clbum/index2.vue"),
+                meta: { title: "班级详情", icon: "ep:star-filled", hidden: true },
+              },
+              {
+                path: "classroom",
+                name: "classroom",
+                component: () => import("@/views/Senate/classroom/index.vue"),
+                meta: { title: "教室管理", icon: "ep:user" },
+              },
+              {
+                path: "grade",
+                name: "grade",
+                component: () => import("@/views/Senate/grade/index.vue"),
+                meta: { title: "年级管理", icon: "ep:medal" },
+              },
+            ],
+          },
 
+          {
+            path: "/educational",
+            component: Layout,
+            redirect: "/educational/course",
+            name: "Educational",
+            meta: {
+              title: "课程管理",
+              icon: "education",
+              order: 1,
+            },
+            children: [
+              {
+                path: "course",
+                component: () => import("@/views/Lessions/course/index.vue"),
+                name: "CourseManagement",
+                meta: {
+                  title: "课程管理",
+                  icon: "course",
+                },
+              },
+              {
+                path: "subject",
+                component: () => import("@/views/Lessions/subject/index.vue"),
+                name: "SubjectManagement",
+                meta: {
+                  title: "科目管理",
+                  icon: "subject",
+                },
+              },
+              {
+                path: "topic",
+                component: () => import("@/views/Lessions/topic/index.vue"),
+                name: "TopicManagement",
+                meta: {
+                  title: "专题管理",
+                  icon: "topic",
+                },
+              },
+            ],
+          },
+          {
+            path: "/material",
+            component: Layout,
+            redirect: "/material/user",
+            meta: { title: "物料", icon: "ep:setting" },
+            children: [
+              {
+                path: "material",
+                name: "Material",
+                component: () => import("@/views/Materials/material/index.vue"),
+                meta: { title: "物料列表", icon: "ep:collection" },
+              },
+              {
+                path: "storerooms",
+                name: "Storerooms",
+                component: () => import("@/views/Materials/storerooms/index.vue"),
+                meta: { title: "出入库记录", icon: "ep:collection" },
+              },
+            ],
+          },
           {
             path: "/tissue",
             component: Layout,
@@ -144,47 +248,6 @@ export const usePermissionStore = defineStore("permission", () => {
                   title: "内部公告",
                   icon: "notification",
                   permission: ["system:announcement:list"],
-                },
-              },
-            ],
-          },
-
-          {
-            path: "/educational",
-            component: Layout,
-            redirect: "/educational/course",
-            name: "Educational",
-            meta: {
-              title: "课程管理",
-              icon: "education",
-              order: 1,
-            },
-            children: [
-              {
-                path: "course",
-                component: () => import("@/views/Lessions/course/index.vue"),
-                name: "CourseManagement",
-                meta: {
-                  title: "课程管理",
-                  icon: "course",
-                },
-              },
-              {
-                path: "subject",
-                component: () => import("@/views/Lessions/subject/index.vue"),
-                name: "SubjectManagement",
-                meta: {
-                  title: "科目管理",
-                  icon: "subject",
-                },
-              },
-              {
-                path: "topic",
-                component: () => import("@/views/Lessions/topic/index.vue"),
-                name: "TopicManagement",
-                meta: {
-                  title: "专题管理",
-                  icon: "topic",
                 },
               },
             ],

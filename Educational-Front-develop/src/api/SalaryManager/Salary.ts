@@ -27,7 +27,6 @@ interface UpdateSalaryDto {
   classHourFee?: number; // 课时费（可选）
   assistantFee?: number; // 助教费（可选，修正大小写）
 }
-
 // 2. 创建响应式数据（小驼峰，变量名）
 const updateSalaryDto = ref<UpdateSalaryDto[]>([
   // 可选：初始对象（也可留空数组 []）
