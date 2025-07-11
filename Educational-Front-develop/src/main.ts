@@ -28,31 +28,6 @@ import "animate.css";
 // 自动为某些默认事件（如 touchstart、wheel 等）添加 { passive: true },提升滚动性能并消除控制台的非被动事件监听警告
 import "default-passive-events";
 
-console.log("🚀 应用启动...");
-
-// 检测后端API是否可用
-ApiDetector.testConnection("https://localhost:44375/")
-  .then((status) => {
-    console.log(`🔌 API连接状态: ${status}`);
-
-    // 根据状态设置模拟数据模式
-    const useMockData =
-      status.includes("网络错误") || status.includes("连接失败") || status.includes("连接超时");
-    localStorage.setItem("useMockData", useMockData ? "true" : "false");
-
-    if (useMockData) {
-      console.log("⚠️ 使用模拟数据模式");
-      ElMessage.warning({
-        message: "后端API不可用，已启用模拟数据模式",
-        duration: 5000,
-      });
-    }
-  })
-  .catch((err) => {
-    console.error("🔴 API检测失败", err);
-    localStorage.setItem("useMockData", "true");
-  });
-
 const app = createApp(App);
 //国际化
 app.use(ElementPlus, {

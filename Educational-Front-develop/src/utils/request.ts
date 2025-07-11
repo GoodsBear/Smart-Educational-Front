@@ -26,7 +26,7 @@ interface BackendApiResponse<T = any> {
  * - 如果后端服务未启动，可以将baseURL设置为空字符串，前端将使用模拟数据
  */
 const service = axios.create({
-  baseURL: "https://localhost:44375/",
+  baseURL: import.meta.env.VITE_APP_API_URL,
   timeout: 50000,
   headers: { "Content-Type": "application/json;charset=utf-8" },
   paramsSerializer: (params) => qs.stringify(params),
@@ -34,20 +34,20 @@ const service = axios.create({
 });
 
 // 打印baseURL值，方便调试
-console.log("HTTP请求baseURL:", service.defaults.baseURL);
+//console.log("HTTP请求baseURL:", service.defaults.baseURL);
 
 /**
  * 请求拦截器 - 添加 Authorization 头
  */
 service.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    console.log(`📤 发送请求: ${config.method} ${config.url}`);
+    //console.log(`📤 发送请求: ${config.method} ${config.url}`);
 
     // 确保登录接口使用POST方法
-    if (config.url?.includes("/login") && !config.method) {
-      console.log("强制设置登录请求为POST方法");
-      config.method = "post";
-    }
+    // if (config.url?.includes("/login") && !config.method) {
+    //   console.log("强制设置登录请求为POST方法");
+    //   config.method = "post";
+    // }
 
     // JWT认证相关代码已注释
     /*
@@ -74,6 +74,9 @@ service.interceptors.request.use(
  */
 service.interceptors.response.use(
   (response: AxiosResponse<BackendApiResponse>) => {
+
+    // debugger
+
     // 如果响应是二进制流，则直接返回（用于文件下载、Excel 导出等）
     if (response.config.responseType === "blob") {
       return response;
@@ -137,7 +140,7 @@ service.interceptors.response.use(
 
     // 使用后端返回的msg作为错误信息
     const { msg } = response.data as BackendApiResponse; // 确保这里使用新的BackendApiResponse类型
-
+    // debugger
     ElMessage.error(msg || "请求失败");
     return Promise.reject(new Error(msg || "Request Error"));
   }
@@ -211,26 +214,26 @@ async function refreshTokenAndRetry(config: InternalAxiosRequestConfig): Promise
 /**
  * 重定向到登录页面
  */
-async function redirectToLogin(message: string = "请重新登录"): Promise<void> {
-  try {
-    ElNotification({
-      title: "提示",
-      message,
-      type: "warning",
-      duration: 3000,
-    });
+// async function redirectToLogin(message: string = "请重新登录"): Promise<void> {
+//   try {
+//     ElNotification({
+//       title: "提示",
+//       message,
+//       type: "warning",
+//       duration: 3000,
+//     });
 
-    await useUserStoreHook().resetAllState();
+//     await useUserStoreHook().resetAllState();
 
-    // 跳转到登录页，保留当前路由用于登录后跳转
-    const currentPath = router.currentRoute.value.fullPath;
-    await router.push(`/login?redirect=${encodeURIComponent(currentPath)}`);
-  } catch (error) {
-    console.error("Redirect to login error:", error);
-  }
-}
+//     // 跳转到登录页，保留当前路由用于登录后跳转
+//     const currentPath = router.currentRoute.value.fullPath;
+//     await router.push(`/login?redirect=${encodeURIComponent(currentPath)}`);
+//   } catch (error) {
+//     console.error("Redirect to login error:", error);
+//   }
+// }
 
-// 定义一个通用的请求函数，返回Promise<T>而不是Promise<AxiosResponse<T>>
+// 定义`一个通用的请求函`数，返回Promise<T>而不是Promise<AxiosResponse<T>>
 const request = <T = any>(config: AxiosRequestConfig): Promise<T> => {
   return service(config) as Promise<T>; // Assert the return type to Promise<T>
 };

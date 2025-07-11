@@ -9,19 +9,21 @@ const MyUserAPI = {
    * 用户登录接口
    * @param data 登录表单数据
    */
-  login(data: {
-    staffAccount: string;
-    staffPassword: string;
-    captchaKey: string;
-    captchaCode: string;
-  }) {
-    return request({
+  login(data: LoginFormData) {
+
+    // // 构建适合后端API的请求参数
+    // const data = {
+    //   StaffAccount: data.StaffAccount,
+    //   StaffPassword: data.StaffPassword,
+    //   CaptchaKey: data.CaptchaKey,
+    //   CaptchaCode: data.CaptchaCode,
+    //   rememberMe: data.rememberMe,
+    // };
+
+    return request<LoginResult>({
       url: "api/app/staff-services/login",
       method: "post",
-      data, // 这里用 data，不是 params
-      headers: {
-        "Content-Type": "application/json",
-      },
+      data,
     });
   },
 

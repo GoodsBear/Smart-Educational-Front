@@ -97,7 +97,6 @@ export const usePermissionStore = defineStore("permission", () => {
                 component: () => import("@/views/Senate/classroom/index.vue"),
                 meta: { title: "教室管理", icon: "ep:user" },
               },
-
               {
                 path: "grade",
                 name: "grade",
@@ -204,12 +203,6 @@ export const usePermissionStore = defineStore("permission", () => {
             redirect: "/system/user",
             meta: { title: "系统", icon: "ep:setting" },
             children: [
-              // {
-              //   path: "staff",
-              //   name: "Staff",
-              //   component: () => import("@/views/system/staff/index.vue"),
-              //   meta: { title: "员工管理", icon: "ep:collection" },
-              // },
               {
                 path: "role",
                 name: "Role",
@@ -244,7 +237,7 @@ export const usePermissionStore = defineStore("permission", () => {
               },
             ],
           },
-        ];
+         ];
         // 清理可能存在的重复路由
         try {
           // 尝试移除可能已存在的路由
