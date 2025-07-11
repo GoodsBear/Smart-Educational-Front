@@ -123,7 +123,7 @@ export const usePermissionStore = defineStore("permission", () => {
                 name: "CourseManagement",
                 meta: {
                   title: "课程管理",
-                  icon: "course",
+                  icon: "课程",
                 },
               },
               {
@@ -230,6 +230,16 @@ export const usePermissionStore = defineStore("permission", () => {
                   title: "内部公告",
                   icon: "notification",
                   permission: ["system:announcement:list"],
+                },
+              },
+              {
+                path: "holiday",
+                component: () => import("@/views/holidays/index.vue"),
+                name: "holiday",
+                meta: {
+                  title: "节假日管理",
+                  icon: "假日",
+                  permission: ["system:holiday:list"],
                 },
               },
             ],
