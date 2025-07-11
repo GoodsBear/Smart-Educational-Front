@@ -37,14 +37,14 @@ export const usePermissionStore = defineStore("permission", () => {
             path: "/dashboard",
             component: Layout,
             redirect: "/dashboard",
-            children: [
-              {
-                path: "",
-                name: "Dashboard",
-                component: () => import("@/views/dashboard/index.vue"),
-                meta: { title: "仪表盘", icon: "ep:odometer", affix: true, keepAlive: true },
-              },
-            ],
+            // children: [
+            //   {
+            //     path: "",
+            //     name: "Dashboard",
+            //     component: () => import("@/views/dashboard/index.vue"),
+            //     meta: { title: "仪表盘", icon: "ep:odometer", affix: true, keepAlive: true },
+            //   },
+            // ],
           },
 
           {

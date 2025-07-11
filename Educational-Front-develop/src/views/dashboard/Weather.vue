@@ -45,7 +45,7 @@ export default {
         },
       },
       apiKey: "d204549d1bb5bd41200b48fc23eac2db",
-      city: "Beijing",
+      city: "BeiJing",
     };
   },
   computed: {
