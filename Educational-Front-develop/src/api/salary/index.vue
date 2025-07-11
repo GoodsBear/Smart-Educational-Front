@@ -6,21 +6,11 @@
     </el-card>
     <!-- 右侧薪资列表  -->
     <div class="salary-list bg-aquamarine w-[70%] h-full p-4 overflow-auto">
-      <h3 class="font-bold mb-3">薪资列表</h3>
-      <el-table
-        ref="tableRef"
-        v-loading="loading"
-        :data="salaryList"
-        style="width: 100%"
-        @selection-change="ToAll"
-      >
+      <h3 class="font-bold mb-3">薪资列表 </h3>
+      <el-table ref="tableRef" v-loading="loading" :data="salaryList" style="width: 100%" @selection-change="ToAll">
         <el-table-column type="index" label="序号" width="80" />
         <template v-for="col in allColumns" :key="col.prop">
-          <el-table-column
-            v-if="checkedProps.includes(col.prop)"
-            :prop="col.prop"
-            :label="col.label"
-          >
+          <el-table-column v-if="checkedProps.includes(col.prop)" :prop="col.prop" :label="col.label">
             <template v-if="col.prop === 'basicSalaryType'" #default="{ row }">
               <el-tag :type="row.basicSalaryType === 0 ? 'success' : 'warning'">
                 {{ row.basicSalaryType === 0 ? "非底薪模式" : "底薪模式" }}
@@ -28,15 +18,15 @@
             </template>
             <template v-else-if="col.prop === 'classHourDuration'" #default="{ row }">
               <span v-if="row.classHourDuration != 0">{{ row.classHourDuration }}分钟</span>
-              <span v-else-if="row.classHourDuration === 0"></span>
+              <span v-else-if="row.classHourDuration === 0"> </span>
             </template>
             <template v-else-if="col.prop === 'classHourFee'" #default="{ row }">
               <span v-if="row.classHourFee != 0">{{ row.classHourFee }}元</span>
-              <span v-else-if="row.classHourFee === 0"></span>
+              <span v-else-if="row.classHourFee === 0"> </span>
             </template>
             <template v-else-if="col.prop === 'assistantFee'" #default="{ row }">
               <span v-if="row.assistantFee != 0">{{ row.assistantFee }}元</span>
-              <span v-else-if="row.assistantFee === 0"></span>
+              <span v-else-if="row.assistantFee === 0"> </span>
             </template>
           </el-table-column>
         </template>
@@ -49,13 +39,7 @@
     </div>
   </div>
   <!-- 编辑修改dialog -->
-  <el-dialog
-    v-model="open"
-    title="薪资设置"
-    width="700px"
-    destroy-on-close
-    :close-on-click-modal="false"
-  >
+  <el-dialog v-model="open" title="薪资设置" width="700px" destroy-on-close :close-on-click-modal="false">
     <el-form re="topicForm" :model="form" :rules="rules" label-width="100px" status-icon>
       <el-form-item label="员工姓名">
         <el-input v-model="form.staffName" readonly />
@@ -69,14 +53,11 @@
       </el-form-item>
       <el-form-item v-if="form.basicSalaryType == 1" label="底薪" prop="basicSalary">
         <el-input v-model="form.basicSalary">
-          <template #append>元/月</template>
-        </el-input>
+          <template #append>元/月</template></el-input>
       </el-form-item>
       <el-form-item v-if="form.basicSalaryType == 1" label="达标课时数" prop="qualifiedClassHours">
         <el-input v-model="form.qualifiedClassHours" type="number" />
-        <span class="teachermoney">
-          若开启系统配置“老师上课数达标后才有课时费”，则上完达标课时数后才统计课时费。
-        </span>
+        <span class="teachermoney">若开启系统配置“老师上课数达标后才有课时费”，则上完达标课时数后才统计课时费。</span>
       </el-form-item>
       <!-- <el-form-item label="讲师" prop="teacher">
         <el-select v-model="form.teacher" placeholder="请输入讲师名称" style="width: 240px">
@@ -87,58 +68,35 @@
       <div width="500" append-to-body>
         <!-- v-model="form.classHourFeeSettings"  -->
         <!-- 添加按钮 -->
-        <el-button type="primary" style="margin-bottom: 12px" @click="addRow">添 加</el-button>
+        <el-button type="primary" style="margin-bottom: 12px;" @click="addRow">添 加</el-button>
         <!-- 动态行列表 -->
         <div class="border border-slate-200 rounded-lg overflow-hidden">
           <!-- 表头 -->
           <div
-            class="flex items-center bg-slate-50 px-4 py-2 text-sm font-medium text-slate-700 border-b border-slate-200"
-          >
+            class="flex items-center bg-slate-50 px-4 py-2 text-sm font-medium text-slate-700 border-b border-slate-200">
             <div class="w-120">上课时长</div>
             <div class="w-120 ml-2">课时费(元)</div>
             <div class="w-120 ml-2">助教费(元)</div>
-            <div class="ml-2 flex-1 text-right"></div>
+            <div class="ml-2 flex-1 text-right"> </div>
           </div>
 
           <!-- 数据行 -->
-          <div
-            v-for="(row, index) in rows"
-            :key="index"
-            class="flex items-center px-4 py-3 border-b border-slate-100 hover:bg-slate-50 transition-colors"
-          >
+          <div v-for="(row, index) in rows" :key="index"
+            class="flex items-center px-4 py-3 border-b border-slate-100 hover:bg-slate-50 transition-colors">
             <!-- 课时时长（下拉框） -->
             <el-select v-model="row.classHourDuration" placeholder="请选择" class="w-120">
-              <el-option
-                v-for="opt in durationOptions"
-                :key="opt.value"
-                :label="opt.label"
-                :value="opt.value"
-              />
+              <el-option v-for="opt in durationOptions" :key="opt.value" :label="opt.label" :value="opt.value" />
             </el-select>
 
             <!-- 课时费（输入框） -->
-            <el-input
-              v-model.number="row.classHourFee"
-              placeholder="课时费(元)"
-              class="w-120 ml-2"
-            />
+            <el-input v-model.number="row.classHourFee" placeholder="课时费(元)" class="w-120 ml-2" />
 
             <!-- 助教费（输入框） -->
-            <el-input
-              v-model.number="row.assistantFee"
-              placeholder="助教费(元)"
-              class="w-120 ml-2"
-            />
+            <el-input v-model.number="row.assistantFee" placeholder="助教费(元)" class="w-120 ml-2" />
 
             <!-- 删除按钮 -->
-            <el-button
-              type="danger"
-              class="ml-2"
-              :disabled="rows.length === 1"
-              @click="deleteRow(index)"
-            >
-              删 除
-            </el-button>
+            <el-button type="danger" class="ml-2" :disabled="rows.length === 1" @click="deleteRow(index)">删
+              除</el-button>
           </div>
         </div>
       </div>
@@ -165,7 +123,7 @@ const queryParams = reactive({
   OrganizationId: "",
   PageIndex: 1,
   PageSize: 10,
-});
+})
 const allColumns = [
   { label: "主键", prop: "id", show: false },
   { label: "姓名主键", prop: "staffId", show: false },
@@ -179,14 +137,14 @@ const allColumns = [
 ];
 const checkedProps = ref(allColumns.filter((c) => c.show).map((c) => c.prop));
 onMounted(async () => {
-  getSalary(); //薪资
-});
+  getSalary();//薪资
+})
 // 获取选中节点
 
-//组织机构树形
+//组织机构树形  
 const TreeOrganizationId = ref<string>("");
 watch(TreeOrganizationId, (newVal, oldVal) => {
-  console.log("titleStaffName 变化:", newVal, oldVal);
+  console.log('titleStaffName 变化:', newVal, oldVal);
   queryParams.OrganizationId = newVal;
   getSalary();
   // 执行自定义逻辑（如调用 API、更新其他状态等）
@@ -209,7 +167,8 @@ const getSalary = async () => {
   } finally {
     loading.value = false;
   }
-};
+}
+
 
 // DTO 接口
 interface UpdateSalaryDto {
@@ -219,34 +178,34 @@ interface UpdateSalaryDto {
 }
 //表单参数
 const form = ref({
-  id: "",
-  staffId: "",
-  staffName: "",
+  id: '',
+  staffId: '',
+  staffName: '',
   basicSalaryType: 0,
   basicSalary: 0,
   qualifiedClassHours: 0,
   classHourFeeSettings: [],
-  organizationId: "",
+  organizationId: '',
   classHourDuration: 0,
   classHourFee: 0,
-  assistantFee: 0,
-});
+  assistantFee: 0
+})
 //重置表单
 const reset = () => {
   form.value = {
-    id: "",
-    staffId: "",
-    staffName: "",
+    id: '',
+    staffId: '',
+    staffName: '',
     basicSalaryType: 0,
     basicSalary: 0,
     qualifiedClassHours: 0,
     classHourFeeSettings: [],
-    organizationId: "",
+    organizationId: '',
     classHourDuration: 0,
     classHourFee: 0,
-    assistantFee: 0,
-  };
-};
+    assistantFee: 0
+  }
+}
 //打开修改对话框
 const showEditDialog = async (row: any) => {
   open.value = true;
@@ -257,27 +216,27 @@ const showEditDialog = async (row: any) => {
   //课时表数据获取到rows
   rows.value = response;
   // rows.value = form.value;
-};
+}
 // 转换函数
 const convertToDtoArray = () => {
-  return rows.value.map((row) => ({
+  return rows.value.map(row => ({
     classHourDuration: row.classHourDuration ? Number(row.classHourDuration) : undefined,
     classHourFee: row.classHourFee,
-    assistantFee: row.assistantFee,
+    assistantFee: row.assistantFee
   }));
 };
 //修改表单提交
 const submitForm = async () => {
   // const formEl = topicForm.value
   //  console.log("submitForm--1");
-  // form.value.classHourFeeSettings
+  // form.value.classHourFeeSettings 
   // if (!formEl) return
   console.log("submitForm--123");
   //将classHourFeeSettings转化为数组？？
   //form.value.classHourFeeSettings = rows.value;
   const dtoArray: UpdateSalaryDto[] = convertToDtoArray();
   //  form.value.classHourFeeSettings = dtoArray;
-  console.log("提交的数据:", dtoArray);
+  console.log('提交的数据:', dtoArray);
   try {
     // await formEl.validate();
     console.log("submitForm--12");
@@ -292,22 +251,23 @@ const submitForm = async () => {
         classHourFeeSettings: dtoArray,
         classHourDuration: form.value.classHourDuration,
         classHourFee: form.value.classHourFee,
-        assistantFee: form.value.assistantFee,
-      });
-      ElMessage.success("修改成功");
-      open.value = false;
+        assistantFee: form.value.assistantFee
+      })
+      ElMessage.success('修改成功')
+      open.value = false
       reset();
-      getSalary();
+      getSalary()
     } catch (error: any) {
-      console.error("修改失败:", error.response?.data);
-      ElMessage.error(error.response?.data?.error?.message || "修改失败");
+      console.error('修改失败:', error.response?.data)
+      ElMessage.error(error.response?.data?.error?.message || '修改失败')
     }
-  } catch (error) {
-    console.error("表单验证失败:", error);
-    ElMessage.warning("请填写必填项");
-    return false;
   }
-};
+  catch (error) {
+    console.error('表单验证失败:', error)
+    ElMessage.warning('请填写必填项')
+    return false
+  }
+}
 // 表单校验
 const rules = {
   basicSalary: [
@@ -320,15 +280,14 @@ const rules = {
           callback();
         } else if (basic != 0 && !value) {
           // 若basic=1但basicSalary为空，则触发错误
-          callback(new Error("底薪不能为空"));
+          callback(new Error('底薪不能为空'));
         } else {
           // 其他情况通过校验
           callback();
         }
       },
-      trigger: "blur",
-    },
-  ],
+      trigger: 'blur'
+    }],
   qualifiedClassHours: [
     {
       validator: (rule, value, callback) => {
@@ -339,46 +298,45 @@ const rules = {
           callback();
         } else if (basic != 0 && !value) {
           // 若basic=1但basicSalary为空，则触发错误
-          callback(new Error("达标课时数不能为空"));
+          callback(new Error('达标课时数不能为空'));
         } else {
           // 其他情况通过校验
           callback();
         }
       },
-      trigger: "blur",
-    },
-  ],
-};
+      trigger: 'blur'
+    }]
+}
 
 // 课时时长选项（可自定义）
 const durationOptions = [
-  { label: "45", value: 45 },
-  { label: "50", value: 50 },
-  { label: "80", value: 80 },
-  { label: "180", value: 180 },
-];
+  { label: '45', value: 45 },
+  { label: '50', value: 50 },
+  { label: '80', value: 80 },
+  { label: '180', value: 180 },
+]
 
 // 动态行数据（响应式）
 const rows = ref([
   {
-    classHourDuration: "", // 课时时长（关联下拉框）
-    classHourFee: 0, // 课时费（数字类型）
-    assistantFee: 0, // 助教费（数字类型）
-  },
-]);
+    classHourDuration: '',     // 课时时长（关联下拉框）
+    classHourFee: 0,      // 课时费（数字类型）
+    assistantFee: 0,  // 助教费（数字类型）
+  }
+])
 // 添加一行
 const addRow = () => {
   rows.value.push({
-    classHourDuration: "",
+    classHourDuration: '',
     classHourFee: 0,
     assistantFee: 0,
-  });
-};
+  })
+}
 // 删除一行（保留至少一行）
 const deleteRow = (index: number) => {
-  if (rows.value.length === 1) return; // 禁止删除最后一行
-  rows.value.splice(index, 1);
-};
+  if (rows.value.length === 1) return // 禁止删除最后一行
+  rows.value.splice(index, 1)
+}
 </script>
 
 <style scoped>

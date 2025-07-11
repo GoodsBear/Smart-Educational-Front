@@ -475,7 +475,6 @@ const handleBatchDelete = () => {
     ElMessage.warning('请选择要删除的数据')
     return
   }
-
   ElMessageBox.confirm('确认批量删除所选专题吗？', '警告', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
@@ -501,7 +500,6 @@ const formatDateTime = (dateTimeStr: string) => {
   const hours = String(date.getHours()).padStart(2, '0')
   const minutes = String(date.getMinutes()).padStart(2, '0')
   const seconds = String(date.getSeconds()).padStart(2, '0')
-
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
 }
 

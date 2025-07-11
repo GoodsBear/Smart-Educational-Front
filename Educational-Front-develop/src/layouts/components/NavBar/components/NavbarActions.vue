@@ -32,8 +32,8 @@
     <div class="navbar-actions__item">
       <el-dropdown trigger="click">
         <div class="user-profile">
-          <img class="user-profile__avatar" :src="userStore.userInfo.avatar" />
-          <span class="user-profile__name">{{ userStore.userInfo.username }}</span>
+          <img class="user-profile__avatar" :src="staffInfo.PhotoUrl" />
+          <span class="user-profile__name">{{ staffInfo.StaffAccount }}</span>
         </div>
         <template #dropdown>
           <el-dropdown-menu>
@@ -130,7 +130,9 @@ function logout() {
     lockScroll: false,
   }).then(() => {
     userStore.logout().then(() => {
-      router.push(`/login?redirect=${route.fullPath}`);
+      router.push(`/login?redirect=${route.fullPath}`).then(() => {
+        window.location.reload();
+      });
     });
   });
 }
@@ -141,6 +143,25 @@ function logout() {
 function handleSettingsClick() {
   settingStore.settingsVisible = true;
 }
+
+const staffInfo = ref({
+  PhotoUrl: "",
+  StaffAccount: "",
+  // 你还可以加其他字段
+});
+
+onMounted(() => {
+  // await loadUserProfile();
+  const infoStr = localStorage.getItem("staffInfo");
+  if (infoStr) {
+    try {
+      const info = JSON.parse(infoStr);
+      staffInfo.value = info;
+    } catch {
+      staffInfo.value = { PhotoUrl: "", StaffAccount: "" };
+    }
+  }
+});
 </script>
 
 <style lang="scss" scoped>
@@ -154,7 +175,8 @@ function handleSettingsClick() {
     display: flex;
     align-items: center;
     justify-content: center;
-    min-width: 44px; /* 增加最小点击区域到44px，符合人机交互标准 */
+    min-width: 44px;
+    /* 增加最小点击区域到44px，符合人机交互标准 */
     height: 100%;
     min-height: 44px;
     padding: 0 8px;
