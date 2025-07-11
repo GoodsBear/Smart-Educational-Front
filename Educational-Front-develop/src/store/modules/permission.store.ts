@@ -89,7 +89,13 @@ export const usePermissionStore = defineStore("permission", () => {
                 path: "clbum",
                 name: "clbum",
                 component: () => import("@/views/Senate/clbum/index.vue"),
-                meta: { title: "班级管理", icon: "ep:star-filled" },
+                meta: { title: "班级管理", icon: "ep:star-filled"  },
+              },
+              {
+                path: "detail",
+                name: "Clbumdetail",
+                component: () => import("@/views/Senate/clbum/index2.vue"),
+                meta: { title: "班级详情", icon: "ep:star-filled", hidden: true },
               },
               {
                 path: "classroom",
@@ -103,6 +109,46 @@ export const usePermissionStore = defineStore("permission", () => {
                 name: "grade",
                 component: () => import("@/views/Senate/grade/index.vue"),
                 meta: { title: "年级管理", icon: "ep:medal" },
+              },
+            ],
+          },
+          {
+            path: "/educational",
+            component: Layout,
+            redirect: "/educational/course",
+            name: "Educational",
+            meta: {
+              title: "课程管理",
+              icon: "education",
+              order: 1,
+            },
+            children: [
+              {
+                path: "course",
+                component: () => import("@/views/Lessions/course/index.vue"),
+                name: "CourseManagement",
+                meta: {
+                  title: "课程管理",
+                  icon: "course",
+                },
+              },
+              {
+                path: "subject",
+                component: () => import("@/views/Lessions/subject/index.vue"),
+                name: "SubjectManagement",
+                meta: {
+                  title: "科目管理",
+                  icon: "subject",
+                },
+              },
+              {
+                path: "topic",
+                component: () => import("@/views/Lessions/topic/index.vue"),
+                name: "TopicManagement",
+                meta: {
+                  title: "专题管理",
+                  icon: "topic",
+                },
               },
             ],
           },
@@ -158,46 +204,7 @@ export const usePermissionStore = defineStore("permission", () => {
               },
             ],
           },
-          {
-            path: "/educational",
-            component: Layout,
-            redirect: "/educational/course",
-            name: "Educational",
-            meta: {
-              title: "课程管理",
-              icon: "education",
-              order: 1,
-            },
-            children: [
-              {
-                path: "course",
-                component: () => import("@/views/Lessions/course/index.vue"),
-                name: "CourseManagement",
-                meta: {
-                  title: "课程管理",
-                  icon: "course",
-                },
-              },
-              {
-                path: "subject",
-                component: () => import("@/views/Lessions/subject/index.vue"),
-                name: "SubjectManagement",
-                meta: {
-                  title: "科目管理",
-                  icon: "subject",
-                },
-              },
-              {
-                path: "topic",
-                component: () => import("@/views/Lessions/topic/index.vue"),
-                name: "TopicManagement",
-                meta: {
-                  title: "专题管理",
-                  icon: "topic",
-                },
-              },
-            ],
-          },
+         
           {
             path: "/system",
             component: Layout,

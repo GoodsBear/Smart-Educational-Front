@@ -70,7 +70,7 @@
         <el-table-column label="操作" width="200" align="center" fixed="right">
           <template #default="{ row }">
             <el-button type="primary" link @click="handleView(row)">查看</el-button>
-            <el-button type="success" link @click="handleEnroll(row)">报名</el-button>
+            <el-button type="success" link @click="">报名</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -192,14 +192,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, reactive } from 'vue'
+import { ref, onMounted, reactive, watch } from 'vue'
 import { ElMessage, ElMessageBox, FormInstance } from 'element-plus'
 import studentApi from '@/api/StudentsManager/Student/Student'
 import { formatDate } from '@/utils/date'
-import { useRouter } from 'vue-router'
-
-const router = useRouter()
-
+import { getCourseList } from '@/api/Lession/CourseManager/Course'
+import router from '@/router'
+//#region 
 // 查询参数
 const queryParams = reactive({
   studentName: '',
@@ -226,7 +225,7 @@ const dataLoadStatus = reactive({
 // 学员表单
 const studentFormRef = ref<FormInstance>()
 const addDialogVisible = ref(false)
-const studentForm = reactive<StudentInfo>({
+const studentForm = reactive({
   name: '',
   phone: '',
   campusId: '',
@@ -397,7 +396,7 @@ const handleCurrentChange = (val: number) => {
 const handleView = (row: any) => {
   console.log('查看学员详情:', row)
   router.push({
-    path: '/students/detail',
+    path: '/satena/detail',
     query: {
       id: row.guid || row.id,
       name: row.name,
@@ -417,12 +416,6 @@ const handleView = (row: any) => {
       lessonNums: row.lessonNums?.toString()
     }
   })
-}
-
-// 学员报名
-const handleEnroll = (row: any) => {
-  console.log('学员报名:', row)
-  // TODO: 实现报名功能
 }
 
 // 重新加载所有数据
@@ -658,6 +651,16 @@ const submitConsultant = async () => {
     ElMessage.error('修改顾问失败')
   }
 }
+
+
+
+
+
+
+
+
+
+
 
 // 页面加载时获取列表
 onMounted(() => {

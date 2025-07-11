@@ -11,22 +11,13 @@
         </el-form-item>
         <el-form-item label="所属机构">
           <el-select v-model="queryParams.orgaizationId" placeholder="请选择机构" style="width:200px" clearable>
-            <el-option 
-              v-for="item in orgList" 
-              :key="item.id" 
-              :label="item.name" 
-              :value="item.id" 
-            />
+            <el-option v-for="item in orgList" :key="item.id" :label="item.name" :value="item.id" />
           </el-select>
         </el-form-item>
         <el-form-item label="所属年级">
           <el-select v-model="queryParams.gradeId" placeholder="请选择年级" style="width:200px" clearable>
-            <el-option 
-              v-for="item in gradeList" 
-              :key="item.id || item.gradeId" 
-              :label="item.gradeName || item.name" 
-              :value="item.id || item.gradeId" 
-            />
+            <el-option v-for="item in gradeList" :key="item.id || item.gradeId" :label="item.gradeName || item.name"
+              :value="item.id || item.gradeId" />
           </el-select>
         </el-form-item>
         <el-form-item>
@@ -50,13 +41,8 @@
         </div>
       </div>
       <!-- 表格区域 -->
-      <el-table 
-        v-loading="loading" 
-        :data="studentList" 
-        border 
-        style="width: 100%"
-        @selection-change="handleSelectionChange"
-      >
+      <el-table v-loading="loading" :data="studentList" border style="width: 100%"
+        @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="55" align="center" />
         <el-table-column label="编号" type="index" width="60" align="center" />
         <el-table-column label="学员姓名" prop="name" align="center" />
@@ -88,44 +74,21 @@
       </el-table>
 
       <!-- 分页区域 -->
-      <el-pagination
-        v-model:current-page="queryParams.pageIndex"
-        v-model:page-size="queryParams.pageSize"
-        :total="total"
-        :page-sizes="[10, 20, 30, 50]"
-        layout="total, sizes, prev, pager, next, jumper"
-        class="pagination"
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-      />
+      <el-pagination v-model:current-page="queryParams.pageIndex" v-model:page-size="queryParams.pageSize"
+        :total="total" :page-sizes="[10, 20, 30, 50]" layout="total, sizes, prev, pager, next, jumper"
+        class="pagination" @size-change="handleSizeChange" @current-change="handleCurrentChange" />
     </el-card>
 
     <!-- 添加学员对话框 -->
-    <el-dialog
-      title="意向学员"
-      v-model="addDialogVisible"
-      width="40%"
-      @close="resetForm"
-      :close-on-click-modal="false"
-    >
-      <el-form 
-        :model="studentForm" 
-        :rules="studentFormRules" 
-        ref="studentFormRef" 
-        label-width="100px"
-        label-position="right"
-      >
+    <el-dialog title="意向学员" v-model="addDialogVisible" width="40%" @close="resetForm" :close-on-click-modal="false">
+      <el-form :model="studentForm" :rules="studentFormRules" ref="studentFormRef" label-width="100px"
+        label-position="right">
         <el-form-item label="手机号" prop="phone">
           <el-input v-model="studentForm.phone" placeholder="一个的手机号支持添加多个学生"></el-input>
         </el-form-item>
         <el-form-item label="所属校区" prop="campusId">
           <el-select v-model="studentForm.campusId" placeholder="请选择" style="width:100%">
-            <el-option
-              v-for="item in orgList"
-              :key="item.id"
-              :label="item.name"
-              :value="item.id"
-            />
+            <el-option v-for="item in orgList" :key="item.id" :label="item.name" :value="item.id" />
           </el-select>
         </el-form-item>
         <el-form-item label="家长姓名">
@@ -153,30 +116,18 @@
           </el-select>
         </el-form-item>
         <el-form-item label="入学时间">
-          <el-date-picker
-            v-model="studentForm.enrollTime"
-            type="date"
-            style="width:100%"
-            value-format="YYYY-MM-DD"
-          ></el-date-picker>
+          <el-date-picker v-model="studentForm.enrollTime" type="date" style="width:100%"
+            value-format="YYYY-MM-DD"></el-date-picker>
         </el-form-item>
         <el-form-item label="年级">
           <el-select v-model="studentForm.gradeId" placeholder="请选择" style="width:100%">
-            <el-option
-              v-for="item in gradeList"
-              :key="item.id || item.gradeId"
-              :label="item.gradeName || item.name"
-              :value="item.id || item.gradeId"
-            />
+            <el-option v-for="item in gradeList" :key="item.id || item.gradeId" :label="item.gradeName || item.name"
+              :value="item.id || item.gradeId" />
           </el-select>
         </el-form-item>
         <el-form-item label="出生年月">
-          <el-date-picker
-            v-model="studentForm.birthday"
-            type="date"
-            style="width:100%"
-            value-format="YYYY-MM-DD"
-          ></el-date-picker>
+          <el-date-picker v-model="studentForm.birthday" type="date" style="width:100%"
+            value-format="YYYY-MM-DD"></el-date-picker>
         </el-form-item>
         <el-form-item label="身份证号">
           <el-input v-model="studentForm.idCard"></el-input>
@@ -190,11 +141,7 @@
           </el-select>
         </el-form-item>
         <el-form-item label="备注">
-          <el-input
-            v-model="studentForm.remark"
-            type="textarea"
-            rows="3"
-          ></el-input>
+          <el-input v-model="studentForm.remark" type="textarea" rows="3"></el-input>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -206,21 +153,11 @@
     </el-dialog>
 
     <!-- 转校区对话框 -->
-    <el-dialog
-      title="转校区"
-      v-model="transferDialogVisible"
-      width="30%"
-      :close-on-click-modal="false"
-    >
+    <el-dialog title="转校区" v-model="transferDialogVisible" width="30%" :close-on-click-modal="false">
       <el-form :model="transferForm" label-width="80px">
         <el-form-item label="目标校区">
           <el-select v-model="transferForm.campusId" placeholder="请选择校区" style="width:100%">
-            <el-option
-              v-for="item in orgList"
-              :key="item.id"
-              :label="item.name"
-              :value="item.id"
-            />
+            <el-option v-for="item in orgList" :key="item.id" :label="item.name" :value="item.id" />
           </el-select>
         </el-form-item>
       </el-form>
@@ -233,21 +170,12 @@
     </el-dialog>
 
     <!-- 修改顾问对话框 -->
-    <el-dialog
-      title="修改顾问"
-      v-model="consultantDialogVisible"
-      width="30%"
-      :close-on-click-modal="false"
-    >
+    <el-dialog title="修改顾问" v-model="consultantDialogVisible" width="30%" :close-on-click-modal="false">
       <el-form :model="consultantForm" label-width="80px">
         <el-form-item label="选择顾问">
           <el-select v-model="consultantForm.consultantId" placeholder="请选择顾问" style="width:100%">
-            <el-option
-              v-for="item in staffList"
-              :key="item.guid || item.id"
-              :label="item.staffName || item.name"
-              :value="item.guid || item.id"
-            />
+            <el-option v-for="item in staffList" :key="item.guid || item.id" :label="item.staffName || item.name"
+              :value="item.guid || item.id" />
           </el-select>
         </el-form-item>
       </el-form>
@@ -366,7 +294,7 @@ const getStudentList = async () => {
     loading.value = true
     const res = await studentApi.getReadyStudents(queryParams)
     console.log('意向学员数据:', res)
-    
+
     if (res) {
       studentList.value = res.data
       total.value = res.totleCount || 0
@@ -389,7 +317,7 @@ const getOrganizationList = async () => {
   try {
     const res = await studentApi.getOrganizationList()
     console.log('机构数据:', res)
-    
+
     // 直接将返回结果赋值给orgList
     orgList.value = res
     console.log('机构列表:', orgList.value)
@@ -404,7 +332,7 @@ const getGradeList = async () => {
   try {
     const res = await studentApi.getGradeList()
     console.log('年级数据:', res)
-    
+
     // 直接将返回结果赋值给gradeList
     gradeList.value = res
     console.log('年级列表:', gradeList.value)
@@ -519,7 +447,7 @@ const handleDelete = (row: any) => {
       console.error('删除学员失败:', error)
       ElMessage.error('删除失败')
     }
-  }).catch(() => {})
+  }).catch(() => { })
 }
 
 // 重新加载所有数据
@@ -596,7 +524,7 @@ const handleBatchDelete = () => {
       console.error('批量删除失败:', error)
       ElMessage.error('删除失败')
     }
-  }).catch(() => {})
+  }).catch(() => { })
 }
 
 // 转校区相关数据
@@ -627,12 +555,12 @@ const submitTransfer = async () => {
     selectedIds.value.forEach(id => {
       transferIds.push(id)
     })
-    
+
     await studentApi.transferSchool({
       campusId: transferForm.campusId,
       guids: transferIds
     })
-    
+
     ElMessage.success('转校区成功')
     transferDialogVisible.value = false
     getStudentList() // 刷新列表
@@ -666,12 +594,12 @@ const submitConsultant = async () => {
     selectedIds.value.forEach(id => {
       studentIds.push(id)
     })
-    
+
     await studentApi.updateConsultant({
       consultant: consultantForm.consultantId,
       guids: studentIds
     })
-    
+
     ElMessage.success('修改顾问成功')
     consultantDialogVisible.value = false
     getStudentList() // 刷新列表
@@ -704,7 +632,7 @@ const handleToOnline = () => {
       console.error('转换失败:', error)
       ElMessage.error('转换失败')
     }
-  }).catch(() => {})
+  }).catch(() => { })
 }
 
 // 页面加载时获取列表

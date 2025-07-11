@@ -72,3 +72,13 @@ export function batchUpdateClassStatus(data: any) {
     data,
   });
 }
+/**
+ * 反填
+ * @param id 班级ID
+ */
+export function FTClassInfo(id: string) {
+  return request({
+    url: `/api/app/class-info/${id}/f-tClass-info`,
+    method: "get"
+  });
+}

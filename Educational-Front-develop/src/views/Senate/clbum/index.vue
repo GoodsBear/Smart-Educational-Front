@@ -76,7 +76,7 @@
         <el-table-column label="操作" width="120">
           <template #default="{ row }">
             <el-button type="text" @click="showEditDialog(row)">编辑</el-button>
-            <el-button type="text">详情</el-button>
+            <el-button type="text" @click="showDetail(row)">详情</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -176,6 +176,20 @@ import { getGradeDropdown } from '@/api/Senate/grade.api'
 import { getCourseDropdown } from '@/api/Lession/CourseManager/Course'
 import { Plus } from '@element-plus/icons-vue';
 import type { UploadProps } from 'element-plus';
+import { useRouter } from 'vue-router'
+import { pathToFileURL } from "node:url";
+const router = useRouter();
+// 查看班级详情
+const showDetail = (row: any) => {
+  console.log('查看班级详情:', row)
+  router.push({
+    path: '/senate/detail',
+    query: {
+      id: row.id,
+    }
+  })
+}
+
 // 查询参数
 const queryParams = reactive({
   className: "",

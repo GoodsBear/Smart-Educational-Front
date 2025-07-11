@@ -52,7 +52,7 @@ export const constantRoutes: RouteRecordRaw[] = [
     ],
   },
 
-  // 临时测试路由 - 用于排查空白页面问题
+  // 临时测试路由 - 用于排查空白页面问
   {
     path: "/test",
     component: () => import("@/views/error/404.vue"),
