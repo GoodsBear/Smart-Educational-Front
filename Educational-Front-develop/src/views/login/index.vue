@@ -84,28 +84,6 @@
               </el-link>
             </div>
 
-            <!-- 开发模式下显示模拟数据开关 -->
-            <!--
-            <div class="flex-x-between w-full mt-2">
-              <el-checkbox v-model="useMockData" @change="handleMockDataChange">
-                使用模拟数据
-              </el-checkbox>
-              <el-text type="info" size="small">后端未启动时使用</el-text>
-            </div>
-             -->
-
-            <!-- 添加后端连接测试按钮 -->
-            <!--
-                        <div v-if="showDiagnosticTools" class="flex-x-between w-full mt-2">
-              <el-button size="small" type="info" @click="testBackendConnection">
-                测试后端连接
-              </el-button>
-              <el-text v-if="connectionStatus" type="info" size="small">
-                {{ connectionStatus }}
-              </el-text>
-            </div>
-            -->
-
             <!-- 登录按钮 -->
             <el-form-item>
               <el-button
@@ -197,16 +175,6 @@ const loginRules = computed(() => {
         trigger: "blur",
       },
     ],
-    // 注释验证码的验证规则
-    /*
-    captchaCode: [
-      {
-        required: true,
-        trigger: "blur",
-        message: t("login.message.captchaCode.required"),
-      },
-    ],
-    */
   };
 });
 
@@ -283,11 +251,6 @@ function toOtherForm(type: "register" | "resetPwd") {
   emit("update:modelValue", type);
 }
 
-// // 监听模拟数据模式变化
-// function handleMockDataChange(val: any) {
-//   localStorage.setItem("useMockData", val ? "true" : "false");
-//   console.log(`模拟数据模式: ${val ? "开启" : "关闭"}`);
-// }
 
 const captchaImgUrl = ref("");
 const captchaLoading = ref(false);
