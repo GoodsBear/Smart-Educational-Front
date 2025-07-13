@@ -119,7 +119,6 @@ import logo from "@/assets/icons/b_ecd07cbf1b39cf913b555c732b89b120.jpg";
 import illustration from "@/assets/icons/65A3D8E6A127C519E4752FFFCBD6E5D9.gif";
 import { useStore } from "@/store/pinia/user.pinia";
 import { jwtDecode } from "jwt-decode"; // 注意是 jwtDecode（具名导出）
-const userinfo = useStore();
 const { t } = useI18n();
 
 // 获取路由实例

@@ -47,14 +47,18 @@
       <el-col :span="16">
         <el-card class="info-card">
           <template #header>
-            <div class="card-header">
+            <div
+              class="card-header"
+              style="display: flex; justify-content: space-between; align-items: center"
+            >
               <span>账号信息</span>
+              <el-button type="primary" size="small" @click="handleLogout">返回</el-button>
             </div>
           </template>
           <el-descriptions :column="1" border>
             <el-descriptions-item label="用户名">
-              {{ userProfile.username }}
-              <el-icon v-if="userProfile.gender === 1" class="gender-icon male">
+              {{ staffInfo.StaffName }}
+              <el-icon v-if="staffInfo.StaffGender == '男'" class="gender-icon male">
                 <Male />
               </el-icon>
               <el-icon v-else class="gender-icon female">
@@ -62,8 +66,8 @@
               </el-icon>
             </el-descriptions-item>
             <el-descriptions-item label="手机号码">
-              {{ userProfile.mobile || "未绑定" }}
-              <el-button
+              {{ staffInfo.StaffPhone || "未绑定" }}
+              <!-- <el-button
                 v-if="userProfile.mobile"
                 type="primary"
                 link
@@ -78,9 +82,9 @@
                 @click="() => handleOpenDialog(DialogType.MOBILE)"
               >
                 绑定
-              </el-button>
+              </el-button> -->
             </el-descriptions-item>
-            <el-descriptions-item label="邮箱">
+            <!-- <el-descriptions-item label="邮箱">
               {{ userProfile.email || "未绑定" }}
               <el-button
                 v-if="userProfile.email"
@@ -98,12 +102,12 @@
               >
                 绑定
               </el-button>
+            </el-descriptions-item> -->
+            <el-descriptions-item label="所属机构">
+              {{ staffInfo.Organization }}
             </el-descriptions-item>
-            <el-descriptions-item label="部门">
-              {{ userProfile.deptName }}
-            </el-descriptions-item>
-            <el-descriptions-item label="创建时间">
-              {{ userProfile.createTime }}
+            <el-descriptions-item label="生日">
+              {{ staffInfo.Birthday }}
             </el-descriptions-item>
           </el-descriptions>
         </el-card>
@@ -226,9 +230,12 @@ import UserAPI, {
   UserProfileForm,
 } from "@/api/system/user.api";
 
+import StaffAPI from "@/api/staff/staff.api";
+
 import FileAPI from "@/api/file.api";
 
 import { Camera } from "@element-plus/icons-vue";
+import { useRouter } from "vue-router";
 
 const userProfile = ref<UserProfileVO>({});
 
@@ -310,6 +317,9 @@ const handleOpenDialog = (type: DialogType) => {
       break;
     case DialogType.PASSWORD:
       dialog.title = "修改密码";
+      passwordChangeForm.oldPassword = "";
+      passwordChangeForm.newPassword = "";
+      passwordChangeForm.confirmPassword = "";
       break;
     case DialogType.MOBILE:
       dialog.title = "绑定手机";
@@ -395,10 +405,19 @@ const handleSubmit = async () => {
       ElMessage.error("两次输入的密码不一致");
       return;
     }
-    UserAPI.changePassword(passwordChangeForm).then(() => {
-      ElMessage.success("密码修改成功");
-      dialog.visible = false;
-    });
+    // 新增：调用员工密码修改接口
+    if (!staffInfo.value.Id) {
+      ElMessage.error("员工ID缺失，无法修改密码");
+      return;
+    }
+    StaffAPI.updateStaffPassword(staffInfo.value.Id, passwordChangeForm.newPassword)
+      .then(() => {
+        ElMessage.success("密码修改成功");
+        dialog.visible = false;
+      })
+      .catch(() => {
+        ElMessage.error("密码修改失败");
+      });
   } else if (dialog.type === DialogType.MOBILE) {
     UserAPI.bindOrChangeMobile(mobileUpdateForm).then(() => {
       ElMessage.success("手机号绑定成功");
@@ -463,10 +482,21 @@ const handleFileChange = async (event: Event) => {
 // };
 
 const staffInfo = ref({
+  Id: "",
   PhotoUrl: "",
   StaffName: "",
-  // 你还可以加其他字段
+  StaffAccount: "",
+  StaffGender: "",
+  Organization: "",
+  StaffPhone: "",
+  Birthday: "",
 });
+
+const router = useRouter();
+
+function handleLogout() {
+  router.push("/dashboard");
+}
 
 onMounted(() => {
   if (mobileTimer.value) {
@@ -482,7 +512,16 @@ onMounted(() => {
       const info = JSON.parse(infoStr);
       staffInfo.value = info;
     } catch {
-      staffInfo.value = { PhotoUrl: "", StaffName: "" };
+      staffInfo.value = {
+        Id: "",
+        PhotoUrl: "",
+        StaffName: "",
+        StaffAccount: "",
+        StaffGender: "",
+        Organization: "",
+        StaffPhone: "",
+        Birthday: "",
+      };
     }
   }
 });

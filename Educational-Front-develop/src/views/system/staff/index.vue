@@ -703,6 +703,7 @@ const imageUrl = ref("");
 const handleAvatarSuccess: UploadProps["onSuccess"] = (response, uploadFile) => {
   imageUrl.value = URL.createObjectURL(uploadFile.raw!);
   addFormData.photoUrl = response;
+  editFormData.photoUrl = response;
 };
 
 const beforeAvatarUpload: UploadProps["beforeUpload"] = (rawFile) => {

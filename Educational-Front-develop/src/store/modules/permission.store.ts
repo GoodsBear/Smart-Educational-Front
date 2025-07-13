@@ -37,14 +37,14 @@ export const usePermissionStore = defineStore("permission", () => {
             path: "/dashboard",
             component: Layout,
             redirect: "/dashboard",
-            children: [
-              {
-                path: "",
-                name: "Dashboard",
-                component: () => import("@/views/dashboard/index.vue"),
-                meta: { title: "仪表盘", icon: "ep:odometer", affix: true, keepAlive: true },
-              },
-            ],
+            // children: [
+            //   {
+            //     path: "",
+            //     name: "Dashboard",
+            //     component: () => import("@/views/dashboard/index.vue"),
+            //     meta: { title: "仪表盘", icon: "ep:odometer", affix: true, keepAlive: true },
+            //   },
+            // ],
           },
 
           {
@@ -162,6 +162,26 @@ export const usePermissionStore = defineStore("permission", () => {
                 name: "Storerooms",
                 component: () => import("@/views/Materials/storerooms/index.vue"),
                 meta: { title: "出入库记录", icon: "ep:collection" },
+              },
+            ],
+          },
+          {
+            path: "/interact",
+            component: Layout,
+            redirect: "/interact/user",
+            meta: { title: "互动", icon: "ep:setting" },
+            children: [
+              {
+                path: "evaluation",
+                name: "Evaluation",
+                component: () => import("@/views/Interact/evaluation/index.vue"),
+                meta: { title: "学评教", icon: "ep:collection" },
+              },
+              {
+                path: "evaluation",
+                name: "Evaluation",
+                component: () => import("@/views/Interact/evaluation/index.vue"),
+                meta: { title: "学评教", icon: "ep:collection" },
               },
             ],
           },
