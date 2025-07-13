@@ -13,7 +13,9 @@
             <el-input v-model="queryParams.CourseName" placeholder="请输入课程名称" style="width: 150px" class="filter-item" />
           </el-form-item>
           <el-form-item label="班级名称">
-            <el-input v-model="queryParams.ClassId" placeholder="请输入班级名称" style="width: 150px" class="filter-item" />
+            <el-select v-model="queryParams.ClassId" placeholder="请输入班级名称" style="width: 150px">
+              <el-option v-for="item in classList" :key="item.id" :label="item.className" :value="item.id" />
+            </el-select>
           </el-form-item>
           <el-form-item>
             <el-button type="primary" @click="ShowClassSchedule">查询</el-button>
@@ -38,7 +40,7 @@
         <template v-for="col in allColumns" :key="col.prop">
           <el-table-column v-if="checkedProps.includes(col.prop)" :prop="col.prop" :label="col.label">
             <template v-if="col.prop === 'isTimetableGenerated'" #default="{ row }">
-              {{ row.isTimetableGenerated === false ? "已生成" : "未生成" }}
+              {{ row.isTimetableGenerated === true ? "已生成" : "未生成" }}
             </template>
             <template v-else-if="col.prop === 'hasSchedulingConflict'" #default="{ row }">
               <el-dropdown v-if="row.hasSchedulingConflict === false" trigger="hover">
@@ -67,11 +69,10 @@
 
 
         <!-- 操作列 -->
-        <el-table-column label="操作" width="200" align="center" fixed="right">
+        <el-table-column label="操作" width="60" align="center" fixed="right">
           <template #default="scope">
-            <el-button type="primary" link @click="AddUpdate(scope.row)">编辑</el-button>
-            <el-button type="success" link @click="handleViewTimetable(scope.row)">查看课表</el-button>
-            <el-button type="danger" link @click="handleDelete(scope.row)">删除</el-button>
+            <el-button v-if="scope.row.isTimetableGenerated === false" type="primary" link
+              @click="AddUpdate(scope.row)">编辑</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -88,53 +89,71 @@
     <el-drawer v-model="drawer" :title="title" size="800px" :with-header="true" close-on-press-escape>
       <el-form ref="formRef" :model="scheduleForm" :rules="rules" label-width="120px" style="padding: 20px;">
         <el-row :gutter="20">
-          <el-col :span="12">
-            <el-form-item label="组织机构" prop="organizationName">
-              <el-select v-model="scheduleForm.organizationName" placeholder="请选择组织机构" style="width: 100%">
+          <el-col :span="20">
+            <el-form-item label="所属分校" prop="organizationName">
+              <el-select v-model="scheduleForm.organizationName" placeholder="请选择组织机构">
                 <el-option v-for="item in organizationList" :key="item.id" :label="item.name" :value="item.name" />
               </el-select>
             </el-form-item>
           </el-col>
-          <el-col :span="12">
+        </el-row>
+        <el-row :gutter="20">
+          <el-col :span="20">
             <el-form-item label="班级" prop="className">
-              <el-select v-model="scheduleForm.className" placeholder="请选择班级" style="width: 100%">
-                <el-option v-for="item in classList" :key="item.id" :label="item.className" :value="item.id" />
+              <el-select v-model="scheduleForm.className" placeholder="请选择班级">
+                <el-option v-for="item in classList" :key="item.id" :label="item.className" :value="item.className" />
               </el-select>
             </el-form-item>
           </el-col>
         </el-row>
-
         <el-row :gutter="20">
-          <el-col :span="12">
+          <el-col :span="20">
             <el-form-item label="课程" prop="courseName">
               <el-select v-model="scheduleForm.courseName" placeholder="请选择课程" style="width: 100%">
-                <el-option v-for="item in courseList" :key="item.id" :label="item.courseName" :value="item.id" />
+                <el-option v-for="item in courseList" :key="item.id" :label="item.courseName"
+                  :value="item.courseName" />
               </el-select>
             </el-form-item>
           </el-col>
-          <el-col :span="12">
-            <el-form-item label="主教师" prop="mainTeacher">
-              <el-select v-model="queryParams.mainTeacher" placeholder="请输入讲师名称" style="width: 240px">
+        </el-row>
+        <el-row :gutter="20">
+          <el-col :span="20">
+            <el-form-item label="上课教师" prop="mainTeacher">
+              <el-select v-model="scheduleForm.mainTeacher" placeholder="请输入讲师名称" style="width: 100%">
                 <el-option v-for="item in teacherList" :key="item.id" :label="item.staffName" :value="item.staffName" />
               </el-select>
+              <!-- <el-dropdown trigger="click">
+                <el-input v-model="queryParams.mainTeacher" placeholder="请输入讲师名称" style="width: 480px" />
+                <template #dropdown>
+                  <el-dropdown-item>
+                    老师表
+                  </el-dropdown-item>
+                </template>
+              </el-dropdown> -->
+
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row :gutter="20">
+          <el-col :span="20">
+            <el-form-item label="助教" prop="assistantTeacher">
+              <el-select v-model="scheduleForm.assistantTeacher" placeholder="请输入助教名称" style="width: 100%">
+                <el-option v-for="item in teacherList" :key="item.id" :label="item.staffName" :value="item.staffName" />
+              </el-select>
+              <!-- <el-dropdown trigger="click">
+                <el-input v-model="queryParams.assistantTeacher" placeholder="请输入助教名称" style="width: 480px" />
+                <template #dropdown>
+                  <el-dropdown-item>
+                    老师表
+                  </el-dropdown-item>
+                </template>
+              </el-dropdown> -->
+
             </el-form-item>
           </el-col>
         </el-row>
 
-        <el-row :gutter="20">
-          <el-col :span="12">
-            <el-form-item label="助教" prop="assistantTeacher">
-              <el-select v-model="queryParams.assistantTeacher" placeholder="请输入讲师名称" style="width: 240px">
-                <el-option v-for="item in teacherList" :key="item.id" :label="item.staffName" :value="item.staffName" />
-              </el-select>
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="最大人数" prop="maxAttendees">
-              <el-input-number v-model="scheduleForm.maxAttendees" :min="1" :max="100" style="width: 100%" />
-            </el-form-item>
-          </el-col>
-        </el-row>
+
 
         <el-row :gutter="20">
           <el-col :span="12">
@@ -156,8 +175,16 @@
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="最大排课数" prop="maxSchedules">
-              <el-input-number v-model="scheduleForm.maxSchedules" :min="1" style="width: 100%" />
+            <el-form-item label="限制上课人数" prop="maxAttendees">
+              <el-input-number v-model="scheduleForm.maxAttendees" :min="1" style="width: 100%" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <!-- 哈哈哈 -->
+        <el-row :gutter="20">
+          <el-col :span="20">
+            <el-form-item label="计划排课次数" prop="maxSchedules">
+              <el-input-number v-model="scheduleForm.maxSchedules" :min="1" :max="100" style="width: 100%" />
             </el-form-item>
           </el-col>
         </el-row>
@@ -168,52 +195,60 @@
               <el-switch v-model="scheduleForm.skipHolidays" />
             </el-form-item>
           </el-col>
-          <el-col :span="12">
-            <el-form-item label="排课时间" prop="scheduleTimes">
-              <el-select v-model="scheduleForm.scheduleTimes" placeholder="请选择排课时间" style="width: 100%">
-                <el-option label="周一 09:00-10:30" value="1_09:00-10:30" />
-                <el-option label="周二 14:00-15:30" value="2_14:00-15:30" />
-                <el-option label="周三 16:00-17:30" value="3_16:00-17:30" />
-                <el-option label="周四 19:00-20:30" value="4_19:00-20:30" />
-                <el-option label="周五 15:00-16:30" value="5_15:00-16:30" />
-                <el-option label="周六 09:00-10:30" value="6_09:00-10:30" />
-                <el-option label="周日 14:00-15:30" value="0_14:00-15:30" />
-              </el-select>
-            </el-form-item>
+        </el-row>
+        <el-divider>上课时间</el-divider>
+        <el-row :gutter="20">
+          <el-col :span="24">
+            <el-button type="primary" style="margin-bottom: 12px;float:right;" @click="addRow">添 加</el-button>
+            <br>
+            <!-- 动态行列表 -->
+            <div class="border border-slate-200 rounded-lg overflow-hidden">
+              <!-- 表头 -->
+              <div
+                class="flex items-center bg-slate-50 px-4 py-2 text-sm font-medium text-slate-700 border-b border-slate-200">
+                <div class="w-120 ml-2">星期</div>
+                <div class="w-120 ml-2">开始时间</div>
+                <div class="w-120 ml-2">结束时间</div>
+                <div class="w-120 ml-2">教室</div>
+                <div class="w-120 ml-2">操作</div>
+              </div>
+              <!-- 数据行 -->
+              <div v-for="(row, index) in rows" :key="index"
+                class="flex items-center px-4 py-3 border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                <!-- 星期 -->
+                <el-select v-model="row.classHourDuration" placeholder="请选择" class="w-120 ml-2">
+                  <el-option :value="0">星期日</el-option>
+                  <el-option :value="1">星期一</el-option>
+                  <el-option :value="2">星期二</el-option>
+                  <el-option :value="3">星期三</el-option>
+                  <el-option :value="4">星期四</el-option>
+                  <el-option :value="5">星期五</el-option>
+                  <el-option :value="6">星期六</el-option>
+                </el-select>
+                <!-- 开始时间 -->
+                <el-input v-model.number="row.classHourFee" class="w-120 ml-2" />
+
+                <!--结束时间 -->
+                <el-input v-model.number="row.assistantFee" class="w-120 ml-2" />
+
+                <!-- 教室 -->
+                <el-select v-model="scheduleForm.courseName" class="w-120 ml-2">
+                  <el-option v-for="item in classroomList" :key="item.id" :label="item.classRoomName"
+                    :value="item.id" />
+                </el-select>
+                <!-- 删除按钮 -->
+                <el-button type="danger" class="w-120 ml-2" :disabled="rows.length === 1" @click="deleteRow(index)">删
+                  除</el-button>
+              </div>
+            </div>
+            <el-button type="primary" style="float: left;" @click="SubmitButton">提交</el-button>
+            <el-button @click="resetForm">重置</el-button>
           </el-col>
         </el-row>
 
-        <el-form-item>
-          <el-button type="primary" @click="submitForm">提交</el-button>
-          <el-button @click="resetForm">重置</el-button>
-        </el-form-item>
       </el-form>
     </el-drawer>
 
-    <!-- 课表查看对话框 -->
-    <el-dialog v-model="timetableDialog" title="课表详情" width="80%" :close-on-click-modal="false">
-      <div class="timetable-container">
-        <div class="timetable-header">
-          <h3>{{ currentSchedule?.className }} - {{ currentSchedule?.courseName }}</h3>
-          <p>主教师：{{ currentSchedule?.mainTeacher }} | 助教：{{ currentSchedule?.assistantTeacher }}</p>
-        </div>
-
-        <el-table :data="timetableData" border style="width: 100%">
-          <el-table-column label="周次" prop="week" width="80" align="center" />
-          <el-table-column label="日期" prop="date" width="120" align="center" />
-          <el-table-column label="时间" prop="time" width="120" align="center" />
-          <el-table-column label="教室" prop="classroom" width="100" align="center" />
-          <el-table-column label="状态" prop="status" width="100" align="center">
-            <template #default="scope">
-              <el-tag v-if="scope.row.status === '已完成'" type="success">已完成</el-tag>
-              <el-tag v-else-if="scope.row.status === '进行中'" type="warning">进行中</el-tag>
-              <el-tag v-else type="info">未开始</el-tag>
-            </template>
-          </el-table-column>
-          <el-table-column label="备注" prop="remark" />
-        </el-table>
-      </div>
-    </el-dialog>
   </div>
 </template>
 
@@ -222,8 +257,22 @@ import { ref, reactive, onMounted, computed } from "vue";
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from "element-plus";
 import { getClassSchedule, addClassSchedule } from '@/api/Senate/classSchedule/classSchedule';
 import { getOrganizationDropdown } from '@/api/Organization/organization.api';
+import { getCourseDropdown } from '@/api/Lession/CourseManager/Course';
+import { selectClassRoom } from '@/api/Senate/classroom.api';
 import { getstaffList } from '@/api/Lession/TopicManager/TopicManager';
+import { selectClassInfo } from '@/api/Senate/clbum.api';
 import moment from 'moment';
+// 动态行数据（响应式）
+const rows = ref([
+  {
+    classHourDuration: '',     // 课时时长（关联下拉框）
+    classHourFee: 0,      // 课时费（数字类型）
+    assistantFee: 0,  // 助教费（数字类型）
+  }
+])
+const durationOptions = ref({
+
+})
 onMounted(() => {
   getorganizationList();
   getteacherList();
@@ -297,13 +346,15 @@ const classroomList = ref({})
 //组织下拉
 const getorganizationList = () => {
   getOrganizationDropdown().then(response => {
-    organizationList.value = response.data || [];
+    organizationList.value = response || [];
+    console.log("shdofjo", response);
+    debugger;
   })
 }
 //老师下拉
 const getteacherList = () => {
   getstaffList().then(response => {
-    teacherList.value = response.data || [];
+    teacherList.value = response || [];
   })
 }
 //课程下拉
@@ -311,18 +362,27 @@ const getcourseList = () => {
   //courseName
   //id
   //  /GetCourseAsync
+  getCourseDropdown().then(response => {
+    courseList.value = response || [];
+  })
 }
 //班级下拉
 const getclassList = () => {
   //  /api/app/class-info/class
   //className
   //id
+  selectClassInfo().then(response => {
+    classList.value = response || [];
+  })
 }
 //教室下拉
 const getclassroomList = () => {
   //classRoomName
   //id
   //  /api/app/class-room/class-room
+  selectClassRoom().then(response => {
+    classroomList.value = response || [];
+  })
 }
 
 const selectedIdList = ref<string[]>([])
@@ -372,6 +432,32 @@ const AddUpdate = (row: any) => {
   }
   drawer.value = true;
 }
+// 添加一行
+const addRow = () => {
+  rows.value.push({
+    classHourDuration: '',
+    classHourFee: 0,
+    assistantFee: 0,
+  })
+}
+// 删除一行（保留至少一行）
+const deleteRow = (index: number) => {
+  if (rows.value.length === 1) return // 禁止删除最后一行
+  rows.value.splice(index, 1)
+}
+//添加删除提交按钮
+const SubmitButton = () => {
+
+}
 </script>
 
-<style scoped></style>
+<style scoped>
+.flex items-center px-4 py-3 border-b border-slate-100 hover:bg-slate-50 transition-colors {
+  width: 800px;
+
+}
+
+.w-120 {
+  width: 200px;
+}
+</style>
