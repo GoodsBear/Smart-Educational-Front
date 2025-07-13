@@ -23,18 +23,19 @@
         <el-date-picker
           v-model="selectedYear"
           type="year"
-          placeholder="Pick a year"
+          placeholder="选择年份"
+          @change="handleYearChange"
         />
       </div>
       <div class="calendar">
-        <Calendar/>
+        <Calendar :selected-year="currentYear" />
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import Calendar from '@/components/Calendar/Calendar.vue'
 
 // 节假日列表（静态模拟，后续可对接数据库）
@@ -47,16 +48,21 @@ const holidayList = ref<string[]>([
 ])
 
 // 当前选中的年份，默认为今年
-const selectedYear = ref<number>(new Date().getTime())
+const selectedYear = ref<Date>(new Date())
+
+// 计算当前年份数字
+const currentYear = computed(() => {
+  return selectedYear.value ? selectedYear.value.getFullYear() : new Date().getFullYear()
+})
 
 // 删除节假日
 function removeHoliday(date: string) {
   holidayList.value = holidayList.value.filter(d => d !== date)
 }
 
-// 获取某年某月的1号日期对象
-function getMonthDate(year: number, month: number): Date {
-  return new Date(year, month - 1, 1)
+// 年份变化处理函数
+function handleYearChange(year: Date) {
+  console.log('选择的年份:', year?.getFullYear())
 }
 </script>
 
@@ -106,7 +112,16 @@ function getMonthDate(year: number, month: number): Date {
   color: #333;
 }
 /*右侧样式 */
-
-
-
+.calendar-area {
+  flex: 1;
+  min-width: 0;
+}
+.block {
+  margin-bottom: 16px;
+}
+.demonstration {
+  margin-right: 8px;
+  font-size: 14px;
+  color: #666;
+}
 </style>

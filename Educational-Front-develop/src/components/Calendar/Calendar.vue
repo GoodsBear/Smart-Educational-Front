@@ -4,7 +4,7 @@
       <!-- 12个月的日历 -->
       <div v-for="month in 12" :key="month" class="month-calendar">
         <el-calendar
-          :model-value="getMonthDate(2025, month - 1)"
+          :model-value="getMonthDate(selectedYear, month)"
           :fullscreen="false"
           class="mini-calendar"
         >
@@ -13,7 +13,7 @@
             <div 
               class="custom-date-cell"
               :class="{
-                'holiday': isHoliday(data.day, month - 1)
+                'holiday': isHoliday(data.day, month)
               }"
             >
               {{ data.day.split('-')[2] }}
@@ -25,24 +25,37 @@
   </div>
 </template>
 
-<script setup>
-import { ref } from 'vue';
+<script setup lang="ts">
+import { ref, computed } from 'vue';
 
-// 假设的节假日数据(2025年)
+// 定义props，接收选中的年份
+interface Props {
+  selectedYear: number
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  selectedYear: new Date().getFullYear()
+})
+
+// 假设的节假日数据(可以根据年份动态获取)
 const holidays = [
-  { day: '2025-01-01', name: '元旦' },
-  { day: '2025-02-01', name: '春节' },
-  // 添加更多节假日...
+  { day: '2024-01-01', name: '元旦' },
+  { day: '2024-02-10', name: '春节' },
+  { day: '2024-04-05', name: '清明节' },
+  { day: '2024-05-01', name: '劳动节' },
+  { day: '2024-10-01', name: '国庆节' },
+  // 可以添加更多年份的节假日数据...
 ];
 
 // 获取指定年月的日期对象
-const getMonthDate = (year, month) => {
-  return new Date(year, month, 1);
+const getMonthDate = (year: number, month: number): Date => {
+  return new Date(year, month - 1, 1);
 };
 
 // 判断是否是节假日
-const isHoliday = (day, monthIndex) => {
-  const dateStr = `2025-${String(monthIndex + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+const isHoliday = (day: string, month: number): boolean => {
+  const year = props.selectedYear;
+  const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
   return holidays.some(holiday => holiday.day === dateStr);
 };
 </script>
@@ -63,7 +76,7 @@ const isHoliday = (day, monthIndex) => {
 
 .month-calendar {
   border: 1px solid #e0e0e0;              /* 灰色边框，分隔每个月份 */
-  border-radius: 25px;                     /* 边角圆润，半径4px */
+  border-radius: 4px;                     /* 边角圆润，半径4px */
   overflow: hidden;                       /* 内容溢出隐藏，防止圆角被破坏 */
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1); /* 轻微阴影，提升层次感 */
 }
@@ -93,7 +106,7 @@ const isHoliday = (day, monthIndex) => {
   line-height: 20px;                      /* 行高20px，数字垂直居中 */
 }
 
-/* 为“今天”高亮显示，蓝色背景和文字 */
+/* 为"今天"高亮显示，蓝色背景和文字 */
 :deep(.mini-calendar .el-calendar-day.today) {
   background-color: #1635e4 !important;              /* 今天的背景色为浅蓝色 */
   color: #fff !important;                         /* 今天的文字为蓝色 */
@@ -116,7 +129,7 @@ const isHoliday = (day, monthIndex) => {
   border-radius: 50%;                     /* 圆形背景 */
 }
 
-/* 隐藏日历头部的导航按钮（如“今天”、“上月”、“下月”） */
+/* 隐藏日历头部的导航按钮（如"今天"、"上月"、"下月"） */
 :deep(.mini-calendar .el-calendar__button-group) {
   display: none !important;               /* 隐藏按钮组 */
 }
