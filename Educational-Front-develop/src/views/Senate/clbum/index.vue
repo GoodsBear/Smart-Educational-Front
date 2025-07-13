@@ -5,7 +5,7 @@
       <div class="search-bar">
         <el-form :inline="true" :model="queryParams">
           <el-form-item label="班级名称：">
-            <el-input v-model="queryParams.className" placeholder="请输入班级名称" clearable />
+            <el-input v-model="queryParams.ClassName" placeholder="请输入班级名称" clearable />
           </el-form-item>
           <el-form-item label="选择分校：">
             <el-select v-model="queryParams.campusId" placeholder="请选择" style="width: 200px;">
@@ -177,14 +177,15 @@ import { getCourseDropdown } from '@/api/Lession/CourseManager/Course'
 import { Plus } from '@element-plus/icons-vue';
 import type { UploadProps } from 'element-plus';
 // 查询参数
+
 const queryParams = reactive({
-  className: "",
+  ClassName: "",
   campusId: "",
   defaultCourseId: "",
   defaultClassroomId: "",
   classTeacherId: "",
   gradeId: "",
-  classStatus: ""
+  classStatus: 0
 });
 const pageParams = reactive({
   PageIndex: 1,
@@ -194,17 +195,22 @@ const pageParams = reactive({
 });
 //列表
 const fetchClbumList = () => {
-  const params = {
+  const params: any = {
     PageIndex: pageParams.PageIndex,
     PageSize: pageParams.PageSize,
-    className: queryParams.className,
-    campusId: queryParams.campusId,
-    defaultCourseId: queryParams.defaultCourseId,
-    defaultClassroomId: queryParams.defaultClassroomId,
-    classTeacherId: queryParams.classTeacherId,
-    gradeId: queryParams.gradeId,
+    campusId: queryParams.campusId || "",
+    defaultCourseId: queryParams.defaultCourseId || "",
+    defaultClassroomId: queryParams.defaultClassroomId || "",
+    classTeacherId: queryParams.classTeacherId || "",
+    gradeId: queryParams.gradeId || "",
     classStatus: queryParams.classStatus,
   };
+  
+  // 只有当ClassName有值时才添加此参数
+  if (queryParams.ClassName) {
+    params.ClassName = queryParams.ClassName;
+  }
+  
   getClassInfoList(params).then((res) => {
     clbumList.value = res.data || [];
     pageParams.TotalCount = res.totleCount || 0;
@@ -426,13 +432,13 @@ const submitForm = () => {
 }
 // 重置查询条件
 const resetQuery = () => {
-  queryParams.className = "";
+  queryParams.ClassName = "";
   queryParams.campusId = "";
   queryParams.defaultCourseId = "";
   queryParams.defaultClassroomId = "";
   queryParams.classTeacherId = "";
   queryParams.gradeId = "";
-  queryParams.classStatus = "";
+  queryParams.classStatus = 0;
   fetchClbumList();
 };
 

@@ -32,7 +32,7 @@ export function selectClassInfo(params?: any) {
   return request({
     url: "/api/app/class-info/class",
     method: "get",
-    params,
+    params:params,
   });
 }
 

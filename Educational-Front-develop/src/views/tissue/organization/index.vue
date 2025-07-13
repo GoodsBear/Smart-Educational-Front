@@ -192,6 +192,9 @@ function collectAllKeys(data: Organization[]): string[] {
 const OrganizationTree = async () => {
   try {
     const response = await OrganizationAPI.getOrganizationTreeAll('00000000-0000-0000-0000-000000000000')
+
+    console.log('打印数据response', response);
+
     tableData1.value = response
     expandedRowKeys.value = collectAllKeys(response)
   } catch (error) {

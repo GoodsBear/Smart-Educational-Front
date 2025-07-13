@@ -39,6 +39,11 @@ export default defineConfig(({ mode }: ConfigEnv) => {
         },
       },
     },
+//     //# 应用端口
+//   //VITE_APP_PORT=3000
+//   // 代理前缀
+//   //VITE_APP_BASE_API = 'http://8.152.99.73:8080'
+//   //VITE_APP_API_URL=https://localhost:44375
     server: {
       host: "0.0.0.0",
       port: +env.VITE_APP_PORT,
@@ -49,7 +54,7 @@ export default defineConfig(({ mode }: ConfigEnv) => {
           changeOrigin: true,
           // 代理目标地址：https://api.youlai.tech
           target: env.VITE_APP_API_URL,
-          rewrite: (path) => path.replace(new RegExp("^" + env.VITE_APP_API_URL), ""),
+          rewrite: (path) => path.replace(new RegExp("^" + env.VITE_APP_BASE_API), ""),
         },
       },
     },
@@ -236,3 +241,27 @@ export default defineConfig(({ mode }: ConfigEnv) => {
     },
   };
 });
+
+
+
+//     //# 应用端口
+//   //VITE_APP_PORT=3000
+//   // 代理前缀
+//   //VITE_APP_BASE_API = 'http://8.152.99.73:8080'
+//   //VITE_APP_API_URL=https://localhost:44375
+
+//     server: {
+//       host: "0.0.0.0",
+//       port: +env.VITE_APP_PORT,
+//       open: true,
+//       proxy: {
+//         // 代理 /dev-api 的请求
+//         [env.VITE_APP_BASE_API]: {
+//           changeOrigin: true,
+//           // 代理目标地址：https://api.youlai.tech
+//           target: env.VITE_APP_API_URL,
+//           rewrite: (path) => path.replace(new RegExp("^" + env.VITE_APP_BASE_API), ""),
+//         },
+//       },
+//     },
+
