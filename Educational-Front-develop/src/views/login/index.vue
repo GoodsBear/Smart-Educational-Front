@@ -12,13 +12,8 @@
       <div class="login-right">
         <div class="login-container">
           <h2 class="login-welcome">欢迎使用</h2>
-          <el-form
-            ref="loginFormRef"
-            :model="loginFormData"
-            :rules="loginRules"
-            size="large"
-            :validate-on-rule-change="false"
-          >
+          <el-form ref="loginFormRef" :model="loginFormData" :rules="loginRules" size="large"
+            :validate-on-rule-change="false">
             <!-- 用户名 -->
             <el-form-item prop="StaffAccount">
               <el-input v-model="loginFormData.StaffAccount" :placeholder="t('login.username')">
@@ -33,14 +28,8 @@
             <!-- 密码 -->
             <el-tooltip :visible="isCapsLock" :content="t('login.capsLock')" placement="right">
               <el-form-item prop="StaffPassword">
-                <el-input
-                  v-model.trim="loginFormData.StaffPassword"
-                  :placeholder="t('login.password')"
-                  type="password"
-                  show-password
-                  @keyup="checkCapsLock"
-                  @keyup.enter="handleLoginSubmit"
-                >
+                <el-input v-model.trim="loginFormData.StaffPassword" :placeholder="t('login.password')" type="password"
+                  show-password @keyup="checkCapsLock" @keyup.enter="handleLoginSubmit">
                   <template #prefix>
                     <el-icon>
                       <Lock />
@@ -51,27 +40,16 @@
             </el-tooltip>
 
             <el-form-item>
-              <el-input
-                v-model="loginFormData.CaptchaCode"
-                placeholder="请输入验证码"
-                style="width: 120px"
-              />
+              <el-input v-model="loginFormData.CaptchaCode" placeholder="请输入验证码" style="width: 120px" />
               <template v-if="!captchaImgUrl">
-                <el-button
-                  :disabled="!loginFormData.StaffAccount || captchaLoading"
-                  style="margin-left: 8px"
-                  @click="getCaptchaImg"
-                >
+                <el-button :disabled="!loginFormData.StaffAccount || captchaLoading" style="margin-left: 8px"
+                  @click="getCaptchaImg">
                   获取验证码
                 </el-button>
               </template>
               <template v-else>
-                <img
-                  :src="captchaImgUrl"
-                  style="height: 32px; margin-left: 8px; cursor: pointer"
-                  title="点击刷新验证码"
-                  @click="getCaptchaImg"
-                />
+                <img :src="captchaImgUrl" style="height: 32px; margin-left: 8px; cursor: pointer" title="点击刷新验证码"
+                  @click="getCaptchaImg" />
               </template>
             </el-form-item>
 
@@ -86,12 +64,7 @@
 
             <!-- 登录按钮 -->
             <el-form-item>
-              <el-button
-                :loading="loading"
-                type="primary"
-                class="w-full"
-                @click="handleLoginSubmit"
-              >
+              <el-button :loading="loading" type="primary" class="w-full" @click="handleLoginSubmit">
                 {{ t("login.login") }}
               </el-button>
             </el-form-item>

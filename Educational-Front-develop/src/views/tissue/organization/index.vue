@@ -142,7 +142,10 @@
 </template>
 
 <script setup lang="ts">
-import OrganizationAPI from '@/api/Organization/organizations.api'
+import {
+  createOrganization, getOrganizationList, deleteOrganization, getOrganizationById, updateOrganization, getOrganizationLevelList, addOrganizationLevel,
+  getOrganizationDropdown, getOrganizationTreeAll, getOrganizationTree, getOrganizationTreeSimple
+} from "@/api/Organization/organization.api"
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 interface Organization {
@@ -191,7 +194,7 @@ function collectAllKeys(data: Organization[]): string[] {
 // 获取树数据后，收集所有key
 const OrganizationTree = async () => {
   try {
-    const response = await OrganizationAPI.getOrganizationTreeAll('00000000-0000-0000-0000-000000000000')
+    const response = await getOrganizationTreeAll('00000000-0000-0000-0000-000000000000')
     tableData1.value = response
     expandedRowKeys.value = collectAllKeys(response)
   } catch (error) {
@@ -212,7 +215,7 @@ const handleDelete = async (row: Organization) => {
     type: 'warning'
   }).then(async () => {
     try {
-      await OrganizationAPI.deleteOrganization(row.id);
+      await deleteOrganization(row.id);
       ElMessage.success('删除成功');
       OrganizationTree();
     } catch (e) {
@@ -252,7 +255,7 @@ const levelList = ref([{
 }])
 
 const GetLevel = async () => {
-  const res = await OrganizationAPI.getOrganizationLevelList()
+  const res = await getOrganizationLevelList()
   levelList.value = res || []
 }
 
@@ -276,7 +279,7 @@ const openAddDialog = (parentRow: Organization) => {
 const submitAddForm = () => {
   addFormRef.value.validate(async (valid: any) => {
     if (!valid) return
-    await OrganizationAPI.createOrganization(addForm)
+    await createOrganization(addForm)
     console.log(addForm);
     ElMessage.success('新增成功')
     addDialogVisible.value = false
@@ -320,7 +323,7 @@ function openEditDialog(row: Organization) {
 function submitEditForm() {
   editFormRef.value.validate(async (valid: any) => {
     if (!valid) return
-    await OrganizationAPI.updateOrganization(editForm.id, editForm)
+    await updateOrganization(editForm.id, editForm)
     ElMessage.success('修改成功')
     editDialogVisible.value = false
     OrganizationTree()
@@ -344,7 +347,7 @@ const infoForm = reactive({
 // 查看按钮事件
 async function handleView(row: any) {
   try {
-    const res = await OrganizationAPI.getOrganizationById(row.id)
+    const res = await getOrganizationById(row.id)
     console.log(res);
 
     // 字段映射
