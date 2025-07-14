@@ -5,7 +5,6 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue';
-import staff from "../../system/staff/staff2.vue"
 const Name = defineModel('Name', {
   type: String,       // 类型验证
   default: '默认名称'  // 默认值
