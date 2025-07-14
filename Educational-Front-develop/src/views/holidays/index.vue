@@ -39,13 +39,8 @@ import { ref, computed } from 'vue'
 import Calendar from '@/components/Calendar/Calendar.vue'
 
 // 节假日列表（静态模拟，后续可对接数据库）
-const holidayList = ref<string[]>([
-  '2024-01-01',
-  '2024-02-10',
-  '2024-04-05',
-  '2024-05-01',
-  '2024-10-01',
-])
+const holidayList = ref<string[]>([])
+
 
 // 当前选中的年份，默认为今年
 const selectedYear = ref<Date>(new Date())
