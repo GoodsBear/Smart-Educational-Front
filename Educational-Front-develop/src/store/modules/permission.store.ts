@@ -72,6 +72,18 @@ export const usePermissionStore = defineStore("permission", () => {
                 meta: { title: "结业学员", icon: "ep:medal" },
               },
               {
+                path: "Enrollments",
+                name: "Enrollments",
+                component: () => import("@/views/Students/Enrollments/index.vue"),
+                meta: { title: "报名记录", icon: "ep:medal" },
+              },
+              {
+                path: "FllowRecord",
+                name: "FllowRecord",
+                component: () => import("@/views/Students/FllowRecord/index.vue"),
+                meta: { title: "跟进记录", icon: "ep:medal" },
+              },
+              {
                 path: "detail",
                 name: "StudentDetail",
                 component: () => import("@/views/Students/StudentDetail/index.vue"),

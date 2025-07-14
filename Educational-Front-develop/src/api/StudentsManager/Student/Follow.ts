@@ -34,9 +34,18 @@ export const getFollowList = (studentGuid: string) => {
     method: 'get'
   })
 }
+// 跟进记录列表
+export const getFollowrecordList = (data:any) => {
+  return request({
+    url: `/api/app/follow-services/follow-record-list`,
+    method: 'get',
+    params:data
+  })
+}
 
 export default {
   addFollowRecord,
   deleteFollowRecord,
-  getFollowList
+  getFollowList,
+  getFollowrecordList
 }
