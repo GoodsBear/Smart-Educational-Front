@@ -336,7 +336,10 @@ import { getSpecialSubjectDropdown } from '@/api/Lession/TopicManager/TopicManag
 import { getGradeDropdown } from '@/api/Lession/ClassAndGrade/Grade'
 import ReletedCourse from './reletedcourse/ReletedCourse.vue'
 import MultiImageUpload from '@/components/Upload/MultiImageUpload.vue'
-import { getOrganizationDropdown } from '@/api/organization/organization.api'
+import { getOrganizationDropdown } from '@/api/Organization/organization.api'
+import { getAvailableIcons } from '@/utils/icons'
+import CustomIcon from '@/components/CustomIcon/index.vue'
+import SvgIcon from '@/components/SvgIcon/index.vue'
 
 
 defineOptions({
@@ -685,6 +688,9 @@ function reletedopen(row: any) {
 
 //#endregion
 
+// 图标相关
+const availableIcons = ref<string[]>([])
+
 //钩子函数
 onMounted(() => {
   //课程加载
@@ -697,6 +703,10 @@ onMounted(() => {
   LoadSchool()
   //年级选项
   LoadGrade()
+  
+  // 获取可用图标列表
+  availableIcons.value = getAvailableIcons()
+  console.log('可用图标:', availableIcons.value)
 })
 
 // 自定义显示列相关

@@ -360,11 +360,11 @@ export interface UserProfileForm {
 /** 修改密码表单 */
 export interface PasswordChangeForm {
   /** 原密码 */
-  oldPassword?: string;
+  oldPassword: string;
   /** 新密码 */
-  newPassword?: string;
+  newPassword: string;
   /** 确认新密码 */
-  confirmPassword?: string;
+  confirmPassword: string;
 }
 
 /** 修改手机表单 */

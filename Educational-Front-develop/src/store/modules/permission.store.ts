@@ -37,14 +37,14 @@ export const usePermissionStore = defineStore("permission", () => {
             path: "/dashboard",
             component: Layout,
             redirect: "/dashboard",
-            children: [
-              {
-                path: "",
-                name: "Dashboard",
-                component: () => import("@/views/dashboard/index.vue"),
-                meta: { title: "仪表盘", icon: "ep:odometer", affix: true, keepAlive: true },
-              },
-            ],
+            // children: [
+            //   {
+            //     path: "",
+            //     name: "Dashboard",
+            //     component: () => import("@/views/dashboard/index.vue"),
+            //     meta: { title: "仪表盘", icon: "ep:odometer", affix: true, keepAlive: true },
+            //   },
+            // ],
           },
 
           {
@@ -140,7 +140,7 @@ export const usePermissionStore = defineStore("permission", () => {
                 name: "CourseManagement",
                 meta: {
                   title: "课程管理",
-                  icon: "course",
+                  icon: "课程",
                 },
               },
               {
@@ -180,6 +180,26 @@ export const usePermissionStore = defineStore("permission", () => {
                 name: "Storerooms",
                 component: () => import("@/views/Materials/storerooms/index.vue"),
                 meta: { title: "出入库记录", icon: "ep:collection" },
+              },
+            ],
+          },
+          {
+            path: "/interact",
+            component: Layout,
+            redirect: "/interact/user",
+            meta: { title: "互动", icon: "ep:setting" },
+            children: [
+              {
+                path: "evaluation",
+                name: "Evaluation",
+                component: () => import("@/views/Interact/evaluation/index.vue"),
+                meta: { title: "学评教", icon: "ep:collection" },
+              },
+              {
+                path: "evaluation",
+                name: "Evaluation",
+                component: () => import("@/views/Interact/evaluation/index.vue"),
+                meta: { title: "学评教", icon: "ep:collection" },
               },
             ],
           },
@@ -241,6 +261,16 @@ export const usePermissionStore = defineStore("permission", () => {
                   title: "内部公告",
                   icon: "notification",
                   permission: ["system:announcement:list"],
+                },
+              },
+              {
+                path: "holiday",
+                component: () => import("@/views/holidays/index.vue"),
+                name: "holiday",
+                meta: {
+                  title: "节假日管理",
+                  icon: "假日",
+                  permission: ["system:holiday:list"],
                 },
               },
             ],

@@ -4,20 +4,18 @@
     <!-- <github-corner class="github-corner" /> -->
 
     <el-card shadow="never" class="mt-2">
-      <div class="flex flex-wrap">
-        <!-- 左侧问候语区域 -->
-        <div class="flex-1 flex items-start">
-          <img class="w80px h80px rounded-full" :src="staffInfo.PhotoUrl" />
-          <div class="ml-5">
-            <p class="text-lg font-bold">欢迎使用智慧教务系统！</p>
-            {{ staffInfo.StaffName }}
-            <p class="text-sm text-gray">今日天气晴朗，气温在15℃至25℃之间，东南风。</p>
+      <div class="flex items-stretch justify-between">
+        <!-- 左侧内容 -->
+        <div class="flex flex-col justify-between flex-1 min-w-0">
+          <div class="flex items-center">
+            <img class="w80px h80px rounded-full" :src="staffInfo.PhotoUrl" />
+            <div class="ml-5">
+              <p class="text-lg font-bold">欢迎使用智慧教务系统！</p>
+              {{ staffInfo.StaffName }}
+            </div>
           </div>
-        </div>
-
-        <!-- 右侧图标区域 - PC端 -->
-        <div class="hidden sm:block">
-          <div class="flex items-end space-x-6">
+          <!-- 图标区 -->
+          <div class="flex items-center mt-6 space-x-6">
             <!-- 仓库 -->
             <div>
               <div class="font-bold color-#ff9a2e text-sm flex items-center">
@@ -36,7 +34,6 @@
                 </el-link>
               </div>
             </div>
-
             <!-- 文档 -->
             <div>
               <div class="font-bold color-#4080ff text-sm flex items-center">
@@ -56,6 +53,11 @@
               </div>
             </div>
           </div>
+        </div>
+        <!-- 天气组件区域，设置固定宽度 -->
+        <div class="flex flex-col items-center justify-center" style="width: 350px">
+          <div class="text-base font-bold mb-2">今日天气</div>
+          <WeatherWidget />
         </div>
       </div>
     </el-card>
@@ -159,6 +161,7 @@
 import { Connection } from "@element-plus/icons-vue";
 import { Document, Top } from "@element-plus/icons-vue";
 import { ref, onMounted } from "vue";
+import WeatherWidget from "@/views/dashboard/Weather.vue";
 
 defineOptions({
   name: "Dashboard",

@@ -64,6 +64,9 @@ export const useUserStore = defineStore("user", () => {
   // 退出登录
   async function logout() {
     try {
+      // 清理本地存储
+      localStorage.clear();
+      sessionStorage.clear();
       // 重置状态
       await resetAllState();
       return true;

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <header class="app-header" @click="OrganizationPage">组织机构：</header>
+    <!-- <header class="app-header" @click="OrganizationPage">组织机构：</header> -->
     <ElTree
       ref="treeRef"
       style="max-width: 600px; float: left"

@@ -1,52 +1,54 @@
 <template>
   <div class="flex h-full">
     <!-- 左侧组织树卡片  -->
-    <el-card class="org-tree-card w-[30%] flex-shrink-0 h-full">
+    <el-card class="org-tree-card w-[30%] flex-shrink-0 h-full" style="margin-right: 20px">
       <salarytree v-model:TreeOrganizationId="TreeOrganizationId"></salarytree>
     </el-card>
     <!-- 右侧薪资列表  -->
-    <div class="salary-list bg-aquamarine w-[70%] h-full p-4 overflow-auto">
-      <h3 class="font-bold mb-3">薪资列表</h3>
-      <el-table
-        ref="tableRef"
-        v-loading="loading"
-        :data="salaryList"
-        style="width: 100%"
-        @selection-change="ToAll"
-      >
-        <el-table-column type="index" label="序号" width="80" />
-        <template v-for="col in allColumns" :key="col.prop">
-          <el-table-column
-            v-if="checkedProps.includes(col.prop)"
-            :prop="col.prop"
-            :label="col.label"
-          >
-            <template v-if="col.prop === 'basicSalaryType'" #default="{ row }">
-              <el-tag :type="row.basicSalaryType === 0 ? 'success' : 'warning'">
-                {{ row.basicSalaryType === 0 ? "非底薪模式" : "底薪模式" }}
-              </el-tag>
-            </template>
-            <template v-else-if="col.prop === 'classHourDuration'" #default="{ row }">
-              <span v-if="row.classHourDuration != 0">{{ row.classHourDuration }}分钟</span>
-              <span v-else-if="row.classHourDuration === 0"></span>
-            </template>
-            <template v-else-if="col.prop === 'classHourFee'" #default="{ row }">
-              <span v-if="row.classHourFee != 0">{{ row.classHourFee }}元</span>
-              <span v-else-if="row.classHourFee === 0"></span>
-            </template>
-            <template v-else-if="col.prop === 'assistantFee'" #default="{ row }">
-              <span v-if="row.assistantFee != 0">{{ row.assistantFee }}元</span>
-              <span v-else-if="row.assistantFee === 0"></span>
+    <el-card class="salary-list-card w-[70%] flex-shrink-0 h-full">
+      <div class="salary-list bg-aquamarine h-full p-4">
+        <h3 class="font-bold mb-3">薪资列表</h3>
+        <el-table
+          ref="tableRef"
+          v-loading="loading"
+          :data="salaryList"
+          style="width: 100%"
+          @selection-change="ToAll"
+        >
+          <el-table-column type="index" label="序号" width="80" />
+          <template v-for="col in allColumns" :key="col.prop">
+            <el-table-column
+              v-if="checkedProps.includes(col.prop)"
+              :prop="col.prop"
+              :label="col.label"
+            >
+              <template v-if="col.prop === 'basicSalaryType'" #default="{ row }">
+                <el-tag :type="row.basicSalaryType === 0 ? 'success' : 'warning'">
+                  {{ row.basicSalaryType === 0 ? "非底薪模式" : "底薪模式" }}
+                </el-tag>
+              </template>
+              <template v-else-if="col.prop === 'classHourDuration'" #default="{ row }">
+                <span v-if="row.classHourDuration != 0">{{ row.classHourDuration }}分钟</span>
+                <span v-else-if="row.classHourDuration === 0"></span>
+              </template>
+              <template v-else-if="col.prop === 'classHourFee'" #default="{ row }">
+                <span v-if="row.classHourFee != 0">{{ row.classHourFee }}元</span>
+                <span v-else-if="row.classHourFee === 0"></span>
+              </template>
+              <template v-else-if="col.prop === 'assistantFee'" #default="{ row }">
+                <span v-if="row.assistantFee != 0">{{ row.assistantFee }}元</span>
+                <span v-else-if="row.assistantFee === 0"></span>
+              </template>
+            </el-table-column>
+          </template>
+          <el-table-column label="操作">
+            <template #default="{ row }">
+              <el-button size="small" @click="showEditDialog(row)">修改</el-button>
             </template>
           </el-table-column>
-        </template>
-        <el-table-column label="操作">
-          <template #default="{ row }">
-            <el-button size="small" @click="showEditDialog(row)">修改</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
-    </div>
+        </el-table>
+      </div>
+    </el-card>
   </div>
   <!-- 编辑修改dialog -->
   <el-dialog
@@ -312,7 +314,7 @@ const submitForm = async () => {
 const rules = {
   basicSalary: [
     {
-      validator: (rule, value, callback) => {
+      validator: (value: any, callback: any) => {
         const basic = form.value.basicSalaryType; // 获取表单中的basicSalaryType
         if (basic == 0 && !value) {
           // 若basic为0且basicSalary为空，则通过校验
@@ -331,7 +333,7 @@ const rules = {
   ],
   qualifiedClassHours: [
     {
-      validator: (rule, value, callback) => {
+      validator: (value: any, callback: any) => {
         const basic = form.value.qualifiedClassHours; // 获取表单中的qualifiedClassHours
         if (basic == 0 && !value) {
           // 若basic为0且basicSalary为空，则通过校验

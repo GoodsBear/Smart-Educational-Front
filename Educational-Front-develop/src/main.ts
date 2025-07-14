@@ -7,6 +7,10 @@ import { ElMessage } from "element-plus";
 import { createPinia } from "pinia";
 import piniaPluginPersistedstate from "pinia-plugin-persistedstate";
 
+import ElementPlus from 'element-plus'
+//国际化
+import zhCn from 'element-plus/es/locale/lang/zh-cn'
+
 const pinia = createPinia();
 pinia.use(piniaPluginPersistedstate);
 
@@ -25,6 +29,10 @@ import "animate.css";
 import "default-passive-events";
 
 const app = createApp(App);
+//国际化
+app.use(ElementPlus, {
+  locale: zhCn,
+})
 // 注册插件
 app.use(setupPlugins);
 app.use(pinia);
